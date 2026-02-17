@@ -1,16 +1,38 @@
 import { useState, useCallback } from 'react'
 import { useSettingsStore, ThemeMode } from '../../stores/settingsStore'
-import SettingsItem, { SettingsToggle, SettingsSelect } from './SettingsItem'
+import { Switch } from '../ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '../ui/select'
+import { Button } from '../ui/button'
+import { Separator } from '../ui/separator'
+import {
+  Settings,
+  Keyboard,
+  Cloud,
+  Lock,
+  Palette,
+  Info,
+  Moon,
+  Sun,
+  Monitor,
+  Trash2,
+  RefreshCw
+} from 'lucide-react'
 
 type SettingsSection = 'general' | 'shortcuts' | 'sync' | 'privacy' | 'theme' | 'about'
 
-const SECTIONS: { id: SettingsSection; label: string; icon: string }[] = [
-  { id: 'general', label: '通用', icon: '⚙️' },
-  { id: 'shortcuts', label: '快捷键', icon: '⌨️' },
-  { id: 'sync', label: '同步', icon: '☁️' },
-  { id: 'privacy', label: '隐私', icon: '🔒' },
-  { id: 'theme', label: '主题', icon: '🎨' },
-  { id: 'about', label: '关于', icon: 'ℹ️' }
+const SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
+  { id: 'general', label: '通用', icon: Settings },
+  { id: 'shortcuts', label: '快捷键', icon: Keyboard },
+  { id: 'sync', label: '同步', icon: Cloud },
+  { id: 'privacy', label: '隐私', icon: Lock },
+  { id: 'theme', label: '主题', icon: Palette },
+  { id: 'about', label: '关于', icon: Info }
 ]
 
 interface Props {
@@ -21,53 +43,44 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
   const [activeSection, setActiveSection] = useState<SettingsSection>('general')
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background text-foreground">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 dark:border-white/10">
-        <h1 className="text-sm font-semibold text-gray-800 dark:text-gray-200">设置</h1>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs px-2 py-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-        >
-          ✕ 关闭
-        </button>
+      <div className="flex items-center justify-between px-6 py-4 border-b">
+        <h1 className="text-lg font-semibold">设置</h1>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          关闭
+        </Button>
       </div>
 
       <div className="flex flex-1 min-h-0">
         {/* Left nav */}
-        <div className="w-[140px] shrink-0 border-r border-black/5 dark:border-white/5 py-2">
+        <div className="w-48 shrink-0 border-r py-4">
           {SECTIONS.map((section) => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
-              className={`w-full text-left px-4 py-2 text-xs transition-colors flex items-center gap-2 ${
+              className={`w-full text-left px-6 py-2 text-sm transition-colors flex items-center gap-3 ${
                 activeSection === section.id
-                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5'
+                  ? 'bg-accent text-accent-foreground font-medium'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
               }`}
             >
-              <span>{section.icon}</span>
+              <section.icon className="w-4 h-4" />
               {section.label}
             </button>
           ))}
         </div>
 
         {/* Right content */}
-        <div className="flex-1 overflow-y-auto px-5 py-3">
-          <SectionContent section={activeSection} onClose={onClose} />
+        <div className="flex-1 overflow-y-auto px-8 py-6">
+          <SectionContent section={activeSection} />
         </div>
       </div>
     </div>
   )
 }
 
-function SectionContent({
-  section,
-  onClose: _onClose
-}: {
-  section: SettingsSection
-  onClose: () => void
-}): React.JSX.Element {
+function SectionContent({ section }: { section: SettingsSection }): React.JSX.Element {
   switch (section) {
     case 'general':
       return <GeneralSection />
@@ -88,14 +101,30 @@ function SectionContent({
 
 function SectionTitle({ title }: { title: string }): React.JSX.Element {
   return (
-    <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+    <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
       {title}
     </h2>
   )
 }
 
-function Divider(): React.JSX.Element {
-  return <div className="h-px bg-black/5 dark:bg-white/5 my-1" />
+function SettingsItem({
+  label,
+  description,
+  children
+}: {
+  label: string
+  description?: string
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <div className="flex items-center justify-between py-4">
+      <div className="flex-1 min-w-0 mr-4">
+        <p className="text-sm font-medium">{label}</p>
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  )
 }
 
 function GeneralSection(): React.JSX.Element {
@@ -112,38 +141,43 @@ function GeneralSection(): React.JSX.Element {
     <div>
       <SectionTitle title="通用设置" />
       <SettingsItem label="开机自启" description="登录 macOS 时自动启动 Z-Paste">
-        <SettingsToggle
-          value={launchAtLogin}
-          onChange={(v) => {
+        <Switch
+          checked={launchAtLogin}
+          onCheckedChange={(v) => {
             setLaunchAtLogin(v)
             window.api.setLaunchAtLogin?.(v)
           }}
         />
       </SettingsItem>
-      <Divider />
+      <Separator />
       <SettingsItem label="历史保留时长" description="超过时间的非收藏/非置顶记录将自动清理">
-        <SettingsSelect
-          value={historyRetention}
-          options={[
-            { label: '1 天', value: 1 },
-            { label: '7 天', value: 7 },
-            { label: '30 天', value: 30 },
-            { label: '永久', value: 0 }
-          ]}
-          onChange={setHistoryRetention}
-        />
+        <Select
+          value={String(historyRetention)}
+          onValueChange={(v) => setHistoryRetention(Number(v))}
+        >
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">1 天</SelectItem>
+            <SelectItem value="7">7 天</SelectItem>
+            <SelectItem value="30">30 天</SelectItem>
+            <SelectItem value="0">永久</SelectItem>
+          </SelectContent>
+        </Select>
       </SettingsItem>
-      <Divider />
+      <Separator />
       <SettingsItem label="最大记录数" description="超过限制时自动删除最旧的非收藏记录">
-        <SettingsSelect
-          value={maxItems}
-          options={[
-            { label: '500', value: 500 },
-            { label: '1000', value: 1000 },
-            { label: '2000', value: 2000 }
-          ]}
-          onChange={setMaxItems}
-        />
+        <Select value={String(maxItems)} onValueChange={(v) => setMaxItems(Number(v))}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="500">500</SelectItem>
+            <SelectItem value="1000">1000</SelectItem>
+            <SelectItem value="2000">2000</SelectItem>
+          </SelectContent>
+        </Select>
       </SettingsItem>
     </div>
   )
@@ -156,11 +190,11 @@ function ShortcutsSection(): React.JSX.Element {
     <div>
       <SectionTitle title="快捷键" />
       <SettingsItem label="唤起面板" description="全局快捷键，唤起/隐藏剪贴板面板">
-        <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-mono">
+        <div className="bg-muted px-3 py-1.5 rounded-md text-sm font-mono border">
           {customShortcut.replace('CommandOrControl', '⌘').replace('Shift', '⇧').replace('+', ' ')}
-        </span>
+        </div>
       </SettingsItem>
-      <p className="text-[10px] text-gray-400 mt-2">
+      <p className="text-xs text-muted-foreground mt-4">
         自定义快捷键功能将在后续版本中开放
       </p>
     </div>
@@ -185,21 +219,25 @@ function SyncSection(): React.JSX.Element {
     <div>
       <SectionTitle title="iCloud 同步" />
       <SettingsItem label="启用 iCloud 同步" description="通过 iCloud Drive 在多台 Mac 间同步剪贴板数据">
-        <SettingsToggle value={iCloudSync} onChange={setICloudSync} />
+        <Switch checked={iCloudSync} onCheckedChange={setICloudSync} />
       </SettingsItem>
-      <Divider />
+      <Separator />
       <SettingsItem label="立即同步" description="手动触发一次同步">
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleSyncNow}
           disabled={!iCloudSync || syncing}
-          className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
-            iCloudSync && !syncing
-              ? 'bg-blue-500 text-white hover:bg-blue-600'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-          }`}
         >
-          {syncing ? '同步中...' : '同步'}
-        </button>
+          {syncing ? (
+            <>
+              <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+              同步中...
+            </>
+          ) : (
+            '同步'
+          )}
+        </Button>
       </SettingsItem>
     </div>
   )
@@ -222,20 +260,25 @@ function PrivacySection(): React.JSX.Element {
     <div>
       <SectionTitle title="隐私与安全" />
       <SettingsItem label="加密存储" description="使用 AES-256-GCM 加密剪贴板内容（需设置密码）">
-        <SettingsToggle value={encryptionEnabled} onChange={setEncryptionEnabled} />
+        <Switch checked={encryptionEnabled} onCheckedChange={setEncryptionEnabled} />
       </SettingsItem>
-      <Divider />
+      <Separator />
       <SettingsItem label="清空所有数据" description="删除所有剪贴板记录（不可恢复）">
-        <button
+        <Button
+          variant={confirming ? 'destructive' : 'outline'}
+          size="sm"
           onClick={handleClearAll}
-          className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
-            confirming
-              ? 'bg-red-500 text-white hover:bg-red-600'
-              : 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
-          }`}
+          className={confirming ? '' : 'text-destructive hover:text-destructive'}
         >
-          {confirming ? '确认清空？' : '清空'}
-        </button>
+          {confirming ? (
+            '确认清空？'
+          ) : (
+            <>
+              <Trash2 className="w-3 h-3 mr-2" />
+              清空
+            </>
+          )}
+        </Button>
       </SettingsItem>
     </div>
   )
@@ -244,31 +287,30 @@ function PrivacySection(): React.JSX.Element {
 function ThemeSection(): React.JSX.Element {
   const { theme, setTheme } = useSettingsStore()
 
-  const themes: { value: ThemeMode; label: string; desc: string }[] = [
-    { value: 'auto', label: '自动', desc: '跟随系统偏好' },
-    { value: 'dark', label: '暗色', desc: '深色主题' },
-    { value: 'light', label: '亮色', desc: '浅色主题' }
+  const themes: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
+    { value: 'auto', label: '自动', icon: Monitor },
+    { value: 'dark', label: '暗色', icon: Moon },
+    { value: 'light', label: '亮色', icon: Sun }
   ]
 
   return (
     <div>
       <SectionTitle title="主题" />
-      <div className="flex gap-2">
+      <div className="grid grid-cols-3 gap-4">
         {themes.map((t) => (
           <button
             key={t.value}
             onClick={() => setTheme(t.value)}
-            className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-colors ${
+            className={`flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all ${
               theme === t.value
-                ? 'border-blue-500 bg-blue-500/10'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                ? 'border-primary bg-primary/5'
+                : 'border-transparent bg-muted hover:bg-muted/80'
             }`}
           >
-            <span className="text-lg">
-              {t.value === 'auto' ? '🌗' : t.value === 'dark' ? '🌙' : '☀️'}
+            <t.icon className={`w-6 h-6 ${theme === t.value ? 'text-primary' : 'text-muted-foreground'}`} />
+            <span className={`text-sm font-medium ${theme === t.value ? 'text-primary' : 'text-muted-foreground'}`}>
+              {t.label}
             </span>
-            <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{t.label}</span>
-            <span className="text-[10px] text-gray-500">{t.desc}</span>
           </button>
         ))}
       </div>
@@ -280,27 +322,26 @@ function AboutSection(): React.JSX.Element {
   return (
     <div>
       <SectionTitle title="关于" />
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-lg font-bold">
-            Z
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Z-Paste</p>
-            <p className="text-xs text-gray-500">版本 1.0.0</p>
-          </div>
+      <div className="flex flex-col items-center py-8 text-center space-y-4">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+          Z
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <div>
+          <h3 className="text-lg font-semibold">Z-Paste</h3>
+          <p className="text-sm text-muted-foreground">版本 1.0.0</p>
+        </div>
+        <p className="text-sm text-muted-foreground max-w-xs">
           Mac 剪贴板管理器 — 让复制粘贴更高效
         </p>
-        <a
-          href="https://github.com/perseveringman/z-paste"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          GitHub →
-        </a>
+        <Button variant="link" asChild>
+          <a
+            href="https://github.com/perseveringman/z-paste"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub →
+          </a>
+        </Button>
       </div>
     </div>
   )

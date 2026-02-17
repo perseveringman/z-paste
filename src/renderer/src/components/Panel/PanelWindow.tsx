@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
 import FilterTabs from './FilterTabs'
@@ -10,30 +9,20 @@ import SettingsPage from '../Settings/SettingsPage'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
+import { Settings } from 'lucide-react'
+import { Button } from '../ui/button'
+import { cn } from '../../lib/utils'
 
 type PanelView = 'clipboard' | 'templates' | 'settings'
-
-const panelTransition = {
-  type: 'spring' as const,
-  stiffness: 500,
-  damping: 30
-}
 
 export default function PanelWindow(): React.JSX.Element {
   useKeyboard()
   const items = useSearch()
-  const { selectedIndex, pasteItem, isVisible } = useClipboardStore()
+  const { selectedIndex, pasteItem } = useClipboardStore()
   const selectedItem = items[selectedIndex] || null
 
   const [view, setView] = useState<PanelView>('clipboard')
   const [editingItem, setEditingItem] = useState<string | null>(null)
-  const [animKey, setAnimKey] = useState(0)
-
-  useEffect(() => {
-    if (isVisible) {
-      setAnimKey((k) => k + 1)
-    }
-  }, [isVisible])
 
   const handleDoubleClick = useCallback((itemId: string) => {
     setEditingItem(itemId)
@@ -61,31 +50,22 @@ export default function PanelWindow(): React.JSX.Element {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  const containerClass =
+    'w-full h-full rounded-xl overflow-hidden bg-background/95 backdrop-blur-xl border shadow-2xl flex flex-col'
+
   if (view === 'settings') {
     return (
-      <motion.div
-        key={`settings-${animKey}`}
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={panelTransition}
-        className="w-full h-full rounded-xl overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-2xl flex flex-col"
-      >
+      <div className={containerClass}>
         <SettingsPage onClose={() => setView('clipboard')} />
-      </motion.div>
+      </div>
     )
   }
 
   return (
-    <motion.div
-      key={`panel-${animKey}`}
-      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={panelTransition}
-      className="w-full h-full rounded-xl overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-2xl flex flex-col"
-    >
+    <div className={containerClass}>
       {/* Top bar */}
-      <div className="flex items-center border-b border-black/10 dark:border-white/10">
-        <div className="flex items-center gap-1 px-3">
+      <div className="flex items-center h-14 px-4 border-b bg-muted/30">
+        <div className="flex items-center gap-1 p-1 bg-muted rounded-lg mr-4">
           <TabButton
             label="剪贴板"
             active={view === 'clipboard'}
@@ -97,21 +77,23 @@ export default function PanelWindow(): React.JSX.Element {
             onClick={() => setView('templates')}
           />
         </div>
-        {view === 'clipboard' && <SearchBar />}
-        <button
+        <SearchBar />
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setView('settings')}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 px-3 py-2.5 text-sm transition-colors"
+          className="ml-2 h-9 w-9 text-muted-foreground hover:text-foreground"
           title="设置 (⌘,)"
         >
-          ⚙
-        </button>
+          <Settings className="w-4 h-4" />
+        </Button>
       </div>
 
       {view === 'clipboard' ? (
         <>
           <FilterTabs />
           <div className="flex-1 flex min-h-0">
-            <div className="w-[55%] flex flex-col min-h-0 border-r border-black/5 dark:border-white/5">
+            <div className="w-[55%] flex flex-col min-h-0 border-r">
               <ClipboardList onDoubleClick={handleDoubleClick} />
             </div>
             {editingItem && selectedItem ? (
@@ -128,7 +110,7 @@ export default function PanelWindow(): React.JSX.Element {
       ) : (
         <TemplateList />
       )}
-    </motion.div>
+    </div>
   )
 }
 
@@ -144,11 +126,12 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2.5 text-xs transition-colors ${
+      className={cn(
+        "px-3 py-1 text-xs font-medium rounded-md transition-all",
         active
-          ? 'text-gray-900 dark:text-white border-b-2 border-blue-500'
-          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-      }`}
+          ? "bg-background text-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+      )}
     >
       {label}
     </button>

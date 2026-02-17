@@ -1,4 +1,6 @@
 import { useClipboardStore } from '../../stores/clipboardStore'
+import { Badge } from '../ui/badge'
+import { cn } from '../../lib/utils'
 
 const TABS = [
   { label: '全部', value: null },
@@ -26,20 +28,23 @@ export default function FilterTabs(): React.JSX.Element {
   }
 
   return (
-    <div className="flex items-center gap-1 px-4 py-1.5 border-b border-black/5 dark:border-white/5 overflow-x-auto">
-      {TABS.map(({ label, value }) => (
-        <button
-          key={label}
-          onClick={() => handleClick(value)}
-          className={`px-2 py-0.5 text-[11px] rounded-full whitespace-nowrap transition-colors ${
-            filterType === value
-              ? 'bg-blue-500/20 text-blue-600 dark:bg-blue-600/30 dark:text-blue-300'
-              : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'
-          }`}
-        >
-          {label}
-        </button>
-      ))}
+    <div className="flex items-center gap-2 px-3 py-2 border-b overflow-x-auto no-scrollbar bg-muted/20">
+      {TABS.map(({ label, value }) => {
+        const isActive = filterType === value
+        return (
+          <Badge
+            key={label}
+            variant={isActive ? 'default' : 'secondary'}
+            className={cn(
+              "cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap",
+              !isActive && "bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border"
+            )}
+            onClick={() => handleClick(value)}
+          >
+            {label}
+          </Badge>
+        )
+      })}
     </div>
   )
 }

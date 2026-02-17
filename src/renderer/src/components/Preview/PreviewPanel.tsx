@@ -15,6 +15,8 @@ import {
   trimWhitespace,
   removeAllWhitespace
 } from '../../utils/transformers'
+import { Clipboard, Copy, Link, Code } from 'lucide-react'
+import { Button } from '../ui/button'
 
 interface Props {
   item: ClipboardItem | null
@@ -23,18 +25,23 @@ interface Props {
 export default function PreviewPanel({ item }: Props): React.JSX.Element {
   if (!item) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-600 text-xs">
-        选择条目查看预览
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+        <Clipboard className="w-12 h-12 mb-3 opacity-20" />
+        <p className="text-xs">选择条目查看预览</p>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 border-l border-black/5 dark:border-white/5">
+    <div className="flex-1 flex flex-col min-w-0 border-l bg-muted/10">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-black/5 dark:border-white/5">
-        <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.content_type}</span>
-        <span className="text-xs text-gray-400 dark:text-gray-600">
+      <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded">
+            {item.content_type}
+          </span>
+        </div>
+        <span className="text-[10px] text-muted-foreground font-mono">
           {new Date(item.created_at).toLocaleString('zh-CN')}
         </span>
       </div>
@@ -73,7 +80,7 @@ function PreviewContent({ item }: { item: ClipboardItem }): React.JSX.Element {
       return <ImagePreview content={item.content} metadata={item.metadata} />
     default:
       return (
-        <pre className="p-3 text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-all font-mono">
+        <pre className="p-4 text-xs text-foreground whitespace-pre-wrap break-all font-mono leading-relaxed">
           {item.content}
         </pre>
       )
@@ -89,19 +96,21 @@ function TextToolbar({ content }: { content: string }): React.JSX.Element {
     { label: 'snake', fn: () => toSnakeCase(content) },
     { label: 'kebab', fn: () => toKebabCase(content) },
     { label: 'Trim', fn: () => trimWhitespace(content) },
-    { label: '去空格', fn: () => removeAllWhitespace(content) }
+    { label: 'NoSpace', fn: () => removeAllWhitespace(content) }
   ]
 
   return (
-    <div className="flex flex-wrap gap-1 px-3 py-2 border-t border-black/5 dark:border-white/5">
+    <div className="flex flex-wrap gap-1.5 px-3 py-2 border-t bg-muted/20 backdrop-blur-sm">
       {tools.map(({ label, fn }) => (
-        <button
+        <Button
           key={label}
+          variant="outline"
+          size="sm"
+          className="h-6 px-2 text-[10px]"
           onClick={() => navigator.clipboard.writeText(fn())}
-          className="px-2 py-0.5 text-[10px] text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded transition-colors"
         >
           {label}
-        </button>
+        </Button>
       ))}
     </div>
   )
@@ -111,19 +120,23 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
   const { decoded, valid } = decodeBase64(content)
 
   return (
-    <div className="border-t border-black/5 dark:border-white/5">
+    <div className="border-t bg-muted/20 backdrop-blur-sm">
       {valid && (
         <div className="px-3 py-2">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-gray-500">解码结果</span>
-            <button
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              解码结果
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 px-2 text-[10px] text-primary hover:text-primary"
               onClick={() => navigator.clipboard.writeText(decoded)}
-              className="text-[10px] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
-              复制
-            </button>
+              <Copy className="w-3 h-3 mr-1" /> 复制
+            </Button>
           </div>
-          <pre className="text-xs text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 rounded p-2 max-h-20 overflow-auto whitespace-pre-wrap break-all">
+          <pre className="text-xs text-foreground bg-muted/50 border rounded p-2 max-h-24 overflow-auto whitespace-pre-wrap break-all font-mono">
             {decoded}
           </pre>
         </div>
@@ -137,20 +150,24 @@ function UrlToolbar({ content }: { content: string }): React.JSX.Element {
   const showDecoded = decoded !== content
 
   return (
-    <div className="flex flex-wrap gap-1 px-3 py-2 border-t border-black/5 dark:border-white/5">
-      <button
+    <div className="flex flex-wrap gap-2 px-3 py-2 border-t bg-muted/20 backdrop-blur-sm">
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-6 px-2 text-[10px]"
         onClick={() => navigator.clipboard.writeText(content)}
-        className="px-2 py-0.5 text-[10px] text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded transition-colors"
       >
-        复制 URL
-      </button>
+        <Link className="w-3 h-3 mr-1" /> 复制 URL
+      </Button>
       {showDecoded && (
-        <button
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-6 px-2 text-[10px]"
           onClick={() => navigator.clipboard.writeText(decoded)}
-          className="px-2 py-0.5 text-[10px] text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded transition-colors"
         >
-          复制解码
-        </button>
+          <Code className="w-3 h-3 mr-1" /> 复制解码
+        </Button>
       )}
     </div>
   )

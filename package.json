@@ -20,12 +20,21 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
     "better-sqlite3": "^11.7.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "framer-motion": "^12.34.1",
     "fuse.js": "^7.0.0",
+    "lucide-react": "^0.574.0",
     "nanoid": "^5.0.9",
     "react-window": "^2.2.7",
     "shiki": "^3.22.0",
+    "tailwind-merge": "^3.4.1",
+    "tailwindcss-animate": "^1.0.7",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

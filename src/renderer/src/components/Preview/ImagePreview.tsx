@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 interface Props {
   content: string
@@ -6,8 +6,6 @@ interface Props {
 }
 
 export default function ImagePreview({ content, metadata }: Props): React.JSX.Element {
-  const [loaded, setLoaded] = useState(false)
-
   const size = useMemo(() => {
     if (!metadata) return null
     try {
@@ -29,19 +27,10 @@ export default function ImagePreview({ content, metadata }: Props): React.JSX.El
 
   return (
     <div className="flex flex-col items-center gap-3 p-4">
-      {!loaded && (
-        <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center animate-pulse">
-          <span className="text-gray-400 text-sm">加载中...</span>
-        </div>
-      )}
       <img
         src={src}
         alt="Clipboard image"
-        loading="lazy"
-        onLoad={() => setLoaded(true)}
-        className={`max-w-full max-h-64 rounded-lg border border-black/10 dark:border-white/10 object-contain ${
-          loaded ? 'block' : 'hidden'
-        }`}
+        className="max-w-full max-h-64 rounded-lg border border-black/10 dark:border-white/10 object-contain"
       />
       {size && (
         <span className="text-xs text-gray-500">
