@@ -10,11 +10,14 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
 mac:
+  entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application data storage
     - LSUIElement: true
   notarize: false
+  icon: resources/icon.icns
+  category: public.app-category.utilities
   target:
     - target: dmg
       arch:

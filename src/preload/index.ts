@@ -14,6 +14,21 @@ const api = {
   togglePin: (id: string) => ipcRenderer.invoke('clipboard:togglePin', id),
   pasteItem: (id: string) => ipcRenderer.invoke('clipboard:pasteItem', id),
   clearAll: () => ipcRenderer.invoke('clipboard:clearAll'),
+  getCategories: () => ipcRenderer.invoke('categories:getAll'),
+  createCategory: (id: string, name: string, color: string | null) =>
+    ipcRenderer.invoke('categories:create', id, name, color),
+  deleteCategory: (id: string) => ipcRenderer.invoke('categories:delete', id),
+  updateItemCategory: (itemId: string, categoryId: string | null) =>
+    ipcRenderer.invoke('clipboard:updateCategory', itemId, categoryId),
+  getTemplates: () => ipcRenderer.invoke('templates:getAll'),
+  createTemplate: (id: string, name: string, content: string, categoryId?: string) =>
+    ipcRenderer.invoke('templates:create', id, name, content, categoryId),
+  updateTemplate: (id: string, name: string, content: string) =>
+    ipcRenderer.invoke('templates:update', id, name, content),
+  deleteTemplate: (id: string) => ipcRenderer.invoke('templates:delete', id),
+  setLaunchAtLogin: (enabled: boolean) => ipcRenderer.invoke('settings:setLaunchAtLogin', enabled),
+  getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
+  syncNow: () => ipcRenderer.invoke('sync:now'),
   onNewItem: (callback: (item: unknown) => void) => {
     ipcRenderer.on('clipboard:newItem', (_, item) => callback(item))
     return () => ipcRenderer.removeAllListeners('clipboard:newItem')

@@ -1,18 +1,16 @@
-# Z-Paste 剩余阶段实施计划
+# Z-Paste 实施计划
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** 完成 Phase 2（开发者功能 + 效率工具）和 Phase 3（iCloud 同步 + 打磨），将 Z-Paste 从 MVP 推进到完整产品。
+**Goal:** 完成 Phase 3（iCloud 同步 + 打磨），将 Z-Paste 推进到完整产品。
 
-**Architecture:** 在 Phase 1 已完成的 electron-vite + React 18 + Tailwind + SQLite 基础上，逐步添加预览组件、工具函数、模板系统、设置页、iCloud 同步层、主题和性能优化。
+**Architecture:** 在 Phase 1 + 2 已完成的基础上，添加 iCloud 同步层、加密存储、设置页、引导页、主题切换、性能优化和动画。
 
 **Tech Stack:** Shiki（代码高亮）、framer-motion（动画）、react-window（虚拟滚动）、crypto（AES-256 加密）
 
 ---
 
-## Phase 1 完成状态
-
-以下模块已实现，后续任务基于此构建：
+## Phase 1 完成状态 ✅
 
 | 模块 | 文件 | 状态 |
 |------|------|------|
@@ -28,308 +26,24 @@
 
 ---
 
-## Phase 2: 开发者功能 + 效率工具（1.5 周）
-
-### Task 1: 安装 Phase 2 依赖
-
-**Files:**
-- Modify: `package.json`
-- Modify: `electron.vite.config.ts`
-
-**Step 1: 安装新依赖**
-
-```bash
-npm install shiki framer-motion react-window
-npm install -D @types/react-window
-```
-
-**Step 2: 更新 electron.vite.config.ts**
-
-在 renderer 配置中确保 shiki 正常工作（可能需要处理 WASM 加载）。
-
-**Step 3: 验证安装**
-
-```bash
-npx electron-vite build
-```
-
-**Step 4: Commit**
-
-```bash
-git add -A && git commit -m "chore: add phase 2 dependencies (shiki, framer-motion, react-window)"
-```
-
----
-
-### Task 2: 代码高亮预览组件（Shiki）
-
-**Files:**
-- Create: `src/renderer/src/components/Preview/CodePreview.tsx`
-- Create: `src/renderer/src/components/Preview/PreviewPanel.tsx`
-- Modify: `src/renderer/src/components/Panel/PanelWindow.tsx` — 添加右侧预览区
-
-**需求:**
-- 使用 Shiki 引擎渲染代码高亮（支持 10+ 语言：TypeScript, JavaScript, Python, Rust, Go, Java, HTML, CSS, SQL, Shell, JSON）
-- 根据 `metadata.language` 选择语言
-- 暗色主题（vitesse-dark 或类似）
-- 预览区在面板右侧，选中代码类型条目时展示
-
-**实现要点:**
-```tsx
-// CodePreview.tsx
-import { useEffect, useState } from 'react'
-import { codeToHtml } from 'shiki'
-
-interface Props {
-  code: string
-  language: string
-}
-
-export default function CodePreview({ code, language }: Props) {
-  const [html, setHtml] = useState('')
-
-  useEffect(() => {
-    codeToHtml(code, { lang: language, theme: 'vitesse-dark' })
-      .then(setHtml)
-      .catch(() => setHtml(`<pre>${code}</pre>`))
-  }, [code, language])
-
-  return <div dangerouslySetInnerHTML={{ __html: html }} className="text-xs overflow-auto p-3" />
-}
-```
-
-**PreviewPanel.tsx** 根据当前选中 item 的 `content_type` 切换渲染：
-- `code` → CodePreview
-- `json` → JsonPreview
-- `color` → ColorPreview
-- `image` → ImagePreview
-- 其他 → 纯文本预览
-
-**PanelWindow.tsx** 布局改为左右分栏：左侧列表（flex-1, max-w-[55%]），右侧预览（flex-1）。
-
-**Step 5: Commit**
-
-```bash
-git add -A && git commit -m "feat: add Shiki code highlight preview"
-```
-
----
-
-### Task 3: JSON 格式化/校验 + Base64 解码
-
-**Files:**
-- Create: `src/renderer/src/components/Preview/JsonPreview.tsx`
-- Create: `src/renderer/src/utils/formatters.ts`
-
-**需求:**
-- JSON 自动格式化（2 空格缩进）+ 语法高亮
-- JSON 校验：有效时显示格式化结果，无效时标红错误位置
-- Base64 一键解码并显示解码后内容
-- 工具栏按钮：复制格式化后的 JSON / 复制解码后的 Base64
-
-**formatters.ts 核心函数:**
-```typescript
-export function formatJSON(input: string): { formatted: string; valid: boolean; error?: string }
-export function decodeBase64(input: string): { decoded: string; valid: boolean }
-export function encodeBase64(input: string): string
-export function encodeURL(input: string): string
-export function decodeURL(input: string): string
-```
-
-**Step 4: Commit**
-
-```bash
-git add -A && git commit -m "feat: add JSON formatter and Base64 decoder"
-```
-
----
-
-### Task 4: 颜色值预览
-
-**Files:**
-- Create: `src/renderer/src/components/Preview/ColorPreview.tsx`
-
-**需求:**
-- 解析颜色值：HEX (#RGB, #RRGGBB, #RRGGBBAA)、rgb()、rgba()、hsl()、hsla()
-- 渲染色块 + 各格式互转显示
-- 点击色值复制到剪贴板
-
-**实现要点:**
-```tsx
-// 色块展示 + 格式互转
-<div className="w-20 h-20 rounded-lg" style={{ backgroundColor: colorValue }} />
-<div className="text-xs text-gray-400">
-  <p>HEX: {hexValue}</p>
-  <p>RGB: {rgbValue}</p>
-  <p>HSL: {hslValue}</p>
-</div>
-```
-
-**Step 3: Commit**
-
-```bash
-git add -A && git commit -m "feat: add color value preview with format conversion"
-```
-
----
-
-### Task 5: 图片预览
-
-**Files:**
-- Create: `src/renderer/src/components/Preview/ImagePreview.tsx`
-
-**需求:**
-- base64 图片渲染为 `<img>` 标签
-- 显示尺寸信息（来自 metadata）
-- 图片过大时仅显示缩略图 + "点击查看原图"
-
-**Step 3: Commit**
-
-```bash
-git add -A && git commit -m "feat: add image preview component"
-```
-
----
-
-### Task 6: URL/文本快速转换工具
-
-**Files:**
-- Create: `src/renderer/src/utils/transformers.ts`
-- Modify: `src/renderer/src/components/Preview/PreviewPanel.tsx` — 添加工具栏
-
-**需求:**
-- 大小写切换：UPPER / lower / Title Case / camelCase
-- URL encode/decode
-- 去除首尾空格 / 去除所有空格
-- 工具栏按钮显示在预览区底部
-
-**transformers.ts 核心函数:**
-```typescript
-export function toUpperCase(s: string): string
-export function toLowerCase(s: string): string
-export function toTitleCase(s: string): string
-export function toCamelCase(s: string): string
-export function trimWhitespace(s: string): string
-export function removeAllWhitespace(s: string): string
-```
-
-**Step 4: Commit**
-
-```bash
-git add -A && git commit -m "feat: add text transformation utilities"
-```
-
----
-
-### Task 7: 收藏/置顶增强 + 右键菜单
-
-**Files:**
-- Modify: `src/renderer/src/components/Panel/ClipboardItem.tsx` — 添加右键菜单
-- Modify: `src/renderer/src/components/Panel/ClipboardList.tsx` — 收藏/置顶筛选 Tab
-- Modify: `src/renderer/src/stores/clipboardStore.ts` — 添加视图切换状态
-
-**需求:**
-- 列表顶部添加 Tab 切换：全部 / 收藏 / 按类型筛选
-- 右键菜单：收藏 / 置顶 / 删除 / 编辑 / 移至分类
-- 收藏项在列表中显示 ★ 标记
-
-**Step 5: Commit**
-
-```bash
-git add -A && git commit -m "feat: add context menu and filter tabs"
-```
-
----
-
-### Task 8: 分类/标签管理
-
-**Files:**
-- Create: `src/renderer/src/components/Panel/CategoryFilter.tsx`
-- Modify: `src/main/database/repository.ts` — 添加 categories CRUD
-- Modify: `src/preload/index.ts` — 添加 categories IPC
-- Modify: `src/main/index.ts` — 注册 categories IPC handlers
-
-**需求:**
-- 用户可创建自定义分类（名称 + 颜色）
-- 将剪贴板条目移至分类
-- 面板侧边栏或顶部可按分类筛选
-- 分类 CRUD 通过 IPC 桥接
-
-**数据库操作:**
-```typescript
-// repository.ts 新增
-export function getCategories(): Category[]
-export function createCategory(name: string, color: string): Category
-export function deleteCategory(id: string): void
-export function updateItemCategory(itemId: string, categoryId: string | null): void
-```
-
-**Step 5: Commit**
-
-```bash
-git add -A && git commit -m "feat: add category management"
-```
-
----
-
-### Task 9: 序列粘贴 + 快速编辑
-
-**Files:**
-- Modify: `src/renderer/src/stores/clipboardStore.ts` — 添加 queue 状态
-- Modify: `src/renderer/src/hooks/useKeyboard.ts` — 支持多选
-- Create: `src/renderer/src/components/Panel/QuickEdit.tsx`
-- Modify: `src/main/index.ts` — 添加 pasteQueue IPC
-
-**需求:**
-
-**序列粘贴：**
-- 用户可通过 Shift+Enter 或 Ctrl+Click 选中多个条目
-- 按顺序逐个粘贴（每次粘贴后等待 300ms 再粘贴下一个）
-- 状态栏显示当前队列：如"已选择 3 项"
-
-**快速编辑：**
-- 双击条目进入编辑模式
-- 显示 textarea 覆盖预览区，可修改内容
-- Enter 保存并粘贴，Esc 取消
-
-**Step 5: Commit**
-
-```bash
-git add -A && git commit -m "feat: add sequential paste and quick edit"
-```
-
----
-
-### Task 10: 模板片段 CRUD
-
-**Files:**
-- Create: `src/renderer/src/components/Templates/TemplateList.tsx`
-- Create: `src/renderer/src/components/Templates/TemplateEditor.tsx`
-- Modify: `src/main/database/repository.ts` — 添加 templates CRUD
-- Modify: `src/preload/index.ts` — 添加 templates IPC
-- Modify: `src/main/index.ts` — 注册 templates IPC handlers
-- Modify: `src/renderer/src/stores/clipboardStore.ts` — 或新建 `templateStore.ts`
-
-**需求:**
-- 模板列表视图（面板可切换到模板 Tab）
-- 新建模板：名称 + 内容 + 可选分类
-- 编辑 / 删除模板
-- 点击模板直接粘贴
-- 模板支持排序（拖拽或手动调序）
-
-**数据库操作:**
-```typescript
-export function getTemplates(): Template[]
-export function createTemplate(name: string, content: string, categoryId?: string): Template
-export function updateTemplate(id: string, updates: Partial<Template>): void
-export function deleteTemplate(id: string): void
-```
-
-**Step 5: Commit**
-
-```bash
-git add -A && git commit -m "feat: add template snippets CRUD"
-```
+## Phase 2 完成状态 ✅
+
+| Task | 模块 | 文件 | 状态 |
+|------|------|------|------|
+| T1 | Phase 2 依赖 | shiki, framer-motion, react-window, @types/react-window | ✅ |
+| T2 | Shiki 代码高亮 | Preview/CodePreview.tsx | ✅ |
+| T2 | 预览路由容器 | Preview/PreviewPanel.tsx（含 Text/Base64/URL 工具栏） | ✅ |
+| T3 | JSON 格式化/校验 | Preview/JsonPreview.tsx | ✅ |
+| T3 | 格式化工具函数 | utils/formatters.ts（formatJSON, decodeBase64, encodeBase64, encodeURL, decodeURL） | ✅ |
+| T4 | 颜色预览 | Preview/ColorPreview.tsx（HEX/RGB/HSL 解析 + 色块 + 格式互转） | ✅ |
+| T5 | 图片预览 | Preview/ImagePreview.tsx（base64 渲染 + 尺寸信息） | ✅ |
+| T6 | 文本转换工具 | utils/transformers.ts（UPPER/lower/Title/camel/snake/kebab/trim） | ✅ |
+| T7 | 类型筛选 Tab | Panel/FilterTabs.tsx（全部/收藏/文本/代码/URL/JSON/颜色/图片） | ✅ |
+| T7 | 右键菜单 | Panel/ClipboardItem.tsx（粘贴/收藏/置顶/复制/删除） | ✅ |
+| T8 | 分类管理 | repository.ts + IPC（categories CRUD + updateItemCategory） | ✅ |
+| T9 | 快速编辑 | Panel/QuickEdit.tsx（双击编辑 → ⌘↵ 保存并粘贴） | ✅ |
+| T10 | 模板片段 | Templates/TemplateList.tsx + TemplateEditor.tsx + IPC | ✅ |
+| — | 面板布局升级 | PanelWindow.tsx（左右分栏 55%/45% + 剪贴板/模板 Tab 切换） | ✅ |
 
 ---
 
@@ -618,57 +332,35 @@ git add -A && git commit -m "feat: add framer-motion animations (< 150ms)"
 
 ---
 
-## 未创建文件清单（对照 README 目标结构）
+## Phase 3 待创建文件清单
 
 | 文件路径 | 所属 Task | 状态 |
 |----------|----------|------|
-| `src/renderer/src/components/Preview/CodePreview.tsx` | Task 2 | ⬜ |
-| `src/renderer/src/components/Preview/PreviewPanel.tsx` | Task 2 | ⬜ |
-| `src/renderer/src/components/Preview/JsonPreview.tsx` | Task 3 | ⬜ |
-| `src/renderer/src/components/Preview/ColorPreview.tsx` | Task 4 | ⬜ |
-| `src/renderer/src/components/Preview/ImagePreview.tsx` | Task 5 | ⬜ |
-| `src/renderer/src/utils/formatters.ts` | Task 3 | ⬜ |
-| `src/renderer/src/utils/transformers.ts` | Task 6 | ⬜ |
-| `src/renderer/src/components/Panel/CategoryFilter.tsx` | Task 8 | ⬜ |
-| `src/renderer/src/components/Panel/QuickEdit.tsx` | Task 9 | ⬜ |
-| `src/renderer/src/components/Templates/TemplateList.tsx` | Task 10 | ⬜ |
-| `src/renderer/src/components/Templates/TemplateEditor.tsx` | Task 10 | ⬜ |
-| `src/main/sync/icloud.ts` | Task 11 | ⬜ |
-| `src/main/security/encryption.ts` | Task 12 | ⬜ |
-| `src/renderer/src/stores/settingsStore.ts` | Task 13 | ⬜ |
-| `src/renderer/src/components/Settings/SettingsPage.tsx` | Task 14 | ⬜ |
-| `src/renderer/src/components/Settings/SettingsItem.tsx` | Task 14 | ⬜ |
-| `src/renderer/src/components/Onboarding/OnboardingPage.tsx` | Task 15 | ⬜ |
-| `build/entitlements.mac.plist` | Task 16 | ⬜ |
-| `resources/icon.icns` | Task 16 | ⬜ |
+| `src/main/sync/icloud.ts` | Task 11 | ✅ |
+| `src/main/security/encryption.ts` | Task 12 | ✅ |
+| `src/renderer/src/stores/settingsStore.ts` | Task 13 | ✅ |
+| `src/renderer/src/components/Settings/SettingsPage.tsx` | Task 14 | ✅ |
+| `src/renderer/src/components/Settings/SettingsItem.tsx` | Task 14 | ✅ |
+| `src/renderer/src/components/Onboarding/OnboardingPage.tsx` | Task 15 | ✅ |
+| `build/entitlements.mac.plist` | Task 16 | ✅ |
+| `resources/icon.icns` | Task 16 | ✅ |
 
 ---
 
-## 执行顺序建议
+## Phase 3 执行顺序建议
 
 ```
-Phase 2（按依赖关系排列）:
-  Task 1  → 安装依赖（前置条件）
-  Task 2  → 代码高亮（独立）
-  Task 3  → JSON/Base64（独立）
-  Task 4  → 颜色预览（独立）
-  Task 5  → 图片预览（独立）
-  ↑ Task 2-5 可并行开发 ↑
-  Task 6  → 文本转换（依赖 PreviewPanel）
-  Task 7  → 右键菜单 + 筛选（独立）
-  Task 8  → 分类管理（独立）
-  Task 9  → 序列粘贴 + 快速编辑（独立）
-  Task 10 → 模板片段（独立）
-
 Phase 3（按依赖关系排列）:
   Task 13 → 主题（前置，settingsStore 被后续依赖）
   Task 14 → 设置页（依赖 settingsStore）
   Task 15 → 引导页（依赖 settingsStore）
+  ↑ Task 13-15 顺序执行 ↑
   Task 11 → iCloud 同步（独立，需要设置页联动）
   Task 12 → 加密存储（独立，需要设置页联动）
   Task 16 → 打包配置（独立）
   Task 17 → 性能优化（独立）
   Task 18 → 动画优化（独立）
+  ↑ Task 11/12/16/17/18 可并行开发 ↑
 ```
 
 ---

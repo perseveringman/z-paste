@@ -1,9 +1,14 @@
-import { clipboard, nativeImage } from 'electron'
+import { clipboard } from 'electron'
 import { createHash } from 'crypto'
 import { BrowserWindow } from 'electron'
 import { detectContentType } from './detector'
 import * as repository from '../database/repository'
 import { nanoid } from 'nanoid'
+import { writeFileSync, existsSync, mkdirSync } from 'fs'
+import { join } from 'path'
+import { app } from 'electron'
+
+const MAX_IMAGE_BASE64_SIZE = 5 * 1024 * 1024
 
 export class ClipboardMonitor {
   private intervalId: ReturnType<typeof setInterval> | null = null
@@ -87,12 +92,22 @@ export class ClipboardMonitor {
       return
     }
 
-    const base64 = buffer.toString('base64')
     const size = image.getSize()
+    let content: string
+
+    if (buffer.length > MAX_IMAGE_BASE64_SIZE) {
+      const imgDir = join(app.getPath('userData'), 'images')
+      if (!existsSync(imgDir)) mkdirSync(imgDir, { recursive: true })
+      const filePath = join(imgDir, `${nanoid()}.png`)
+      writeFileSync(filePath, buffer)
+      content = filePath
+    } else {
+      content = buffer.toString('base64')
+    }
 
     const item = {
       id: nanoid(),
-      content: base64,
+      content,
       content_type: 'image' as const,
       content_hash: hash,
       preview: `Image ${size.width}x${size.height}`,

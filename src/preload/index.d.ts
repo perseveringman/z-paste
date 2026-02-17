@@ -29,6 +29,17 @@ interface ZPasteAPI {
   togglePin: (id: string) => Promise<void>
   pasteItem: (id: string) => Promise<void>
   clearAll: () => Promise<void>
+  getCategories: () => Promise<Array<{ id: string; name: string; color: string | null; sort_order: number; created_at: number }>>
+  createCategory: (id: string, name: string, color: string | null) => Promise<void>
+  deleteCategory: (id: string) => Promise<void>
+  updateItemCategory: (itemId: string, categoryId: string | null) => Promise<void>
+  getTemplates: () => Promise<Array<{ id: string; name: string; content: string; category_id: string | null; sort_order: number; created_at: number; updated_at: number }>>
+  createTemplate: (id: string, name: string, content: string, categoryId?: string) => Promise<void>
+  updateTemplate: (id: string, name: string, content: string) => Promise<void>
+  deleteTemplate: (id: string) => Promise<void>
+  setLaunchAtLogin: (enabled: boolean) => Promise<void>
+  getLaunchAtLogin: () => Promise<boolean>
+  syncNow: () => Promise<void>
   onNewItem: (callback: (item: ClipboardItem) => void) => () => void
   onPanelShown: (callback: () => void) => () => void
   onPanelHidden: (callback: () => void) => () => void

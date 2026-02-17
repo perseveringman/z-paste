@@ -12,7 +12,7 @@ export default function SearchBar(): React.JSX.Element {
   }, [isVisible])
 
   return (
-    <div className="flex items-center px-4 py-3 border-b border-white/10">
+    <div className="flex-1 flex items-center px-4 py-2.5">
       <svg
         className="w-4 h-4 text-gray-400 mr-3 shrink-0"
         fill="none"
@@ -32,7 +32,7 @@ export default function SearchBar(): React.JSX.Element {
         value={searchQuery}
         onChange={(e) => search(e.target.value)}
         placeholder="搜索剪贴板内容..."
-        className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+        className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none"
       />
       {searchQuery && (
         <button

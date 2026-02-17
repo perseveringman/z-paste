@@ -1,9 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import PanelWindow from './components/Panel/PanelWindow'
+import OnboardingPage from './components/Onboarding/OnboardingPage'
 import { useClipboardStore } from './stores/clipboardStore'
+import { useSettingsStore } from './stores/settingsStore'
 
 function App(): React.JSX.Element {
   const { loadItems, addItem, setVisible } = useClipboardStore()
+  const resolvedTheme = useSettingsStore((s) => s.resolvedTheme)
+  const hasCompletedOnboarding = useSettingsStore((s) => s.hasCompletedOnboarding)
+  const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding)
 
   useEffect(() => {
     loadItems()
@@ -29,8 +34,12 @@ function App(): React.JSX.Element {
   }, [])
 
   return (
-    <div className="w-full h-screen">
-      <PanelWindow />
+    <div className={`w-full h-screen ${resolvedTheme}`}>
+      {showOnboarding ? (
+        <OnboardingPage onComplete={() => setShowOnboarding(false)} />
+      ) : (
+        <PanelWindow />
+      )}
     </div>
   )
 }

@@ -7,11 +7,13 @@ import { ClipboardMonitor } from './clipboard/monitor'
 import { initDatabase, getDatabase } from './database/connection'
 import { createTables } from './database/schema'
 import * as repository from './database/repository'
+import { iCloudSync } from './sync/icloud'
 
 let windowManager: WindowManager
 let shortcutManager: ShortcutManager
 let trayManager: TrayManager
 let clipboardMonitor: ClipboardMonitor
+let syncService: iCloudSync | null = null
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
@@ -31,6 +33,11 @@ app.whenReady().then(() => {
   shortcutManager.register()
   trayManager.create()
   clipboardMonitor.start()
+
+  // Auto cleanup every 10 minutes
+  setInterval(() => {
+    repository.autoCleanup(2000)
+  }, 10 * 60 * 1000)
 
   // IPC handlers
   ipcMain.handle('clipboard:getItems', async (_, options) => {
@@ -73,6 +80,68 @@ app.whenReady().then(() => {
     return repository.clearAll()
   })
 
+  // Template IPC handlers
+  ipcMain.handle('templates:getAll', async () => {
+    return repository.getTemplates()
+  })
+
+  ipcMain.handle('templates:create', async (_, id: string, name: string, content: string, categoryId?: string) => {
+    return repository.createTemplate(id, name, content, categoryId)
+  })
+
+  ipcMain.handle('templates:update', async (_, id: string, name: string, content: string) => {
+    return repository.updateTemplate(id, name, content)
+  })
+
+  ipcMain.handle('templates:delete', async (_, id: string) => {
+    return repository.deleteTemplate(id)
+  })
+
+  // Category IPC handlers
+  ipcMain.handle('categories:getAll', async () => {
+    return repository.getCategories()
+  })
+
+  ipcMain.handle('categories:create', async (_, id: string, name: string, color: string | null) => {
+    return repository.createCategory(id, name, color)
+  })
+
+  ipcMain.handle('categories:delete', async (_, id: string) => {
+    return repository.deleteCategory(id)
+  })
+
+  ipcMain.handle('clipboard:updateCategory', async (_, itemId: string, categoryId: string | null) => {
+    return repository.updateItemCategory(itemId, categoryId)
+  })
+
+  // Settings IPC handlers
+  ipcMain.handle('settings:setLaunchAtLogin', async (_, enabled: boolean) => {
+    app.setLoginItemSettings({ openAtLogin: enabled })
+  })
+
+  ipcMain.handle('settings:getLaunchAtLogin', async () => {
+    return app.getLoginItemSettings().openAtLogin
+  })
+
+  ipcMain.handle('sync:now', async () => {
+    if (syncService) {
+      syncService.syncNow()
+    }
+  })
+
+  ipcMain.handle('sync:start', async () => {
+    if (!syncService) {
+      syncService = new iCloudSync()
+    }
+    syncService.start()
+  })
+
+  ipcMain.handle('sync:stop', async () => {
+    if (syncService) {
+      syncService.stop()
+    }
+  })
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       windowManager.create()
@@ -87,6 +156,7 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   shortcutManager.unregister()
   clipboardMonitor.stop()
+  if (syncService) syncService.stop()
   const db = getDatabase()
   if (db) db.close()
 })
