@@ -1,7 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
 import FilterTabs from './FilterTabs'
+import Sidebar from './Sidebar'
+import TagPicker from './TagPicker'
 import PreviewPanel from '../Preview/PreviewPanel'
 import QuickEdit from './QuickEdit'
 import TemplateList from '../Templates/TemplateList'
@@ -23,6 +25,8 @@ export default function PanelWindow(): React.JSX.Element {
 
   const [view, setView] = useState<PanelView>('clipboard')
   const [editingItem, setEditingItem] = useState<string | null>(null)
+  const [tagPickerItemId, setTagPickerItemId] = useState<string | null>(null)
+  const tagPickerAnchorRef = useRef<HTMLDivElement>(null)
 
   const handleDoubleClick = useCallback((itemId: string) => {
     setEditingItem(itemId)
@@ -39,16 +43,30 @@ export default function PanelWindow(): React.JSX.Element {
     [selectedItem, pasteItem]
   )
 
+  const openTagPicker = useCallback((itemId: string) => {
+    setTagPickerItemId(itemId)
+  }, [])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === ',' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setView((v) => (v === 'settings' ? 'clipboard' : 'settings'))
+        return
+      }
+      if (e.key === 't' || e.key === 'T') {
+        const target = document.activeElement?.tagName
+        if (target === 'INPUT' || target === 'TEXTAREA') return
+        if (tagPickerItemId) return
+        if (selectedItem) {
+          e.preventDefault()
+          setTagPickerItemId(selectedItem.id)
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [selectedItem, tagPickerItemId])
 
   const containerClass =
     'w-full h-full rounded-xl overflow-hidden bg-background/95 backdrop-blur-xl border shadow-2xl flex flex-col'
@@ -90,23 +108,34 @@ export default function PanelWindow(): React.JSX.Element {
       </div>
 
       {view === 'clipboard' ? (
-        <>
-          <FilterTabs />
-          <div className="flex-1 flex min-h-0">
-            <div className="w-[55%] flex flex-col min-h-0 border-r">
-              <ClipboardList onDoubleClick={handleDoubleClick} />
+        <div className="flex flex-1 min-h-0">
+          <Sidebar />
+          <div className="flex flex-col flex-1 min-h-0 min-w-0">
+            <FilterTabs />
+            <div className="flex-1 flex min-h-0 relative">
+              <div className="w-[55%] flex flex-col min-h-0 border-r" ref={tagPickerAnchorRef}>
+                <ClipboardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
+                {tagPickerItemId && (
+                  <div className="absolute left-2 top-8 z-50">
+                    <TagPicker
+                      itemId={tagPickerItemId}
+                      onClose={() => setTagPickerItemId(null)}
+                    />
+                  </div>
+                )}
+              </div>
+              {editingItem && selectedItem ? (
+                <QuickEdit
+                  content={selectedItem.content}
+                  onSave={handleEditSave}
+                  onCancel={() => setEditingItem(null)}
+                />
+              ) : (
+                <PreviewPanel item={selectedItem} />
+              )}
             </div>
-            {editingItem && selectedItem ? (
-              <QuickEdit
-                content={selectedItem.content}
-                onSave={handleEditSave}
-                onCancel={() => setEditingItem(null)}
-              />
-            ) : (
-              <PreviewPanel item={selectedItem} />
-            )}
           </div>
-        </>
+        </div>
       ) : (
         <TemplateList />
       )}

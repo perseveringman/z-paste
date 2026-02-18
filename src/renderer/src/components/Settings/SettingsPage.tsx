@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useSettingsStore, ThemeMode } from '../../stores/settingsStore'
+import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { Switch } from '../ui/switch'
 import {
   Select,
@@ -21,10 +22,14 @@ import {
   Sun,
   Monitor,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Tag,
+  Pencil,
+  GitMerge,
+  AlertTriangle
 } from 'lucide-react'
 
-type SettingsSection = 'general' | 'shortcuts' | 'sync' | 'privacy' | 'theme' | 'about'
+type SettingsSection = 'general' | 'shortcuts' | 'sync' | 'privacy' | 'theme' | 'tags' | 'about'
 
 const SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
   { id: 'general', label: '通用', icon: Settings },
@@ -32,6 +37,7 @@ const SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[
   { id: 'sync', label: '同步', icon: Cloud },
   { id: 'privacy', label: '隐私', icon: Lock },
   { id: 'theme', label: '主题', icon: Palette },
+  { id: 'tags', label: '标签管理', icon: Tag },
   { id: 'about', label: '关于', icon: Info }
 ]
 
@@ -92,6 +98,8 @@ function SectionContent({ section }: { section: SettingsSection }): React.JSX.El
       return <PrivacySection />
     case 'theme':
       return <ThemeSection />
+    case 'tags':
+      return <TagManagementSection />
     case 'about':
       return <AboutSection />
     default:
@@ -313,6 +321,170 @@ function ThemeSection(): React.JSX.Element {
             </span>
           </button>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function TagManagementSection(): React.JSX.Element {
+  const { tags, loadTags, renameTag, deleteTag, mergeTag } = useTagStore()
+  const [stats, setStats] = useState<{ total: number; singleUse: number } | null>(null)
+  const [renamingSlug, setRenamingSlug] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [mergingSlug, setMergingSlug] = useState<string | null>(null)
+  const [mergeTarget, setMergeTarget] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadTags()
+    window.api.getTagStats().then(setStats)
+  }, [loadTags])
+
+  const handleRenameConfirm = useCallback(
+    async (slug: string) => {
+      if (!renameValue.trim()) return
+      await renameTag(slug, renameValue.trim())
+      setRenamingSlug(null)
+      setRenameValue('')
+      const s = await window.api.getTagStats()
+      setStats(s)
+    },
+    [renameValue, renameTag]
+  )
+
+  const handleDelete = useCallback(
+    async (slug: string) => {
+      if (confirmDelete === slug) {
+        await deleteTag(slug)
+        setConfirmDelete(null)
+        const s = await window.api.getTagStats()
+        setStats(s)
+      } else {
+        setConfirmDelete(slug)
+      }
+    },
+    [confirmDelete, deleteTag]
+  )
+
+  const handleMerge = useCallback(
+    async (sourceSlug: string) => {
+      const target = mergeTarget.trim()
+      if (!target) return
+      await mergeTag(sourceSlug, target)
+      setMergingSlug(null)
+      setMergeTarget('')
+      const s = await window.api.getTagStats()
+      setStats(s)
+    },
+    [mergeTarget, mergeTag]
+  )
+
+  return (
+    <div>
+      <SectionTitle title="标签管理" />
+      {stats && (
+        <div className="flex gap-4 mb-4">
+          <div className="flex-1 bg-muted/40 rounded-lg p-3 text-center">
+            <p className="text-xl font-semibold">{stats.total}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">总标签数</p>
+          </div>
+          <div className="flex-1 bg-muted/40 rounded-lg p-3 text-center">
+            <p className="text-xl font-semibold">{stats.singleUse}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">仅 1 条内容</p>
+          </div>
+        </div>
+      )}
+
+      {stats && stats.total > 15 && (
+        <div className="flex items-start gap-2 mb-4 px-3 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-yellow-700 dark:text-yellow-300">
+            标签数量超过 15 个，建议合并类似标签以保持高效率。
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-1">
+        {tags.map((tag: TagWithCount) => (
+          <div
+            key={tag.slug}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted/40 group"
+          >
+            <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+
+            {renamingSlug === tag.slug ? (
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRenameConfirm(tag.slug)
+                  if (e.key === 'Escape') { setRenamingSlug(null); setRenameValue('') }
+                }}
+                className="flex-1 text-sm bg-background border rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary"
+              />
+            ) : mergingSlug === tag.slug ? (
+              <select
+                autoFocus
+                value={mergeTarget}
+                onChange={(e) => setMergeTarget(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleMerge(tag.slug)
+                  if (e.key === 'Escape') { setMergingSlug(null); setMergeTarget('') }
+                }}
+                className="flex-1 text-sm bg-background border rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">选择目标标签...</option>
+                {tags.filter((t) => t.slug !== tag.slug).map((t) => (
+                  <option key={t.slug} value={t.slug}>{t.name}</option>
+                ))}
+              </select>
+            ) : (
+              <span className="flex-1 text-sm truncate">{tag.name}</span>
+            )}
+
+            <span className="text-[10px] text-muted-foreground/60 tabular-nums mr-1">{tag.count}</span>
+
+            {renamingSlug === tag.slug ? (
+              <>
+                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleRenameConfirm(tag.slug)}>确认</Button>
+                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setRenamingSlug(null); setRenameValue('') }}>取消</Button>
+              </>
+            ) : mergingSlug === tag.slug ? (
+              <>
+                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleMerge(tag.slug)} disabled={!mergeTarget}>合并</Button>
+                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setMergingSlug(null); setMergeTarget('') }}>取消</Button>
+              </>
+            ) : (
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => { setRenamingSlug(tag.slug); setRenameValue(tag.name) }}
+                  className="p-1 rounded hover:bg-background/80 text-muted-foreground"
+                  title="重命名"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => { setMergingSlug(tag.slug); setMergeTarget('') }}
+                  className="p-1 rounded hover:bg-background/80 text-muted-foreground"
+                  title="合并到..."
+                >
+                  <GitMerge className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => handleDelete(tag.slug)}
+                  className={`p-1 rounded hover:bg-background/80 ${confirmDelete === tag.slug ? 'text-destructive' : 'text-muted-foreground'}`}
+                  title={confirmDelete === tag.slug ? '再次点击确认删除' : '删除'}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+        {tags.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-8">暂无标签</p>
+        )}
       </div>
     </div>
   )

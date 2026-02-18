@@ -16,12 +16,18 @@ export interface ClipboardItem {
   updated_at: number
 }
 
+export type LeftFilter =
+  | { type: 'all' }
+  | { type: 'starred' }
+  | { type: 'tag'; slug: string }
+
 interface ClipboardState {
   items: ClipboardItem[]
   selectedIndex: number
   searchQuery: string
   isVisible: boolean
   filterType: string | null
+  leftFilter: LeftFilter
 
   loadItems: () => Promise<void>
   addItem: (item: ClipboardItem) => void
@@ -29,6 +35,7 @@ interface ClipboardState {
   setSearchQuery: (query: string) => void
   setVisible: (visible: boolean) => void
   setFilterType: (type: string | null) => void
+  setLeftFilter: (filter: LeftFilter) => void
   deleteItem: (id: string) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
@@ -43,11 +50,14 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   searchQuery: '',
   isVisible: false,
   filterType: null,
+  leftFilter: { type: 'all' },
 
   loadItems: async () => {
+    const state = get()
     const items = await window.api.getItems({
       limit: 50,
-      contentType: get().filterType || undefined
+      contentType: state.filterType || undefined,
+      leftFilter: state.leftFilter
     })
     set({ items, selectedIndex: 0 })
   },
@@ -71,6 +81,11 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
 
   setFilterType: (type) => {
     set({ filterType: type })
+    get().loadItems()
+  },
+
+  setLeftFilter: (filter) => {
+    set({ leftFilter: filter })
     get().loadItems()
   },
 

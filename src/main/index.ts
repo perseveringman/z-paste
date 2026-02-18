@@ -115,6 +115,43 @@ app.whenReady().then(() => {
   })
 
   // Settings IPC handlers
+  // Tags IPC handlers
+  ipcMain.handle('tags:list', async () => {
+    return repository.listTagsWithCounts()
+  })
+
+  ipcMain.handle('tags:apply', async (_, itemId: string, slugs: string[]) => {
+    return repository.applyTags(itemId, slugs)
+  })
+
+  ipcMain.handle('tags:remove', async (_, itemId: string, slug: string) => {
+    return repository.removeTag(itemId, slug)
+  })
+
+  ipcMain.handle('tags:getItemSlugs', async (_, itemId: string) => {
+    return repository.getItemTagSlugs(itemId)
+  })
+
+  ipcMain.handle('tags:rename', async (_, slug: string, nextName: string) => {
+    return repository.renameTag(slug, nextName)
+  })
+
+  ipcMain.handle('tags:delete', async (_, slug: string) => {
+    return repository.deleteTag(slug)
+  })
+
+  ipcMain.handle('tags:merge', async (_, sourceSlug: string, targetSlug: string) => {
+    return repository.mergeTag(sourceSlug, targetSlug)
+  })
+
+  ipcMain.handle('tags:stats', async () => {
+    return repository.getTagStats()
+  })
+
+  ipcMain.handle('tags:similar', async (_, name: string) => {
+    return repository.getSimilarTags(name)
+  })
+
   ipcMain.handle('settings:setLaunchAtLogin', async (_, enabled: boolean) => {
     app.setLoginItemSettings({ openAtLogin: enabled })
   })

@@ -5,11 +5,12 @@ import { useClipboardStore } from '../../stores/clipboardStore'
 
 interface Props {
   onDoubleClick?: (itemId: string) => void
+  onOpenTagPicker?: (itemId: string) => void
 }
 
 const ITEM_HEIGHT = 60
 
-export default function ClipboardList({ onDoubleClick }: Props): React.JSX.Element {
+export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props): React.JSX.Element {
   const items = useSearch()
   const { selectedIndex } = useClipboardStore()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -86,6 +87,7 @@ export default function ClipboardList({ onDoubleClick }: Props): React.JSX.Eleme
           index={i}
           isSelected={i === selectedIndex}
           onDoubleClick={onDoubleClick}
+          onOpenTagPicker={onOpenTagPicker}
         />
       </div>
     )

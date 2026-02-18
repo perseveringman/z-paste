@@ -13,7 +13,8 @@ import {
   Star,
   Clipboard,
   Copy,
-  Trash2
+  Trash2,
+  Tag
 } from 'lucide-react'
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
   index: number
   isSelected: boolean
   onDoubleClick?: (itemId: string) => void
+  onOpenTagPicker?: (itemId: string) => void
 }
 
 const TypeIcon = ({ type, className }: { type: string; className?: string }): React.JSX.Element => {
@@ -64,9 +66,17 @@ export default function ClipboardItemRow({
   item,
   index,
   isSelected,
-  onDoubleClick
+  onDoubleClick,
+  onOpenTagPicker
 }: Props): React.JSX.Element {
   const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin } = useClipboardStore()
+  const [itemTagSlugs, setItemTagSlugs] = useState<string[]>([])
+
+  useEffect(() => {
+    window.api.getItemTagSlugs(item.id).then(setItemTagSlugs)
+  }, [item.id])
+
+  const hasTag = itemTagSlugs.length > 0
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -153,9 +163,19 @@ export default function ClipboardItemRow({
         </div>
 
         {/* Action Area (Right Side) */}
-        <div className="relative flex items-center justify-end min-w-[48px] ml-2">
+        <div className="relative flex items-center justify-end min-w-[64px] ml-2">
           {/* Hover Actions */}
           <div className="absolute inset-0 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-inherit">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpenTagPicker?.(item.id)
+              }}
+              className="p-1 rounded hover:bg-background/80 text-muted-foreground"
+              title="打标签 (T)"
+            >
+              <Tag className="w-3.5 h-3.5" />
+            </button>
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -184,6 +204,7 @@ export default function ClipboardItemRow({
           <div className="flex items-center gap-1 group-hover:opacity-0 transition-opacity">
             {item.is_pinned !== 0 && <Pin className="w-3 h-3 text-primary" />}
             {item.is_favorite !== 0 && <Star className="w-3 h-3 text-yellow-500" />}
+            {hasTag && <Tag className="w-3 h-3 text-blue-500" />}
           </div>
         </div>
       </div>
@@ -211,6 +232,14 @@ export default function ClipboardItemRow({
             }}
           />
           <div className="-mx-1 my-1 h-px bg-muted" />
+          <ContextMenuItem
+            icon={<Tag className="w-4 h-4" />}
+            label="打标签 (T)"
+            onClick={() => {
+              onOpenTagPicker?.(item.id)
+              setContextMenu(null)
+            }}
+          />
           <ContextMenuItem
             icon={<Star className="w-4 h-4" />}
             label={item.is_favorite ? '取消收藏' : '收藏'}

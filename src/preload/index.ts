@@ -1,12 +1,18 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+type LeftFilter =
+  | { type: 'all' }
+  | { type: 'starred' }
+  | { type: 'tag'; slug: string }
+
 const api = {
   getItems: (options?: {
     limit?: number
     offset?: number
     contentType?: string
     favoritesOnly?: boolean
+    leftFilter?: LeftFilter
   }) => ipcRenderer.invoke('clipboard:getItems', options),
   searchItems: (query: string) => ipcRenderer.invoke('clipboard:searchItems', query),
   deleteItem: (id: string) => ipcRenderer.invoke('clipboard:deleteItem', id),
@@ -29,6 +35,15 @@ const api = {
   setLaunchAtLogin: (enabled: boolean) => ipcRenderer.invoke('settings:setLaunchAtLogin', enabled),
   getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
   syncNow: () => ipcRenderer.invoke('sync:now'),
+  listTags: () => ipcRenderer.invoke('tags:list'),
+  applyTags: (itemId: string, slugs: string[]) => ipcRenderer.invoke('tags:apply', itemId, slugs),
+  removeTag: (itemId: string, slug: string) => ipcRenderer.invoke('tags:remove', itemId, slug),
+  getItemTagSlugs: (itemId: string) => ipcRenderer.invoke('tags:getItemSlugs', itemId),
+  renameTag: (slug: string, nextName: string) => ipcRenderer.invoke('tags:rename', slug, nextName),
+  deleteTag: (slug: string) => ipcRenderer.invoke('tags:delete', slug),
+  mergeTag: (sourceSlug: string, targetSlug: string) => ipcRenderer.invoke('tags:merge', sourceSlug, targetSlug),
+  getTagStats: () => ipcRenderer.invoke('tags:stats'),
+  getSimilarTags: (name: string) => ipcRenderer.invoke('tags:similar', name),
   onNewItem: (callback: (item: unknown) => void) => {
     ipcRenderer.on('clipboard:newItem', (_, item) => callback(item))
     return () => ipcRenderer.removeAllListeners('clipboard:newItem')

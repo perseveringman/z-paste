@@ -42,5 +42,84 @@ export function createTables(): void {
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS tags (
+      id           TEXT PRIMARY KEY,
+      slug         TEXT NOT NULL UNIQUE,
+      name         TEXT NOT NULL,
+      created_at   INTEGER NOT NULL,
+      updated_at   INTEGER NOT NULL,
+      last_used_at INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug);
+
+    CREATE TABLE IF NOT EXISTS clipboard_item_tags (
+      item_id    TEXT NOT NULL,
+      tag_id     TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY (item_id, tag_id),
+      FOREIGN KEY (item_id) REFERENCES clipboard_items(id) ON DELETE CASCADE,
+      FOREIGN KEY (tag_id)  REFERENCES tags(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_item_tags_item ON clipboard_item_tags(item_id);
+    CREATE INDEX IF NOT EXISTS idx_item_tags_tag  ON clipboard_item_tags(tag_id);
   `)
+
+  migrateOldTags()
+}
+
+function toSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+}
+
+function migrateOldTags(): void {
+  const db = getDatabase()
+  const items = db
+    .prepare(`SELECT id, tags FROM clipboard_items WHERE tags IS NOT NULL AND tags != ''`)
+    .all() as { id: string; tags: string }[]
+
+  if (items.length === 0) return
+
+  const insertTag = db.prepare(`
+    INSERT OR IGNORE INTO tags (id, slug, name, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?)
+  `)
+  const getTagBySlug = db.prepare(`SELECT id FROM tags WHERE slug = ?`)
+  const insertMapping = db.prepare(`
+    INSERT OR IGNORE INTO clipboard_item_tags (item_id, tag_id, created_at) VALUES (?, ?, ?)
+  `)
+
+  const migrate = db.transaction(() => {
+    for (const item of items) {
+      let names: string[] = []
+      try {
+        names = JSON.parse(item.tags)
+        if (!Array.isArray(names)) names = [String(names)]
+      } catch {
+        names = item.tags.split(',').map((s) => s.trim()).filter(Boolean)
+      }
+      for (const name of names) {
+        if (!name) continue
+        const slug = toSlug(name)
+        if (!slug) continue
+        const existing = getTagBySlug.get(slug) as { id: string } | undefined
+        let tagId: string
+        if (existing) {
+          tagId = existing.id
+        } else {
+          tagId = `tag_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+          insertTag.run(tagId, slug, name, Date.now(), Date.now())
+        }
+        insertMapping.run(item.id, tagId, Date.now())
+      }
+    }
+  })
+
+  migrate()
 }

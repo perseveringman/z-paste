@@ -17,11 +17,38 @@ export interface ClipboardItem {
   updated_at: number
 }
 
+export type LeftFilter =
+  | { type: 'all' }
+  | { type: 'starred' }
+  | { type: 'tag'; slug: string }
+
 export interface GetItemsOptions {
   limit?: number
   offset?: number
   contentType?: string
   favoritesOnly?: boolean
+  leftFilter?: LeftFilter
+}
+
+export interface Tag {
+  id: string
+  slug: string
+  name: string
+  created_at: number
+  updated_at: number
+  last_used_at: number | null
+}
+
+export interface TagWithCount extends Tag {
+  count: number
+}
+
+function toSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
 }
 
 export function insertItem(item: ClipboardItem): void {
@@ -67,25 +94,33 @@ function maybeDecryptItem(item: ClipboardItem): ClipboardItem {
 
 export function getItems(options: GetItemsOptions = {}): ClipboardItem[] {
   const db = getDatabase()
-  const { limit = 50, offset = 0, contentType, favoritesOnly } = options
+  const { limit = 50, offset = 0, contentType, favoritesOnly, leftFilter } = options
 
-  let query = 'SELECT * FROM clipboard_items'
   const conditions: string[] = []
   const params: unknown[] = []
+  let fromClause = 'FROM clipboard_items ci'
+
+  const resolvedLeftFilter = leftFilter ?? (favoritesOnly ? { type: 'starred' as const } : { type: 'all' as const })
+
+  if (resolvedLeftFilter.type === 'starred') {
+    conditions.push('ci.is_favorite = 1')
+  } else if (resolvedLeftFilter.type === 'tag') {
+    fromClause += `
+      JOIN clipboard_item_tags cit ON cit.item_id = ci.id
+      JOIN tags t ON t.id = cit.tag_id AND t.slug = ?`
+    params.unshift(resolvedLeftFilter.slug)
+  }
 
   if (contentType) {
-    conditions.push('content_type = ?')
+    conditions.push('ci.content_type = ?')
     params.push(contentType)
   }
-  if (favoritesOnly) {
-    conditions.push('is_favorite = 1')
-  }
 
+  let query = `SELECT ci.* ${fromClause}`
   if (conditions.length > 0) {
     query += ' WHERE ' + conditions.join(' AND ')
   }
-
-  query += ' ORDER BY is_pinned DESC, updated_at DESC LIMIT ? OFFSET ?'
+  query += ' ORDER BY ci.is_pinned DESC, ci.updated_at DESC LIMIT ? OFFSET ?'
   params.push(limit, offset)
 
   const items = db.prepare(query).all(...params) as ClipboardItem[]
@@ -119,6 +154,10 @@ export function deleteItem(id: string): void {
 
 export function toggleFavorite(id: string): void {
   const db = getDatabase()
+  const hasTag = (db.prepare(
+    'SELECT COUNT(*) as c FROM clipboard_item_tags WHERE item_id = ?'
+  ).get(id) as { c: number }).c > 0
+  if (hasTag) return
   db.prepare(
     'UPDATE clipboard_items SET is_favorite = CASE WHEN is_favorite = 0 THEN 1 ELSE 0 END, updated_at = ? WHERE id = ?'
   ).run(Date.now(), id)
@@ -259,6 +298,132 @@ export function cleanupByRetention(days: number): void {
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000
   db.prepare(
     `DELETE FROM clipboard_items
-     WHERE is_favorite = 0 AND is_pinned = 0 AND updated_at < ?`
+     WHERE is_favorite = 0 AND is_pinned = 0
+       AND id NOT IN (SELECT DISTINCT item_id FROM clipboard_item_tags)
+       AND updated_at < ?`
   ).run(cutoff)
+}
+
+// ─── Tag CRUD ────────────────────────────────────────────────────────────────
+
+export function listTagsWithCounts(): TagWithCount[] {
+  const db = getDatabase()
+  return db.prepare(`
+    SELECT t.*, COUNT(cit.item_id) as count
+    FROM tags t
+    LEFT JOIN clipboard_item_tags cit ON cit.tag_id = t.id
+    GROUP BY t.id
+    ORDER BY t.last_used_at DESC, t.created_at DESC
+  `).all() as TagWithCount[]
+}
+
+export function applyTags(itemId: string, slugs: string[]): void {
+  if (slugs.length === 0) return
+  const db = getDatabase()
+  const now = Date.now()
+
+  const getBySlug = db.prepare('SELECT id FROM tags WHERE slug = ?')
+  const insertTag = db.prepare(
+    'INSERT OR IGNORE INTO tags (id, slug, name, created_at, updated_at, last_used_at) VALUES (?, ?, ?, ?, ?, ?)'
+  )
+  const insertMapping = db.prepare(
+    'INSERT OR IGNORE INTO clipboard_item_tags (item_id, tag_id, created_at) VALUES (?, ?, ?)'
+  )
+  const touchTag = db.prepare('UPDATE tags SET last_used_at = ?, updated_at = ? WHERE id = ?')
+
+  const run = db.transaction(() => {
+    for (const rawName of slugs) {
+      const slug = toSlug(rawName)
+      if (!slug) continue
+      let existing = getBySlug.get(slug) as { id: string } | undefined
+      let tagId: string
+      if (existing) {
+        tagId = existing.id
+        touchTag.run(now, now, tagId)
+      } else {
+        tagId = `tag_${now}_${Math.random().toString(36).slice(2, 8)}`
+        insertTag.run(tagId, slug, rawName, now, now, now)
+      }
+      insertMapping.run(itemId, tagId, now)
+    }
+    // Star/Tag 联动：打了标签自动取消 star
+    db.prepare('UPDATE clipboard_items SET is_favorite = 0, updated_at = ? WHERE id = ?').run(now, itemId)
+  })
+  run()
+}
+
+export function removeTag(itemId: string, slug: string): void {
+  const db = getDatabase()
+  db.prepare(`
+    DELETE FROM clipboard_item_tags
+    WHERE item_id = ?
+      AND tag_id = (SELECT id FROM tags WHERE slug = ?)
+  `).run(itemId, slug)
+}
+
+export function getItemTagSlugs(itemId: string): string[] {
+  const db = getDatabase()
+  const rows = db.prepare(`
+    SELECT t.slug FROM tags t
+    JOIN clipboard_item_tags cit ON cit.tag_id = t.id
+    WHERE cit.item_id = ?
+  `).all(itemId) as { slug: string }[]
+  return rows.map((r) => r.slug)
+}
+
+export function renameTag(slug: string, nextName: string): void {
+  const db = getDatabase()
+  const nextSlug = toSlug(nextName)
+  db.prepare('UPDATE tags SET name = ?, slug = ?, updated_at = ? WHERE slug = ?').run(
+    nextName, nextSlug, Date.now(), slug
+  )
+}
+
+export function deleteTag(slug: string): void {
+  const db = getDatabase()
+  db.prepare('DELETE FROM tags WHERE slug = ?').run(slug)
+}
+
+export function mergeTag(sourceSlug: string, targetSlug: string): void {
+  const db = getDatabase()
+  const now = Date.now()
+
+  const getTag = db.prepare('SELECT id FROM tags WHERE slug = ?')
+  const source = getTag.get(sourceSlug) as { id: string } | undefined
+  const target = getTag.get(targetSlug) as { id: string } | undefined
+  if (!source || !target) return
+
+  const run = db.transaction(() => {
+    const itemsWithSource = db.prepare(
+      'SELECT item_id FROM clipboard_item_tags WHERE tag_id = ?'
+    ).all(source.id) as { item_id: string }[]
+
+    for (const { item_id } of itemsWithSource) {
+      db.prepare(
+        'INSERT OR IGNORE INTO clipboard_item_tags (item_id, tag_id, created_at) VALUES (?, ?, ?)'
+      ).run(item_id, target.id, now)
+    }
+    db.prepare('DELETE FROM tags WHERE id = ?').run(source.id)
+    db.prepare('UPDATE tags SET last_used_at = ?, updated_at = ? WHERE id = ?').run(now, now, target.id)
+  })
+  run()
+}
+
+export function getTagStats(): { total: number; singleUse: number } {
+  const db = getDatabase()
+  const total = (db.prepare('SELECT COUNT(*) as c FROM tags').get() as { c: number }).c
+  const singleUse = (db.prepare(`
+    SELECT COUNT(*) as c FROM (
+      SELECT tag_id FROM clipboard_item_tags GROUP BY tag_id HAVING COUNT(*) = 1
+    )
+  `).get() as { c: number }).c
+  return { total, singleUse }
+}
+
+export function getSimilarTags(name: string): Tag[] {
+  const db = getDatabase()
+  const slug = toSlug(name)
+  if (!slug) return []
+  const pattern = `%${slug.replace(/-/g, '%')}%`
+  return db.prepare('SELECT * FROM tags WHERE slug LIKE ? LIMIT 5').all(pattern) as Tag[]
 }

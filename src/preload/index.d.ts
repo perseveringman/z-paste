@@ -16,12 +16,28 @@ interface ClipboardItem {
   updated_at: number
 }
 
+type LeftFilter =
+  | { type: 'all' }
+  | { type: 'starred' }
+  | { type: 'tag'; slug: string }
+
+interface TagWithCount {
+  id: string
+  slug: string
+  name: string
+  created_at: number
+  updated_at: number
+  last_used_at: number | null
+  count: number
+}
+
 interface ZPasteAPI {
   getItems: (options?: {
     limit?: number
     offset?: number
     contentType?: string
     favoritesOnly?: boolean
+    leftFilter?: LeftFilter
   }) => Promise<ClipboardItem[]>
   searchItems: (query: string) => Promise<ClipboardItem[]>
   deleteItem: (id: string) => Promise<void>
@@ -40,6 +56,15 @@ interface ZPasteAPI {
   setLaunchAtLogin: (enabled: boolean) => Promise<void>
   getLaunchAtLogin: () => Promise<boolean>
   syncNow: () => Promise<void>
+  listTags: () => Promise<TagWithCount[]>
+  applyTags: (itemId: string, slugs: string[]) => Promise<void>
+  removeTag: (itemId: string, slug: string) => Promise<void>
+  getItemTagSlugs: (itemId: string) => Promise<string[]>
+  renameTag: (slug: string, nextName: string) => Promise<void>
+  deleteTag: (slug: string) => Promise<void>
+  mergeTag: (sourceSlug: string, targetSlug: string) => Promise<void>
+  getTagStats: () => Promise<{ total: number; singleUse: number }>
+  getSimilarTags: (name: string) => Promise<TagWithCount[]>
   onNewItem: (callback: (item: ClipboardItem) => void) => () => void
   onPanelShown: (callback: () => void) => () => void
   onPanelHidden: (callback: () => void) => () => void
