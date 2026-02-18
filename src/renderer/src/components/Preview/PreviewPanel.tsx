@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ClipboardItem } from '../../stores/clipboardStore'
 import CodePreview from './CodePreview'
 import JsonPreview from './JsonPreview'
@@ -117,30 +117,41 @@ function TextToolbar({ content }: { content: string }): React.JSX.Element {
 }
 
 function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
-  const { decoded, valid } = decodeBase64(content)
+  const [expanded, setExpanded] = useState(false)
+
+  const decoded = useMemo(() => {
+    if (!expanded) return null
+    return decodeBase64(content)
+  }, [expanded, content])
 
   return (
     <div className="border-t bg-muted/20 backdrop-blur-sm">
-      {valid && (
-        <div className="px-3 py-2">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-              解码结果
-            </span>
+      <div className="px-3 py-2">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="text-[10px] font-medium text-primary hover:underline flex items-center gap-1"
+          >
+            <Code className="w-3 h-3" />
+            {expanded ? '收起解码结果' : '展开解码结果'}
+          </button>
+          {expanded && decoded?.valid && (
             <Button
               variant="ghost"
               size="sm"
               className="h-5 px-2 text-[10px] text-primary hover:text-primary"
-              onClick={() => navigator.clipboard.writeText(decoded)}
+              onClick={() => navigator.clipboard.writeText(decoded.decoded)}
             >
               <Copy className="w-3 h-3 mr-1" /> 复制
             </Button>
-          </div>
-          <pre className="text-xs text-foreground bg-muted/50 border rounded p-2 max-h-24 overflow-auto whitespace-pre-wrap break-all font-mono">
-            {decoded}
-          </pre>
+          )}
         </div>
-      )}
+        {expanded && decoded && (
+          <pre className="mt-2 text-xs text-foreground bg-muted/50 border rounded p-2 max-h-24 overflow-auto whitespace-pre-wrap break-all font-mono">
+            {decoded.valid ? decoded.decoded : '无效的 Base64 内容'}
+          </pre>
+        )}
+      </div>
     </div>
   )
 }

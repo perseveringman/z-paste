@@ -15,6 +15,7 @@ export interface ClipboardItem {
   category_id: string | null
   created_at: number
   updated_at: number
+  tag_slugs?: string | null
 }
 
 export type LeftFilter =
@@ -116,7 +117,13 @@ export function getItems(options: GetItemsOptions = {}): ClipboardItem[] {
     params.push(contentType)
   }
 
-  let query = `SELECT ci.* ${fromClause}`
+  let query = `
+    SELECT ci.*,
+      (SELECT GROUP_CONCAT(t2.slug, ',')
+       FROM clipboard_item_tags cit2
+       JOIN tags t2 ON t2.id = cit2.tag_id
+       WHERE cit2.item_id = ci.id) AS tag_slugs
+    ${fromClause}`
   if (conditions.length > 0) {
     query += ' WHERE ' + conditions.join(' AND ')
   }
@@ -174,9 +181,14 @@ export function searchItems(query: string): ClipboardItem[] {
   const db = getDatabase()
   const items = db
     .prepare(
-      `SELECT * FROM clipboard_items
-       WHERE content LIKE ? OR preview LIKE ?
-       ORDER BY is_pinned DESC, updated_at DESC
+      `SELECT ci.*,
+        (SELECT GROUP_CONCAT(t.slug, ',')
+         FROM clipboard_item_tags cit
+         JOIN tags t ON t.id = cit.tag_id
+         WHERE cit.item_id = ci.id) AS tag_slugs
+       FROM clipboard_items ci
+       WHERE ci.content LIKE ? OR ci.preview LIKE ?
+       ORDER BY ci.is_pinned DESC, ci.updated_at DESC
        LIMIT 50`
     )
     .all(`%${query}%`, `%${query}%`) as ClipboardItem[]

@@ -70,13 +70,7 @@ export default function ClipboardItemRow({
   onOpenTagPicker
 }: Props): React.JSX.Element {
   const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin } = useClipboardStore()
-  const [itemTagSlugs, setItemTagSlugs] = useState<string[]>([])
-
-  useEffect(() => {
-    window.api.getItemTagSlugs(item.id).then(setItemTagSlugs)
-  }, [item.id])
-
-  const hasTag = itemTagSlugs.length > 0
+  const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 

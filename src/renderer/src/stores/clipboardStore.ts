@@ -14,6 +14,7 @@ export interface ClipboardItem {
   category_id: string | null
   created_at: number
   updated_at: number
+  tag_slugs?: string | null
 }
 
 export type LeftFilter =

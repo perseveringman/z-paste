@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useDeferredValue } from 'react'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
 import FilterTabs from './FilterTabs'
@@ -22,6 +22,7 @@ export default function PanelWindow(): React.JSX.Element {
   const items = useSearch()
   const { selectedIndex, pasteItem } = useClipboardStore()
   const selectedItem = items[selectedIndex] || null
+  const deferredItem = useDeferredValue(selectedItem)
 
   const [view, setView] = useState<PanelView>('clipboard')
   const [editingItem, setEditingItem] = useState<string | null>(null)
@@ -131,7 +132,7 @@ export default function PanelWindow(): React.JSX.Element {
                   onCancel={() => setEditingItem(null)}
                 />
               ) : (
-                <PreviewPanel item={selectedItem} />
+                <PreviewPanel item={deferredItem} />
               )}
             </div>
           </div>
