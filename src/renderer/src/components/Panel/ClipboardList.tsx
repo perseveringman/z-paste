@@ -8,7 +8,12 @@ interface Props {
   onOpenTagPicker?: (itemId: string) => void
 }
 
-const ITEM_HEIGHT = 60
+const DEFAULT_HEIGHT = 60
+const IMAGE_HEIGHT = 68
+
+function getItemHeight(contentType: string): number {
+  return contentType === 'image' ? IMAGE_HEIGHT : DEFAULT_HEIGHT
+}
 
 export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props): React.JSX.Element {
   const items = useSearch()
@@ -16,6 +21,20 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
   const [containerHeight, setContainerHeight] = useState(400)
+
+  // 预计算每项的 top offset
+  const offsets = React.useMemo(() => {
+    const arr: number[] = []
+    let acc = 0
+    for (const item of items) {
+      arr.push(acc)
+      acc += getItemHeight(item.content_type)
+    }
+    arr.push(acc) // sentinel: total height
+    return arr
+  }, [items])
+
+  const totalHeight = offsets[offsets.length - 1] ?? 0
 
   useEffect(() => {
     const el = containerRef.current
@@ -32,8 +51,8 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
 
   useEffect(() => {
     if (!containerRef.current || selectedIndex < 0) return
-    const itemTop = selectedIndex * ITEM_HEIGHT
-    const itemBottom = itemTop + ITEM_HEIGHT
+    const itemTop = offsets[selectedIndex] ?? 0
+    const itemBottom = itemTop + getItemHeight(items[selectedIndex]?.content_type ?? '')
     const viewTop = scrollTop
     const viewBottom = scrollTop + containerHeight
 
@@ -42,7 +61,7 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
     } else if (itemBottom > viewBottom) {
       containerRef.current.scrollTop = itemBottom - containerHeight
     }
-  }, [selectedIndex, scrollTop, containerHeight])
+  }, [selectedIndex, scrollTop, containerHeight, offsets, items])
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop)
@@ -60,15 +79,20 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
     )
   }
 
-  const totalHeight = items.length * ITEM_HEIGHT
-  const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - 3)
-  const endIndex = Math.min(
-    items.length,
-    Math.ceil((scrollTop + containerHeight) / ITEM_HEIGHT) + 3
-  )
+  // 二分找第一个可见项
+  let startIndex = 0
+  let lo = 0, hi = items.length - 1
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if ((offsets[mid + 1] ?? 0) <= scrollTop) lo = mid + 1
+    else { startIndex = mid; hi = mid - 1 }
+  }
+  startIndex = Math.max(0, startIndex - 2)
 
   const visibleItems: React.JSX.Element[] = []
-  for (let i = startIndex; i < endIndex; i++) {
+  for (let i = startIndex; i < items.length; i++) {
+    const top = offsets[i] ?? 0
+    if (top > scrollTop + containerHeight + DEFAULT_HEIGHT * 3) break
     const item = items[i]
     if (!item) continue
     visibleItems.push(
@@ -76,10 +100,10 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
         key={item.id}
         style={{
           position: 'absolute',
-          top: i * ITEM_HEIGHT,
+          top,
           left: 0,
           right: 0,
-          height: ITEM_HEIGHT
+          height: getItemHeight(item.content_type)
         }}
       >
         <ClipboardItemRow

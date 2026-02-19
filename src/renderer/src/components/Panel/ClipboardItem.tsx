@@ -121,40 +121,38 @@ export default function ClipboardItemRow({
           <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
         )}
 
-        {/* Index / Icon */}
-        <div className="w-8 flex items-center justify-center shrink-0 mr-2">
-          {index < 9 ? (
-            <span
-              className={`text-xs font-mono ${
-                isSelected ? 'text-primary' : 'text-muted-foreground'
-              }`}
-            >
-              ⌘{index + 1}
-            </span>
-          ) : (
-            <TypeIcon type={item.content_type} />
-          )}
-        </div>
+        {item.content_type === 'image' ? (
+          <ImageRow item={item} index={index} isSelected={isSelected} />
+        ) : (
+          <>
+            {/* Index / Icon */}
+            <div className="w-8 flex items-center justify-center shrink-0 mr-2">
+              {index < 9 ? (
+                <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                  ⌘{index + 1}
+                </span>
+              ) : (
+                <TypeIcon type={item.content_type} />
+              )}
+            </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
-          <p
-            className={`text-sm truncate transition-colors ${
-              isSelected ? 'font-medium' : ''
-            }`}
-          >
-            {item.preview || item.content}
-          </p>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              {item.content_type}
-            </span>
-            <span className="text-[10px] text-muted-foreground/50">•</span>
-            <span className="text-[10px] text-muted-foreground">
-              {formatTime(item.created_at)}
-            </span>
-          </div>
-        </div>
+            {/* Content */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
+              <p className={`text-sm truncate transition-colors ${isSelected ? 'font-medium' : ''}`}>
+                {item.preview || item.content}
+              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                  {item.content_type}
+                </span>
+                <span className="text-[10px] text-muted-foreground/50">•</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {formatTime(item.created_at)}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Action Area (Right Side) */}
         <div className="relative flex items-center justify-end min-w-[64px] ml-2">
@@ -263,6 +261,50 @@ export default function ClipboardItemRow({
         </div>
       )}
     </>
+  )
+}
+
+function ImageRow({
+  item,
+  index,
+  isSelected
+}: {
+  item: ClipboardItem
+  index: number
+  isSelected: boolean
+}): React.JSX.Element {
+  const src = item.content.startsWith('/')
+    ? `file://${item.content}`
+    : `data:image/png;base64,${item.content}`
+
+  return (
+    <div className="flex items-center gap-2 w-full min-w-0">
+      <div className="w-8 flex items-center justify-center shrink-0">
+        {index < 9 ? (
+          <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+            ⌘{index + 1}
+          </span>
+        ) : (
+          <ImageIcon className="w-4 h-4 text-muted-foreground" />
+        )}
+      </div>
+      <img
+        src={src}
+        alt=""
+        className="h-9 w-14 object-cover rounded border border-black/10 dark:border-white/10 shrink-0"
+        loading="lazy"
+      />
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm truncate ${isSelected ? 'font-medium' : ''}`}>
+          {item.preview || '图片'}
+        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">image</span>
+          <span className="text-[10px] text-muted-foreground/50">•</span>
+          <span className="text-[10px] text-muted-foreground">{formatTime(item.created_at)}</span>
+        </div>
+      </div>
+    </div>
   )
 }
 

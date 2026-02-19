@@ -16,7 +16,7 @@ export default function FilterTabs(): React.JSX.Element {
   const { filterType, setFilterType } = useClipboardStore()
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b overflow-x-auto no-scrollbar bg-muted/20">
+    <div className="flex items-center gap-1.5 px-3 py-1.5 border-b overflow-x-auto no-scrollbar bg-muted/20">
       {TABS.map(({ label, value }) => {
         const isActive = filterType === value
         return (
@@ -24,7 +24,7 @@ export default function FilterTabs(): React.JSX.Element {
             key={label}
             variant={isActive ? 'default' : 'secondary'}
             className={cn(
-              "cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap",
+              "cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px]",
               !isActive && "bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border"
             )}
             onClick={() => setFilterType(value)}

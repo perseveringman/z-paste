@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect, useRef, useDeferredValue } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
 import FilterTabs from './FilterTabs'
-import Sidebar from './Sidebar'
+import TagBar from './TagBar'
 import TagPicker from './TagPicker'
 import PreviewPanel from '../Preview/PreviewPanel'
 import QuickEdit from './QuickEdit'
@@ -11,7 +11,7 @@ import SettingsPage from '../Settings/SettingsPage'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
-import { Settings } from 'lucide-react'
+import { Settings, PanelRightOpen } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
@@ -20,14 +20,17 @@ type PanelView = 'clipboard' | 'templates' | 'settings'
 export default function PanelWindow(): React.JSX.Element {
   useKeyboard()
   const items = useSearch()
-  const { selectedIndex, pasteItem } = useClipboardStore()
+  const { selectedIndex, pasteItem, previewCollapsed, togglePreview } = useClipboardStore()
   const selectedItem = items[selectedIndex] || null
-  const deferredItem = useDeferredValue(selectedItem)
 
   const [view, setView] = useState<PanelView>('clipboard')
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [tagPickerItemId, setTagPickerItemId] = useState<string | null>(null)
   const tagPickerAnchorRef = useRef<HTMLDivElement>(null)
+
+  // 右侧预览 debounce：hover 稳定 150ms 后才显示
+  const [previewItem, setPreviewItem] = useState<(typeof selectedItem) | null>(null)
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleDoubleClick = useCallback((itemId: string) => {
     setEditingItem(itemId)
@@ -44,6 +47,20 @@ export default function PanelWindow(): React.JSX.Element {
     [selectedItem, pasteItem]
   )
 
+  useEffect(() => {
+    if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
+    if (!selectedItem) {
+      setPreviewItem(null)
+      return
+    }
+    previewTimerRef.current = setTimeout(() => {
+      setPreviewItem(selectedItem)
+    }, 150)
+    return () => {
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
+    }
+  }, [selectedItem])
+
   const openTagPicker = useCallback((itemId: string) => {
     setTagPickerItemId(itemId)
   }, [])
@@ -53,6 +70,12 @@ export default function PanelWindow(): React.JSX.Element {
       if (e.key === ',' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setView((v) => (v === 'settings' ? 'clipboard' : 'settings'))
+        return
+      }
+      // Option key: toggle right preview panel
+      if (e.key === 'Alt') {
+        e.preventDefault()
+        togglePreview()
         return
       }
       if (e.key === 't' || e.key === 'T') {
@@ -67,7 +90,7 @@ export default function PanelWindow(): React.JSX.Element {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem, tagPickerItemId])
+  }, [selectedItem, tagPickerItemId, togglePreview])
 
   const containerClass =
     'w-full h-full rounded-xl overflow-hidden bg-background/95 backdrop-blur-xl border shadow-2xl flex flex-col'
@@ -110,11 +133,14 @@ export default function PanelWindow(): React.JSX.Element {
 
       {view === 'clipboard' ? (
         <div className="flex flex-1 min-h-0">
-          <Sidebar />
           <div className="flex flex-col flex-1 min-h-0 min-w-0">
+            <TagBar />
             <FilterTabs />
             <div className="flex-1 flex min-h-0 relative">
-              <div className="w-[55%] flex flex-col min-h-0 border-r" ref={tagPickerAnchorRef}>
+              <div
+                className={`flex flex-col min-h-0 relative ${!previewCollapsed && (previewItem || (editingItem && selectedItem)) ? 'w-[52%] border-r' : 'flex-1'}`}
+                ref={tagPickerAnchorRef}
+              >
                 <ClipboardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
                 {tagPickerItemId && (
                   <div className="absolute left-2 top-8 z-50">
@@ -125,14 +151,23 @@ export default function PanelWindow(): React.JSX.Element {
                   </div>
                 )}
               </div>
-              {editingItem && selectedItem ? (
+              {!previewCollapsed && (editingItem && selectedItem ? (
                 <QuickEdit
                   content={selectedItem.content}
                   onSave={handleEditSave}
                   onCancel={() => setEditingItem(null)}
                 />
-              ) : (
-                <PreviewPanel item={deferredItem} />
+              ) : previewItem ? (
+                <PreviewPanel item={previewItem} />
+              ) : null)}
+              {previewCollapsed && (previewItem || selectedItem) && (
+                <button
+                  onClick={togglePreview}
+                  className="shrink-0 flex items-center justify-center w-8 border-l bg-muted/10 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-colors"
+                  title="展开详情 (⌥)"
+                >
+                  <PanelRightOpen className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
           </div>

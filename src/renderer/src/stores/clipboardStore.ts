@@ -29,6 +29,7 @@ interface ClipboardState {
   isVisible: boolean
   filterType: string | null
   leftFilter: LeftFilter
+  previewCollapsed: boolean
 
   loadItems: () => Promise<void>
   addItem: (item: ClipboardItem) => void
@@ -37,6 +38,7 @@ interface ClipboardState {
   setVisible: (visible: boolean) => void
   setFilterType: (type: string | null) => void
   setLeftFilter: (filter: LeftFilter) => void
+  togglePreview: () => void
   deleteItem: (id: string) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
@@ -52,6 +54,7 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   isVisible: false,
   filterType: null,
   leftFilter: { type: 'all' },
+  previewCollapsed: false,
 
   loadItems: async () => {
     const state = get()
@@ -89,6 +92,8 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
     set({ leftFilter: filter })
     get().loadItems()
   },
+
+  togglePreview: () => set((state) => ({ previewCollapsed: !state.previewCollapsed })),
 
   deleteItem: async (id) => {
     await window.api.deleteItem(id)

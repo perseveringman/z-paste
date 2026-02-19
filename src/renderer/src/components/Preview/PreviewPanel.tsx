@@ -15,14 +15,17 @@ import {
   trimWhitespace,
   removeAllWhitespace
 } from '../../utils/transformers'
-import { Clipboard, Copy, Link, Code } from 'lucide-react'
+import { Clipboard, Copy, Link, Code, PanelRightClose } from 'lucide-react'
 import { Button } from '../ui/button'
+import { useClipboardStore } from '../../stores/clipboardStore'
 
 interface Props {
   item: ClipboardItem | null
 }
 
 export default function PreviewPanel({ item }: Props): React.JSX.Element {
+  const { togglePreview } = useClipboardStore()
+
   if (!item) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
@@ -41,9 +44,18 @@ export default function PreviewPanel({ item }: Props): React.JSX.Element {
             {item.content_type}
           </span>
         </div>
-        <span className="text-[10px] text-muted-foreground font-mono">
-          {new Date(item.created_at).toLocaleString('zh-CN')}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground font-mono">
+            {new Date(item.created_at).toLocaleString('zh-CN')}
+          </span>
+          <button
+            onClick={togglePreview}
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title="收起详情 (⌥)"
+          >
+            <PanelRightClose className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Preview content */}

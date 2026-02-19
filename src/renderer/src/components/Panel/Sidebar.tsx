@@ -1,23 +1,14 @@
-import { useEffect } from 'react'
 import { useClipboardStore, LeftFilter } from '../../stores/clipboardStore'
-import { useTagStore } from '../../stores/tagStore'
 import { cn } from '../../lib/utils'
-import { Star, Tag, Layers } from 'lucide-react'
+import { Star, Layers } from 'lucide-react'
 
 export default function Sidebar(): React.JSX.Element {
   const { leftFilter, setLeftFilter, items } = useClipboardStore()
-  const { tags, loadTags } = useTagStore()
-
-  useEffect(() => {
-    loadTags()
-  }, [loadTags, items])
 
   const starredCount = items.filter((i) => i.is_favorite).length
-  const tagCount = tags.length
 
   const isActive = (f: LeftFilter): boolean => {
     if (f.type !== leftFilter.type) return false
-    if (f.type === 'tag' && leftFilter.type === 'tag') return f.slug === leftFilter.slug
     return true
   }
 
@@ -36,31 +27,6 @@ export default function Sidebar(): React.JSX.Element {
         active={isActive({ type: 'starred' })}
         onClick={() => setLeftFilter({ type: 'starred' })}
       />
-
-      {tagCount > 0 && (
-        <>
-          <div className="px-3 pt-4 pb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-              标签
-            </span>
-          </div>
-          {tagCount > 15 && (
-            <div className="mx-2 mb-1 px-2 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded text-[10px] text-yellow-600 dark:text-yellow-400 leading-snug">
-              标签太多会降低效率，考虑合并类似标签？
-            </div>
-          )}
-          {tags.map((tag) => (
-            <NavItem
-              key={tag.slug}
-              icon={<Tag className="w-3.5 h-3.5" />}
-              label={tag.name}
-              count={tag.count}
-              active={isActive({ type: 'tag', slug: tag.slug })}
-              onClick={() => setLeftFilter({ type: 'tag', slug: tag.slug })}
-            />
-          ))}
-        </>
-      )}
     </div>
   )
 }
