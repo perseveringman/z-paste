@@ -18,6 +18,9 @@ let syncService: iCloudSync | null = null
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
 
+  // Hide dock icon — only show in menu bar tray
+  if (app.dock) app.dock.hide()
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
