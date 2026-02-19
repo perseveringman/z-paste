@@ -1,6 +1,6 @@
 {
   "name": "z-paste",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Z-Paste 剪贴板管理工具 - Mac 剪贴板管理器",
   "main": "./out/main/index.js",
   "author": "Z-Paste",
