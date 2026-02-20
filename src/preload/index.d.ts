@@ -39,6 +39,7 @@ interface ZPasteAPI {
     contentType?: string
     favoritesOnly?: boolean
     leftFilter?: LeftFilter
+    sourceApp?: string
   }) => Promise<ClipboardItem[]>
   searchItems: (query: string) => Promise<ClipboardItem[]>
   deleteItem: (id: string) => Promise<void>
@@ -66,6 +67,21 @@ interface ZPasteAPI {
   mergeTag: (sourceSlug: string, targetSlug: string) => Promise<void>
   getTagStats: () => Promise<{ total: number; singleUse: number }>
   getSimilarTags: (name: string) => Promise<TagWithCount[]>
+  // Source app
+  getSourceApps: () => Promise<{ name: string; bundleId: string; count: number }[]>
+  getAppIcon: (bundleId: string) => Promise<string | null>
+  // Sequence paste queue
+  queueAdd: (item: { id: string; content: string }) => Promise<number>
+  queueAddMultiple: (items: { id: string; content: string }[]) => Promise<number>
+  queueClear: () => Promise<void>
+  queueGetCount: () => Promise<number>
+  queueGetItems: () => Promise<{ id: string; content: string }[]>
+  queueSetSeparator: (separator: string) => Promise<void>
+  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string }) => Promise<void>
+  onQueueUpdated: (callback: (data: { count: number }) => void) => () => void
+  onQueuePasted: (callback: (data: { index: number; total: number }) => void) => () => void
+  onQueueBatchPasted: (callback: (data: { count: number }) => void) => () => void
+  onQueueFinished: (callback: () => void) => () => void
   onNewItem: (callback: (item: ClipboardItem) => void) => () => void
   onPanelShown: (callback: () => void) => () => void
   onPanelHidden: (callback: () => void) => () => void

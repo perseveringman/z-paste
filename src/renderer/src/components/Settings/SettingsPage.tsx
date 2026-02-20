@@ -191,19 +191,72 @@ function GeneralSection(): React.JSX.Element {
   )
 }
 
+function formatShortcut(shortcut: string): string {
+  return shortcut
+    .replace('CommandOrControl', '⌘')
+    .replace('Shift', '⇧')
+    .replace(/\+/g, ' ')
+}
+
+function ShortcutBadge({ shortcut }: { shortcut: string }): React.JSX.Element {
+  return (
+    <div className="bg-muted px-3 py-1.5 rounded-md text-sm font-mono border">
+      {formatShortcut(shortcut)}
+    </div>
+  )
+}
+
 function ShortcutsSection(): React.JSX.Element {
-  const { customShortcut } = useSettingsStore()
+  const { customShortcut, sequencePasteShortcut, batchPasteShortcut, batchPasteSeparator, setBatchPasteSeparator } = useSettingsStore()
+
+  const separatorOptions = [
+    { value: '\n', label: '换行' },
+    { value: '\t', label: 'Tab' },
+    { value: ', ', label: '逗号' },
+    { value: ' ', label: '空格' }
+  ]
 
   return (
     <div>
       <SectionTitle title="快捷键" />
       <SettingsItem label="唤起面板" description="全局快捷键，唤起/隐藏剪贴板面板">
-        <div className="bg-muted px-3 py-1.5 rounded-md text-sm font-mono border">
-          {customShortcut.replace('CommandOrControl', '⌘').replace('Shift', '⇧').replace('+', ' ')}
-        </div>
+        <ShortcutBadge shortcut={customShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label="序列粘贴" description="从队列中粘贴下一条内容">
+        <ShortcutBadge shortcut={sequencePasteShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label="批量粘贴" description="一次性粘贴队列中所有内容">
+        <ShortcutBadge shortcut={batchPasteShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label="添加到队列" description="在面板内将选中条目加入粘贴队列">
+        <ShortcutBadge shortcut="Space" />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label="批量粘贴分隔符" description="批量粘贴时，多条内容之间的分隔方式">
+        <Select
+          value={batchPasteSeparator}
+          onValueChange={(v) => {
+            setBatchPasteSeparator(v)
+            window.api.queueSetSeparator(v)
+          }}
+        >
+          <SelectTrigger className="w-[100px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {separatorOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </SettingsItem>
       <p className="text-xs text-muted-foreground mt-4">
-        自定义快捷键功能将在后续版本中开放
+        提示：在面板中使用 ⌘+Click 多选条目，按 Enter 批量加入队列
       </p>
     </div>
   )

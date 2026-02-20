@@ -8,6 +8,7 @@ import { initDatabase, getDatabase } from './database/connection'
 import { createTables } from './database/schema'
 import * as repository from './database/repository'
 import { iCloudSync } from './sync/icloud'
+import { getAppIcon } from './clipboard/app-icon'
 
 let windowManager: WindowManager
 let shortcutManager: ShortcutManager
@@ -167,6 +168,50 @@ app.whenReady().then(() => {
     if (syncService) {
       syncService.syncNow()
     }
+  })
+
+  // Source app IPC handlers
+  ipcMain.handle('sourceApps:getAll', async () => {
+    return repository.getSourceApps()
+  })
+
+  ipcMain.handle('sourceApps:getIcon', async (_, bundleId: string) => {
+    return getAppIcon(bundleId)
+  })
+
+  // Sequence paste IPC handlers
+  ipcMain.handle('queue:add', async (_, item: { id: string; content: string }) => {
+    shortcutManager.addToQueue(item)
+    return shortcutManager.getQueueCount()
+  })
+
+  ipcMain.handle('queue:addMultiple', async (_, items: { id: string; content: string }[]) => {
+    shortcutManager.addMultipleToQueue(items)
+    return shortcutManager.getQueueCount()
+  })
+
+  ipcMain.handle('queue:clear', async () => {
+    shortcutManager.clearQueue()
+  })
+
+  ipcMain.handle('queue:getCount', async () => {
+    return shortcutManager.getQueueCount()
+  })
+
+  ipcMain.handle('queue:getItems', async () => {
+    return shortcutManager.getQueueItems()
+  })
+
+  ipcMain.handle('shortcuts:update', async (_, config: {
+    panelShortcut?: string
+    sequencePaste?: string
+    batchPaste?: string
+  }) => {
+    shortcutManager.updateShortcuts(config)
+  })
+
+  ipcMain.handle('queue:setSeparator', async (_, separator: string) => {
+    shortcutManager.setBatchSeparator(separator)
   })
 
   ipcMain.handle('sync:start', async () => {

@@ -1,5 +1,6 @@
-import { useCallback, useState, useRef, useEffect } from 'react'
+import { useCallback, useState, useRef, useEffect, useMemo } from 'react'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
+import { useAppIcon } from '../../hooks/useAppIcon'
 import {
   FileText,
   Code,
@@ -69,15 +70,34 @@ export default function ClipboardItemRow({
   onDoubleClick,
   onOpenTagPicker
 }: Props): React.JSX.Element {
-  const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin } = useClipboardStore()
+  const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin, toggleSelectItem, isItemInQueue, getQueuePosition, selectedItems } = useClipboardStore()
   const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const inQueue = isItemInQueue(item.id)
+  const queuePos = inQueue ? getQueuePosition(item.id) : 0
+  const isMultiSelected = selectedItems.has(item.id)
 
-  const handleClick = useCallback(() => {
+  const sourceApp = useMemo(() => {
+    if (!item.source_app) return null
+    try {
+      return JSON.parse(item.source_app) as { name: string; bundleId: string }
+    } catch {
+      return null
+    }
+  }, [item.source_app])
+  const appIcon = useAppIcon(sourceApp?.bundleId)
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey) {
+      // Cmd+Click: toggle multi-select
+      e.preventDefault()
+      toggleSelectItem(item.id)
+      return
+    }
     setSelectedIndex(index)
     pasteItem(item.id)
-  }, [index, item.id, setSelectedIndex, pasteItem])
+  }, [index, item.id, setSelectedIndex, pasteItem, toggleSelectItem])
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -110,10 +130,12 @@ export default function ClipboardItemRow({
         }}
         onContextMenu={handleContextMenu}
         onMouseEnter={() => setSelectedIndex(index)}
-        className={`group relative flex items-center px-3 py-2 mx-2 my-1 rounded-lg cursor-pointer transition-colors duration-75 border border-transparent ${
-          isSelected
-            ? 'bg-accent text-accent-foreground shadow-sm'
-            : 'hover:bg-muted/50 text-foreground'
+        className={`group relative flex items-center px-3 py-2 mx-2 my-1 rounded-lg cursor-pointer transition-colors duration-75 border ${
+          isMultiSelected
+            ? 'bg-primary/10 border-primary/40 text-foreground'
+            : isSelected
+              ? 'bg-accent text-accent-foreground shadow-sm border-transparent'
+              : 'hover:bg-muted/50 text-foreground border-transparent'
         }`}
       >
         {/* Selection Indicator */}
@@ -149,6 +171,21 @@ export default function ClipboardItemRow({
                 <span className="text-[10px] text-muted-foreground">
                   {formatTime(item.created_at)}
                 </span>
+                {sourceApp && (
+                  <>
+                    <span className="text-[10px] text-muted-foreground/50">•</span>
+                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      {appIcon && (
+                        <img
+                          src={`data:image/png;base64,${appIcon}`}
+                          alt=""
+                          className="w-3 h-3 rounded-sm"
+                        />
+                      )}
+                      <span className="max-w-[80px] truncate">{sourceApp.name}</span>
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </>
@@ -194,6 +231,11 @@ export default function ClipboardItemRow({
 
           {/* Static Status (Hidden on Hover) */}
           <div className="flex items-center gap-1 group-hover:opacity-0 transition-opacity">
+            {inQueue && (
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {queuePos}
+              </span>
+            )}
             {item.is_pinned !== 0 && <Pin className="w-3 h-3 text-primary" />}
             {item.is_favorite !== 0 && <Star className="w-3 h-3 text-yellow-500" />}
             {hasTag && <Tag className="w-3 h-3 text-blue-500" />}

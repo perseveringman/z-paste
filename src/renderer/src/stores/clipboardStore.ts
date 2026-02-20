@@ -30,6 +30,23 @@ interface ClipboardState {
   filterType: string | null
   leftFilter: LeftFilter
   previewCollapsed: boolean
+  sourceAppFilter: string | null
+
+  // Sequence paste queue
+  sequenceQueue: ClipboardItem[]
+  queueIndex: number
+  isQueueActive: boolean
+  selectedItems: Set<string>
+
+  addToQueue: (item: ClipboardItem) => void
+  addMultipleToQueue: (items: ClipboardItem[]) => void
+  removeFromQueue: (index: number) => void
+  clearQueue: () => void
+  toggleSelectItem: (id: string) => void
+  clearSelection: () => void
+  isItemSelected: (id: string) => boolean
+  isItemInQueue: (id: string) => boolean
+  getQueuePosition: (id: string) => number
 
   loadItems: () => Promise<void>
   addItem: (item: ClipboardItem) => void
@@ -38,6 +55,7 @@ interface ClipboardState {
   setVisible: (visible: boolean) => void
   setFilterType: (type: string | null) => void
   setLeftFilter: (filter: LeftFilter) => void
+  setSourceAppFilter: (bundleId: string | null) => void
   togglePreview: () => void
   deleteItem: (id: string) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
@@ -55,13 +73,91 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   filterType: null,
   leftFilter: { type: 'all' },
   previewCollapsed: false,
+  sourceAppFilter: null,
+
+  // Sequence paste queue
+  sequenceQueue: [],
+  queueIndex: 0,
+  isQueueActive: false,
+  selectedItems: new Set<string>(),
+
+  addToQueue: (item) => {
+    set((state) => {
+      if (state.sequenceQueue.some((q) => q.id === item.id)) return state
+      return {
+        sequenceQueue: [...state.sequenceQueue, item],
+        isQueueActive: true
+      }
+    })
+  },
+
+  addMultipleToQueue: (items) => {
+    set((state) => {
+      const existingIds = new Set(state.sequenceQueue.map((q) => q.id))
+      const newItems = items.filter((i) => !existingIds.has(i.id))
+      if (newItems.length === 0) return state
+      return {
+        sequenceQueue: [...state.sequenceQueue, ...newItems],
+        isQueueActive: true
+      }
+    })
+  },
+
+  removeFromQueue: (index) => {
+    set((state) => {
+      const newQueue = [...state.sequenceQueue]
+      newQueue.splice(index, 1)
+      const newIndex =
+        state.queueIndex >= newQueue.length
+          ? Math.max(0, newQueue.length - 1)
+          : state.queueIndex
+      return {
+        sequenceQueue: newQueue,
+        queueIndex: newIndex,
+        isQueueActive: newQueue.length > 0
+      }
+    })
+  },
+
+  clearQueue: () => {
+    set({ sequenceQueue: [], queueIndex: 0, isQueueActive: false })
+  },
+
+  toggleSelectItem: (id) => {
+    set((state) => {
+      const newSet = new Set(state.selectedItems)
+      if (newSet.has(id)) {
+        newSet.delete(id)
+      } else {
+        newSet.add(id)
+      }
+      return { selectedItems: newSet }
+    })
+  },
+
+  clearSelection: () => {
+    set({ selectedItems: new Set<string>() })
+  },
+
+  isItemSelected: (id) => {
+    return get().selectedItems.has(id)
+  },
+
+  isItemInQueue: (id) => {
+    return get().sequenceQueue.some((q) => q.id === id)
+  },
+
+  getQueuePosition: (id) => {
+    return get().sequenceQueue.findIndex((q) => q.id === id) + 1
+  },
 
   loadItems: async () => {
     const state = get()
     const items = await window.api.getItems({
       limit: 50,
       contentType: state.filterType || undefined,
-      leftFilter: state.leftFilter
+      leftFilter: state.leftFilter,
+      sourceApp: state.sourceAppFilter || undefined
     })
     set({ items, selectedIndex: 0 })
   },
@@ -90,6 +186,11 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
 
   setLeftFilter: (filter) => {
     set({ leftFilter: filter })
+    get().loadItems()
+  },
+
+  setSourceAppFilter: (bundleId) => {
+    set({ sourceAppFilter: bundleId })
     get().loadItems()
   },
 

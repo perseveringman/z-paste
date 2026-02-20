@@ -11,6 +11,10 @@ export interface Settings {
   encryptionEnabled: boolean
   hasCompletedOnboarding: boolean
   customShortcut: string
+  sequencePasteShortcut: string
+  batchPasteShortcut: string
+  addToQueueShortcut: string
+  batchPasteSeparator: string
 }
 
 interface SettingsState extends Settings {
@@ -23,6 +27,10 @@ interface SettingsState extends Settings {
   setEncryptionEnabled: (value: boolean) => void
   setHasCompletedOnboarding: (value: boolean) => void
   setCustomShortcut: (shortcut: string) => void
+  setSequencePasteShortcut: (shortcut: string) => void
+  setBatchPasteShortcut: (shortcut: string) => void
+  setAddToQueueShortcut: (shortcut: string) => void
+  setBatchPasteSeparator: (separator: string) => void
   loadSettings: () => void
   saveSettings: () => void
 }
@@ -64,7 +72,11 @@ const defaults: Settings = {
   iCloudSync: false,
   encryptionEnabled: false,
   hasCompletedOnboarding: false,
-  customShortcut: 'Shift+CommandOrControl+V'
+  customShortcut: 'Shift+CommandOrControl+V',
+  sequencePasteShortcut: 'CommandOrControl+;',
+  batchPasteShortcut: "CommandOrControl+'",
+  addToQueueShortcut: 'Space',
+  batchPasteSeparator: '\n'
 }
 
 const stored = loadFromStorage()
@@ -116,6 +128,26 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     get().saveSettings()
   },
 
+  setSequencePasteShortcut: (shortcut) => {
+    set({ sequencePasteShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setBatchPasteShortcut: (shortcut) => {
+    set({ batchPasteShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setAddToQueueShortcut: (shortcut) => {
+    set({ addToQueueShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setBatchPasteSeparator: (separator) => {
+    set({ batchPasteSeparator: separator })
+    get().saveSettings()
+  },
+
   loadSettings: () => {
     const stored = loadFromStorage()
     const merged = { ...defaults, ...stored }
@@ -134,7 +166,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       iCloudSync: state.iCloudSync,
       encryptionEnabled: state.encryptionEnabled,
       hasCompletedOnboarding: state.hasCompletedOnboarding,
-      customShortcut: state.customShortcut
+      customShortcut: state.customShortcut,
+      sequencePasteShortcut: state.sequencePasteShortcut,
+      batchPasteShortcut: state.batchPasteShortcut,
+      addToQueueShortcut: state.addToQueueShortcut,
+      batchPasteSeparator: state.batchPasteSeparator
     }
     saveToStorage(settings)
   }

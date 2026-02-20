@@ -2,10 +2,23 @@ import { useEffect, useCallback } from 'react'
 import { useClipboardStore } from '../stores/clipboardStore'
 
 export function useKeyboard(): void {
-  const { items, selectedIndex, setSelectedIndex, pasteItem, setVisible } = useClipboardStore()
+  const {
+    items,
+    selectedIndex,
+    setSelectedIndex,
+    pasteItem,
+    setVisible,
+    addToQueue,
+    addMultipleToQueue,
+    selectedItems,
+    clearSelection
+  } = useClipboardStore()
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      const target = document.activeElement?.tagName
+      const isInput = target === 'INPUT' || target === 'TEXTAREA'
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault()
@@ -17,20 +30,38 @@ export function useKeyboard(): void {
           break
         case 'Enter':
           e.preventDefault()
-          if (items[selectedIndex]) {
+          if (selectedItems.size > 0) {
+            // Add all selected items to queue
+            const selected = items.filter((i) => selectedItems.has(i.id))
+            addMultipleToQueue(selected)
+            selected.forEach((i) => window.api.queueAdd({ id: i.id, content: i.content }))
+            clearSelection()
+          } else if (items[selectedIndex]) {
             pasteItem(items[selectedIndex].id)
+          }
+          break
+        case ' ':
+          if (isInput) return
+          e.preventDefault()
+          if (items[selectedIndex]) {
+            const item = items[selectedIndex]
+            addToQueue(item)
+            window.api.queueAdd({ id: item.id, content: item.content })
           }
           break
         case 'Escape':
           e.preventDefault()
-          setVisible(false)
-          window.electron.ipcRenderer.send('panel:close')
+          if (selectedItems.size > 0) {
+            clearSelection()
+          } else {
+            setVisible(false)
+            window.electron.ipcRenderer.send('panel:close')
+          }
           break
         default:
           // Number keys 1-9 for quick select
           if (e.key >= '1' && e.key <= '9' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-            const target = document.activeElement?.tagName
-            if (target === 'INPUT' || target === 'TEXTAREA') return
+            if (isInput) return
             const index = parseInt(e.key) - 1
             if (index < items.length) {
               e.preventDefault()
@@ -39,7 +70,17 @@ export function useKeyboard(): void {
           }
       }
     },
-    [items, selectedIndex, setSelectedIndex, pasteItem, setVisible]
+    [
+      items,
+      selectedIndex,
+      setSelectedIndex,
+      pasteItem,
+      setVisible,
+      addToQueue,
+      addMultipleToQueue,
+      selectedItems,
+      clearSelection
+    ]
   )
 
   useEffect(() => {

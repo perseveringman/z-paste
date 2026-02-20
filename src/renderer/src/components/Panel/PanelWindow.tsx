@@ -9,6 +9,7 @@ import QuickEdit from './QuickEdit'
 import TemplateList from '../Templates/TemplateList'
 import SettingsPage from '../Settings/SettingsPage'
 import { useKeyboard } from '../../hooks/useKeyboard'
+import { useQueueToast } from '../../hooks/useQueueToast'
 import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { Settings, PanelRightOpen } from 'lucide-react'
@@ -19,6 +20,7 @@ type PanelView = 'clipboard' | 'templates' | 'settings'
 
 export default function PanelWindow(): React.JSX.Element {
   useKeyboard()
+  useQueueToast()
   const items = useSearch()
   const { selectedIndex, pasteItem, previewCollapsed, togglePreview } = useClipboardStore()
   const selectedItem = items[selectedIndex] || null

@@ -1,5 +1,6 @@
 import { clipboard } from 'electron'
 import { createHash } from 'crypto'
+import { execSync } from 'child_process'
 import { BrowserWindow } from 'electron'
 import { detectContentType } from './detector'
 import * as repository from '../database/repository'
@@ -66,7 +67,7 @@ export class ClipboardMonitor {
       metadata: metadata ? JSON.stringify(metadata) : null,
       is_favorite: 0,
       is_pinned: 0,
-      source_app: null,
+      source_app: this.getFrontmostApp(),
       tags: null,
       category_id: null,
       created_at: Date.now(),
@@ -114,7 +115,7 @@ export class ClipboardMonitor {
       metadata: JSON.stringify({ width: size.width, height: size.height }),
       is_favorite: 0,
       is_pinned: 0,
-      source_app: null,
+      source_app: this.getFrontmostApp(),
       tags: null,
       category_id: null,
       created_at: Date.now(),
@@ -123,6 +124,25 @@ export class ClipboardMonitor {
 
     repository.insertItem(item)
     this.notifyRenderer(item)
+  }
+
+  private getFrontmostApp(): string | null {
+    try {
+      const result = execSync(
+        `osascript -e 'tell application "System Events"' -e 'set fp to first application process whose frontmost is true' -e 'set appName to name of fp' -e 'set bid to bundle identifier of fp' -e 'return appName & "|" & bid' -e 'end tell'`,
+        { encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'] }
+      ).trim()
+      const sep = result.indexOf('|')
+      if (sep === -1) return null
+      const name = result.substring(0, sep).trim()
+      const bundleId = result.substring(sep + 1).trim()
+      if (name && bundleId && bundleId !== 'com.apple.loginwindow') {
+        return JSON.stringify({ name, bundleId })
+      }
+      return null
+    } catch {
+      return null
+    }
   }
 
   private computeHash(data: string | Buffer): string {

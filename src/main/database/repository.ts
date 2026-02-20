@@ -29,6 +29,7 @@ export interface GetItemsOptions {
   contentType?: string
   favoritesOnly?: boolean
   leftFilter?: LeftFilter
+  sourceApp?: string
 }
 
 export interface Tag {
@@ -95,7 +96,7 @@ function maybeDecryptItem(item: ClipboardItem): ClipboardItem {
 
 export function getItems(options: GetItemsOptions = {}): ClipboardItem[] {
   const db = getDatabase()
-  const { limit = 50, offset = 0, contentType, favoritesOnly, leftFilter } = options
+  const { limit = 50, offset = 0, contentType, favoritesOnly, leftFilter, sourceApp } = options
 
   const conditions: string[] = []
   const params: unknown[] = []
@@ -115,6 +116,11 @@ export function getItems(options: GetItemsOptions = {}): ClipboardItem[] {
   if (contentType) {
     conditions.push('ci.content_type = ?')
     params.push(contentType)
+  }
+
+  if (sourceApp) {
+    conditions.push("ci.source_app LIKE ?")
+    params.push(`%"bundleId":"${sourceApp}"%`)
   }
 
   let query = `
@@ -438,4 +444,24 @@ export function getSimilarTags(name: string): Tag[] {
   if (!slug) return []
   const pattern = `%${slug.replace(/-/g, '%')}%`
   return db.prepare('SELECT * FROM tags WHERE slug LIKE ? LIMIT 5').all(pattern) as Tag[]
+}
+
+export function getSourceApps(): { name: string; bundleId: string; count: number }[] {
+  const db = getDatabase()
+  const rows = db.prepare(`
+    SELECT source_app, COUNT(*) as count
+    FROM clipboard_items
+    WHERE source_app IS NOT NULL
+    GROUP BY source_app
+    ORDER BY count DESC
+  `).all() as { source_app: string; count: number }[]
+
+  return rows.map((row) => {
+    try {
+      const parsed = JSON.parse(row.source_app)
+      return { name: parsed.name, bundleId: parsed.bundleId, count: row.count }
+    } catch {
+      return { name: row.source_app, bundleId: '', count: row.count }
+    }
+  })
 }

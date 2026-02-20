@@ -44,6 +44,34 @@ const api = {
   mergeTag: (sourceSlug: string, targetSlug: string) => ipcRenderer.invoke('tags:merge', sourceSlug, targetSlug),
   getTagStats: () => ipcRenderer.invoke('tags:stats'),
   getSimilarTags: (name: string) => ipcRenderer.invoke('tags:similar', name),
+  // Source app
+  getSourceApps: () => ipcRenderer.invoke('sourceApps:getAll'),
+  getAppIcon: (bundleId: string) => ipcRenderer.invoke('sourceApps:getIcon', bundleId),
+  // Sequence paste queue
+  queueAdd: (item: { id: string; content: string }) => ipcRenderer.invoke('queue:add', item),
+  queueAddMultiple: (items: { id: string; content: string }[]) => ipcRenderer.invoke('queue:addMultiple', items),
+  queueClear: () => ipcRenderer.invoke('queue:clear'),
+  queueGetCount: () => ipcRenderer.invoke('queue:getCount'),
+  queueGetItems: () => ipcRenderer.invoke('queue:getItems'),
+  queueSetSeparator: (separator: string) => ipcRenderer.invoke('queue:setSeparator', separator),
+  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string }) =>
+    ipcRenderer.invoke('shortcuts:update', config),
+  onQueueUpdated: (callback: (data: { count: number }) => void) => {
+    ipcRenderer.on('queue:updated', (_, data) => callback(data))
+    return () => ipcRenderer.removeAllListeners('queue:updated')
+  },
+  onQueuePasted: (callback: (data: { index: number; total: number }) => void) => {
+    ipcRenderer.on('queue:pasted', (_, data) => callback(data))
+    return () => ipcRenderer.removeAllListeners('queue:pasted')
+  },
+  onQueueBatchPasted: (callback: (data: { count: number }) => void) => {
+    ipcRenderer.on('queue:batch-pasted', (_, data) => callback(data))
+    return () => ipcRenderer.removeAllListeners('queue:batch-pasted')
+  },
+  onQueueFinished: (callback: () => void) => {
+    ipcRenderer.on('queue:finished', () => callback())
+    return () => ipcRenderer.removeAllListeners('queue:finished')
+  },
   onNewItem: (callback: (item: unknown) => void) => {
     ipcRenderer.on('clipboard:newItem', (_, item) => callback(item))
     return () => ipcRenderer.removeAllListeners('clipboard:newItem')
