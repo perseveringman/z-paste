@@ -9,6 +9,7 @@
   "panel.tabs.clipboard": "剪贴板",
   "panel.tabs.templates": "模板",
   "panel.search.placeholder": "搜索...",
+  "panel.help.tooltip": "帮助 / 新手引导",
   "panel.settings.tooltip": "设置 (⌘,)",
   "panel.empty.title": "暂无剪贴板记录",
   "panel.empty.subtitle": "复制内容后将自动出现在这里",

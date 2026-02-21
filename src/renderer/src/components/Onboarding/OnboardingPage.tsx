@@ -11,9 +11,10 @@ interface Step {
 
 interface Props {
   onComplete: () => void
+  isRevisit?: boolean
 }
 
-export default function OnboardingPage({ onComplete }: Props): React.JSX.Element {
+export default function OnboardingPage({ onComplete, isRevisit }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
   const { setICloudSync, setHasCompletedOnboarding } = useSettingsStore()
@@ -129,18 +130,22 @@ export default function OnboardingPage({ onComplete }: Props): React.JSX.Element
 
   const handleNext = useCallback(() => {
     if (isLastStep) {
-      setICloudSync(syncChoice)
-      setHasCompletedOnboarding(true)
+      if (!isRevisit) {
+        setICloudSync(syncChoice)
+        setHasCompletedOnboarding(true)
+      }
       onComplete()
     } else {
       setCurrentStep((s) => s + 1)
     }
-  }, [isLastStep, syncChoice, setICloudSync, setHasCompletedOnboarding, onComplete])
+  }, [isLastStep, isRevisit, syncChoice, setICloudSync, setHasCompletedOnboarding, onComplete])
 
   const handleSkip = useCallback(() => {
-    setHasCompletedOnboarding(true)
+    if (!isRevisit) {
+      setHasCompletedOnboarding(true)
+    }
     onComplete()
-  }, [setHasCompletedOnboarding, onComplete])
+  }, [isRevisit, setHasCompletedOnboarding, onComplete])
 
   const step = steps[currentStep]
 

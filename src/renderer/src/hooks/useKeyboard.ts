@@ -67,6 +67,18 @@ export function useKeyboard(): void {
               e.preventDefault()
               pasteItem(items[index].id)
             }
+            return
+          }
+          // Printable character → focus search bar and let it type
+          if (
+            !isInput &&
+            !e.metaKey && !e.ctrlKey && !e.altKey &&
+            e.key.length === 1 && /[a-zA-Z]/.test(e.key)
+          ) {
+            const searchInput = document.querySelector<HTMLInputElement>('input[type="text"]')
+            if (searchInput) {
+              searchInput.focus()
+            }
           }
       }
     },

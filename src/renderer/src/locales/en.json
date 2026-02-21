@@ -9,6 +9,7 @@
   "panel.tabs.clipboard": "Clipboard",
   "panel.tabs.templates": "Templates",
   "panel.search.placeholder": "Search...",
+  "panel.help.tooltip": "Help / Guide",
   "panel.settings.tooltip": "Settings (⌘,)",
   "panel.empty.title": "No clipboard records",
   "panel.empty.subtitle": "Copied content will appear here automatically",

@@ -10,9 +10,11 @@ export default function SearchBar(): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null)
   const { searchQuery, search, isVisible } = useClipboardStore()
 
+  // Don't auto-focus search — let number keys 1-9 trigger quick paste.
+  // Typing any character will focus the search bar via useKeyboard redirect.
   useEffect(() => {
     if (isVisible && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.blur()
     }
   }, [isVisible])
 

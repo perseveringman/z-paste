@@ -16,11 +16,11 @@ import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { matchShortcut } from '../../utils/shortcut'
-import { Settings, PanelRightOpen } from 'lucide-react'
+import { Settings, PanelRightOpen, HelpCircle } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
-type PanelView = 'clipboard' | 'templates' | 'settings'
+type PanelView = 'clipboard' | 'templates' | 'settings' | 'onboarding'
 
 export default function PanelWindow(): React.JSX.Element {
   const { t } = useTranslation()
@@ -115,6 +115,14 @@ export default function PanelWindow(): React.JSX.Element {
     )
   }
 
+  if (view === 'onboarding') {
+    return (
+      <div className={containerClass}>
+        <OnboardingPage onComplete={() => setView('clipboard')} isRevisit />
+      </div>
+    )
+  }
+
   return (
     <div className={containerClass}>
       {/* Top bar */}
@@ -135,8 +143,17 @@ export default function PanelWindow(): React.JSX.Element {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setView('settings')}
+          onClick={() => setView('onboarding')}
           className="ml-2 h-9 w-9 text-muted-foreground hover:text-foreground"
+          title={t('panel.help.tooltip')}
+        >
+          <HelpCircle className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setView('settings')}
+          className="h-9 w-9 text-muted-foreground hover:text-foreground"
           title={t('panel.settings.tooltip')}
         >
           <Settings className="w-4 h-4" />
