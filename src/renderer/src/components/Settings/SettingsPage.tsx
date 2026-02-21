@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore, ThemeMode, LanguageMode } from '../../stores/settingsStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
@@ -210,12 +210,7 @@ function GeneralSection(): React.JSX.Element {
   )
 }
 
-function formatShortcut(shortcut: string): string {
-  return shortcut
-    .replace('CommandOrControl', '\u2318')
-    .replace('Shift', '\u21E7')
-    .replace(/\+/g, ' ')
-}
+import { formatShortcut, eventToShortcut } from '../../utils/shortcut'
 
 function ShortcutBadge({ shortcut }: { shortcut: string }): React.JSX.Element {
   return (
@@ -225,9 +220,65 @@ function ShortcutBadge({ shortcut }: { shortcut: string }): React.JSX.Element {
   )
 }
 
+function ShortcutRecorder({
+  value,
+  onChange
+}: {
+  value: string
+  onChange: (shortcut: string) => void
+}): React.JSX.Element {
+  const { t } = useTranslation()
+  const [recording, setRecording] = useState(false)
+  const ref = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!recording) return
+    const handler = (e: KeyboardEvent): void => {
+      e.preventDefault()
+      e.stopPropagation()
+      const shortcut = eventToShortcut(e)
+      if (shortcut) {
+        onChange(shortcut)
+        setRecording(false)
+      }
+    }
+    const blur = (): void => setRecording(false)
+    window.addEventListener('keydown', handler, true)
+    window.addEventListener('blur', blur)
+    return () => {
+      window.removeEventListener('keydown', handler, true)
+      window.removeEventListener('blur', blur)
+    }
+  }, [recording, onChange])
+
+  return (
+    <button
+      ref={ref}
+      onClick={() => setRecording(true)}
+      className={`px-3 py-1.5 rounded-md text-sm font-mono border transition-colors min-w-[80px] text-center ${
+        recording
+          ? 'border-primary bg-primary/10 text-primary animate-pulse'
+          : 'bg-muted hover:border-primary/50'
+      }`}
+    >
+      {recording ? t('settings.shortcuts.recording') : formatShortcut(value)}
+    </button>
+  )
+}
+
 function ShortcutsSection(): React.JSX.Element {
   const { t } = useTranslation()
-  const { customShortcut, sequencePasteShortcut, batchPasteShortcut, batchPasteSeparator, setBatchPasteSeparator } = useSettingsStore()
+  const {
+    customShortcut,
+    sequencePasteShortcut,
+    batchPasteShortcut,
+    batchPasteSeparator,
+    setBatchPasteSeparator,
+    toggleFilterShortcut, setToggleFilterShortcut,
+    togglePreviewShortcut, setTogglePreviewShortcut,
+    openTagShortcut, setOpenTagShortcut,
+    openSettingsShortcut, setOpenSettingsShortcut
+  } = useSettingsStore()
 
   const separatorOptions = [
     { value: '\n', label: t('settings.shortcuts.separator.newline') },
@@ -253,6 +304,22 @@ function ShortcutsSection(): React.JSX.Element {
       <Separator />
       <SettingsItem label={t('settings.shortcuts.addToQueue')} description={t('settings.shortcuts.addToQueue.desc')}>
         <ShortcutBadge shortcut="Space" />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.shortcuts.toggleFilter')} description={t('settings.shortcuts.toggleFilter.desc')}>
+        <ShortcutRecorder value={toggleFilterShortcut} onChange={setToggleFilterShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.shortcuts.togglePreview')} description={t('settings.shortcuts.togglePreview.desc')}>
+        <ShortcutRecorder value={togglePreviewShortcut} onChange={setTogglePreviewShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.shortcuts.openTag')} description={t('settings.shortcuts.openTag.desc')}>
+        <ShortcutRecorder value={openTagShortcut} onChange={setOpenTagShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.shortcuts.openSettings')} description={t('settings.shortcuts.openSettings.desc')}>
+        <ShortcutRecorder value={openSettingsShortcut} onChange={setOpenSettingsShortcut} />
       </SettingsItem>
       <Separator />
       <SettingsItem label={t('settings.shortcuts.batchSeparator')} description={t('settings.shortcuts.batchSeparator.desc')}>

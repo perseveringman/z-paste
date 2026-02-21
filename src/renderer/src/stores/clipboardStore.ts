@@ -31,6 +31,7 @@ interface ClipboardState {
   filterType: string | null
   leftFilter: LeftFilter
   previewCollapsed: boolean
+  filtersCollapsed: boolean
   sourceAppFilter: string | null
 
   // Sequence paste queue
@@ -58,6 +59,7 @@ interface ClipboardState {
   setLeftFilter: (filter: LeftFilter) => void
   setSourceAppFilter: (bundleId: string | null) => void
   togglePreview: () => void
+  toggleFilters: () => void
   deleteItem: (id: string) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
@@ -75,6 +77,7 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   filterType: null,
   leftFilter: { type: 'all' },
   previewCollapsed: false,
+  filtersCollapsed: false,
   sourceAppFilter: null,
 
   // Sequence paste queue
@@ -197,6 +200,7 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   },
 
   togglePreview: () => set((state) => ({ previewCollapsed: !state.previewCollapsed })),
+  toggleFilters: () => set((state) => ({ filtersCollapsed: !state.filtersCollapsed })),
 
   deleteItem: async (id) => {
     await window.api.deleteItem(id)

@@ -18,6 +18,10 @@ export interface Settings {
   batchPasteShortcut: string
   addToQueueShortcut: string
   batchPasteSeparator: string
+  toggleFilterShortcut: string
+  togglePreviewShortcut: string
+  openTagShortcut: string
+  openSettingsShortcut: string
 }
 
 interface SettingsState extends Settings {
@@ -35,6 +39,10 @@ interface SettingsState extends Settings {
   setBatchPasteShortcut: (shortcut: string) => void
   setAddToQueueShortcut: (shortcut: string) => void
   setBatchPasteSeparator: (separator: string) => void
+  setToggleFilterShortcut: (shortcut: string) => void
+  setTogglePreviewShortcut: (shortcut: string) => void
+  setOpenTagShortcut: (shortcut: string) => void
+  setOpenSettingsShortcut: (shortcut: string) => void
   loadSettings: () => void
   saveSettings: () => void
 }
@@ -90,7 +98,11 @@ const defaults: Settings = {
   sequencePasteShortcut: 'CommandOrControl+;',
   batchPasteShortcut: "CommandOrControl+'",
   addToQueueShortcut: 'Space',
-  batchPasteSeparator: '\n'
+  batchPasteSeparator: '\n',
+  toggleFilterShortcut: 'CommandOrControl+F',
+  togglePreviewShortcut: 'Alt',
+  openTagShortcut: 'T',
+  openSettingsShortcut: 'CommandOrControl+,'
 }
 
 const stored = loadFromStorage()
@@ -170,6 +182,26 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     get().saveSettings()
   },
 
+  setToggleFilterShortcut: (shortcut) => {
+    set({ toggleFilterShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setTogglePreviewShortcut: (shortcut) => {
+    set({ togglePreviewShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setOpenTagShortcut: (shortcut) => {
+    set({ openTagShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setOpenSettingsShortcut: (shortcut) => {
+    set({ openSettingsShortcut: shortcut })
+    get().saveSettings()
+  },
+
   loadSettings: () => {
     const stored = loadFromStorage()
     const merged = { ...defaults, ...stored }
@@ -193,7 +225,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       sequencePasteShortcut: state.sequencePasteShortcut,
       batchPasteShortcut: state.batchPasteShortcut,
       addToQueueShortcut: state.addToQueueShortcut,
-      batchPasteSeparator: state.batchPasteSeparator
+      batchPasteSeparator: state.batchPasteSeparator,
+      toggleFilterShortcut: state.toggleFilterShortcut,
+      togglePreviewShortcut: state.togglePreviewShortcut,
+      openTagShortcut: state.openTagShortcut,
+      openSettingsShortcut: state.openSettingsShortcut
     }
     saveToStorage(settings)
   }

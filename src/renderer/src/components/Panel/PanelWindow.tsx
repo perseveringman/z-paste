@@ -9,10 +9,13 @@ import PreviewPanel from '../Preview/PreviewPanel'
 import QuickEdit from './QuickEdit'
 import TemplateList from '../Templates/TemplateList'
 import SettingsPage from '../Settings/SettingsPage'
+import OnboardingPage from '../Onboarding/OnboardingPage'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import { useQueueToast } from '../../hooks/useQueueToast'
 import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
+import { useSettingsStore } from '../../stores/settingsStore'
+import { matchShortcut } from '../../utils/shortcut'
 import { Settings, PanelRightOpen } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
@@ -24,7 +27,8 @@ export default function PanelWindow(): React.JSX.Element {
   useKeyboard()
   useQueueToast()
   const items = useSearch()
-  const { selectedIndex, pasteItem, previewCollapsed, togglePreview } = useClipboardStore()
+  const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters } = useClipboardStore()
+  const { toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut } = useSettingsStore()
   const selectedItem = items[selectedIndex] || null
 
   const [view, setView] = useState<PanelView>('clipboard')
@@ -71,18 +75,22 @@ export default function PanelWindow(): React.JSX.Element {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === ',' && (e.metaKey || e.ctrlKey)) {
+      if (matchShortcut(e, openSettingsShortcut)) {
         e.preventDefault()
         setView((v) => (v === 'settings' ? 'clipboard' : 'settings'))
         return
       }
-      // Option key: toggle right preview panel
-      if (e.key === 'Alt') {
+      if (matchShortcut(e, toggleFilterShortcut)) {
+        e.preventDefault()
+        toggleFilters()
+        return
+      }
+      if (matchShortcut(e, togglePreviewShortcut)) {
         e.preventDefault()
         togglePreview()
         return
       }
-      if (e.key === 't' || e.key === 'T') {
+      if (matchShortcut(e, openTagShortcut)) {
         const target = document.activeElement?.tagName
         if (target === 'INPUT' || target === 'TEXTAREA') return
         if (tagPickerItemId) return
@@ -94,7 +102,7 @@ export default function PanelWindow(): React.JSX.Element {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem, tagPickerItemId, togglePreview])
+  }, [selectedItem, tagPickerItemId, togglePreview, toggleFilters, toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut])
 
   const containerClass =
     'w-full h-full rounded-xl overflow-hidden bg-background/95 backdrop-blur-xl border shadow-2xl flex flex-col'
@@ -138,8 +146,12 @@ export default function PanelWindow(): React.JSX.Element {
       {view === 'clipboard' ? (
         <div className="flex flex-1 min-h-0">
           <div className="flex flex-col flex-1 min-h-0 min-w-0">
-            <TagBar />
-            <FilterTabs />
+            {!filtersCollapsed && (
+              <>
+                <TagBar />
+                <FilterTabs />
+              </>
+            )}
             <div className="flex-1 flex min-h-0 relative">
               <div
                 className={`flex flex-col min-h-0 relative ${!previewCollapsed && (previewItem || (editingItem && selectedItem)) ? 'w-[52%] border-r' : 'flex-1'}`}
