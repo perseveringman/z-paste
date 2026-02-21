@@ -1,4 +1,6 @@
 import { useCallback, useState, useRef, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import i18n from '../../i18n'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
 import { useAppIcon } from '../../hooks/useAppIcon'
 import {
@@ -57,10 +59,10 @@ function formatTime(timestamp: number): string {
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
 
-  if (minutes < 1) return '刚刚'
-  if (minutes < 60) return `${minutes}m`
-  if (hours < 24) return `${hours}h`
-  return `${days}d`
+  if (minutes < 1) return i18n.t('time.justNow')
+  if (minutes < 60) return i18n.t('time.minutesAgo', { count: minutes })
+  if (hours < 24) return i18n.t('time.hoursAgo', { count: hours })
+  return i18n.t('time.daysAgo', { count: days })
 }
 
 export default function ClipboardItemRow({
@@ -70,6 +72,7 @@ export default function ClipboardItemRow({
   onDoubleClick,
   onOpenTagPicker
 }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin, toggleSelectItem, isItemInQueue, getQueuePosition, selectedItems } = useClipboardStore()
   const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
@@ -201,7 +204,7 @@ export default function ClipboardItemRow({
                 onOpenTagPicker?.(item.id)
               }}
               className="p-1 rounded hover:bg-background/80 text-muted-foreground"
-              title="打标签 (T)"
+              title={t('panel.context.tag')}
             >
               <Tag className="w-3.5 h-3.5" />
             </button>
@@ -251,7 +254,7 @@ export default function ClipboardItemRow({
         >
           <ContextMenuItem
             icon={<Clipboard className="w-4 h-4" />}
-            label="粘贴"
+            label={t('panel.context.paste')}
             onClick={() => {
               pasteItem(item.id)
               setContextMenu(null)
@@ -259,7 +262,7 @@ export default function ClipboardItemRow({
           />
           <ContextMenuItem
             icon={<Copy className="w-4 h-4" />}
-            label="复制内容"
+            label={t('panel.context.copy')}
             onClick={() => {
               navigator.clipboard.writeText(item.content)
               setContextMenu(null)
@@ -268,7 +271,7 @@ export default function ClipboardItemRow({
           <div className="-mx-1 my-1 h-px bg-muted" />
           <ContextMenuItem
             icon={<Tag className="w-4 h-4" />}
-            label="打标签 (T)"
+            label={t('panel.context.tag')}
             onClick={() => {
               onOpenTagPicker?.(item.id)
               setContextMenu(null)
@@ -276,7 +279,7 @@ export default function ClipboardItemRow({
           />
           <ContextMenuItem
             icon={<Star className="w-4 h-4" />}
-            label={item.is_favorite ? '取消收藏' : '收藏'}
+            label={item.is_favorite ? t('panel.context.unfavorite') : t('panel.context.favorite')}
             onClick={() => {
               toggleFavorite(item.id)
               setContextMenu(null)
@@ -284,7 +287,7 @@ export default function ClipboardItemRow({
           />
           <ContextMenuItem
             icon={<Pin className="w-4 h-4" />}
-            label={item.is_pinned ? '取消置顶' : '置顶'}
+            label={item.is_pinned ? t('panel.context.unpin') : t('panel.context.pin')}
             onClick={() => {
               togglePin(item.id)
               setContextMenu(null)
@@ -293,7 +296,7 @@ export default function ClipboardItemRow({
           <div className="-mx-1 my-1 h-px bg-muted" />
           <ContextMenuItem
             icon={<Trash2 className="w-4 h-4" />}
-            label="删除"
+            label={t('panel.context.delete')}
             danger
             onClick={() => {
               deleteItem(item.id)
@@ -338,7 +341,7 @@ function ImageRow({
       />
       <div className="flex-1 min-w-0">
         <p className={`text-sm truncate ${isSelected ? 'font-medium' : ''}`}>
-          {item.preview || '图片'}
+          {item.preview || i18n.t('panel.image.fallback')}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">image</span>

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, X, Edit2 } from 'lucide-react'
 import { Button } from '../ui/button'
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function QuickEdit({ content, onSave, onCancel }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const [text, setText] = useState(content)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -35,7 +37,7 @@ export default function QuickEdit({ content, onSave, onCancel }: Props): React.J
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Edit2 className="w-3.5 h-3.5" />
-          <span className="text-xs font-medium">快速编辑</span>
+          <span className="text-xs font-medium">{t('panel.quickEdit.title')}</span>
         </div>
         <div className="flex gap-2">
           <Button
@@ -45,7 +47,7 @@ export default function QuickEdit({ content, onSave, onCancel }: Props): React.J
             onClick={onCancel}
           >
             <X className="w-3 h-3 mr-1" />
-            取消
+            {t('common.cancel')}
           </Button>
           <Button
             size="sm"
@@ -53,7 +55,7 @@ export default function QuickEdit({ content, onSave, onCancel }: Props): React.J
             onClick={() => onSave(text)}
           >
             <Check className="w-3 h-3 mr-1" />
-            保存
+            {t('common.save')}
           </Button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ClipboardItemRow from './ClipboardItem'
 import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
@@ -17,6 +18,7 @@ function getItemHeight(contentType: string): number {
 
 export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props): React.JSX.Element {
   const items = useSearch()
+  const { t } = useTranslation()
   const { selectedIndex } = useClipboardStore()
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
@@ -72,8 +74,8 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
       <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
         <div className="text-center">
           <p className="text-2xl mb-2">📋</p>
-          <p>暂无剪贴板记录</p>
-          <p className="text-xs mt-1 text-gray-600">复制内容后将自动出现在这里</p>
+          <p>{t('panel.empty.title')}</p>
+          <p className="text-xs mt-1 text-gray-600">{t('panel.empty.subtitle')}</p>
         </div>
       </div>
     )

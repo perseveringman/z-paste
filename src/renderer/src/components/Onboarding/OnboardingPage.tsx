@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
 
 interface Step {
@@ -13,27 +14,28 @@ interface Props {
 }
 
 export default function OnboardingPage({ onComplete }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
   const { setICloudSync, setHasCompletedOnboarding } = useSettingsStore()
   const [syncChoice, setSyncChoice] = useState(false)
 
   const steps: Step[] = [
     {
-      title: '欢迎使用 Z-Paste',
-      description: '强大的 Mac 剪贴板管理器，让你的复制粘贴更高效',
+      title: t('onboarding.step1.title'),
+      description: t('onboarding.step1.description'),
       icon: '🚀',
       content: (
         <div className="space-y-4">
-          <Feature icon="📋" title="智能历史" desc="自动记录剪贴板，智能分类文本、代码、链接、颜色" />
-          <Feature icon="🔍" title="即时搜索" desc="全文搜索，快速找到任何历史内容" />
-          <Feature icon="📝" title="模板片段" desc="保存常用文本片段，一键粘贴" />
-          <Feature icon="🎨" title="丰富预览" desc="代码高亮、JSON 格式化、颜色预览" />
+          <Feature icon="📋" title={t('onboarding.step1.feature1.title')} desc={t('onboarding.step1.feature1.desc')} />
+          <Feature icon="🔍" title={t('onboarding.step1.feature2.title')} desc={t('onboarding.step1.feature2.desc')} />
+          <Feature icon="📝" title={t('onboarding.step1.feature3.title')} desc={t('onboarding.step1.feature3.desc')} />
+          <Feature icon="🎨" title={t('onboarding.step1.feature4.title')} desc={t('onboarding.step1.feature4.desc')} />
         </div>
       )
     },
     {
-      title: '快捷键',
-      description: '用一个快捷键唤起 Z-Paste',
+      title: t('onboarding.step2.title'),
+      description: t('onboarding.step2.description'),
       icon: '⌨️',
       content: (
         <div className="flex flex-col items-center gap-4">
@@ -45,24 +47,24 @@ export default function OnboardingPage({ onComplete }: Props): React.JSX.Element
             <KeyCap label="V" />
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            按下 ⇧⌘V 即可随时唤起剪贴板面板
+            {t('onboarding.step2.shortcutHint')}
             <br />
-            选择条目后自动粘贴到当前应用
+            {t('onboarding.step2.autoPaste')}
           </p>
           <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 mt-2 w-full">
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">更多快捷键</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">{t('onboarding.step2.moreShortcuts')}</p>
             <div className="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
               <div className="flex justify-between">
-                <span>数字 1-9</span>
-                <span className="text-gray-400">快速粘贴对应条目</span>
+                <span>{t('onboarding.step2.numbers')}</span>
+                <span className="text-gray-400">{t('onboarding.step2.numbersDesc')}</span>
               </div>
               <div className="flex justify-between">
                 <span>⌘ ,</span>
-                <span className="text-gray-400">打开设置</span>
+                <span className="text-gray-400">{t('onboarding.step2.openSettings')}</span>
               </div>
               <div className="flex justify-between">
                 <span>Esc</span>
-                <span className="text-gray-400">关闭面板</span>
+                <span className="text-gray-400">{t('onboarding.step2.closePanel')}</span>
               </div>
             </div>
           </div>
@@ -70,21 +72,20 @@ export default function OnboardingPage({ onComplete }: Props): React.JSX.Element
       )
     },
     {
-      title: '隐私与同步',
-      description: '你的数据安全是第一位的',
+      title: t('onboarding.step3.title'),
+      description: t('onboarding.step3.description'),
       icon: '🔒',
       content: (
         <div className="space-y-4">
           <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-            <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 font-medium">数据存储</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 font-medium">{t('onboarding.step3.storage.title')}</p>
             <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-              所有剪贴板数据存储在本地 SQLite 数据库中。
-              可选开启 AES-256 加密保护敏感内容。
+              {t('onboarding.step3.storage.desc')}
             </p>
           </div>
           <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">iCloud 同步</p>
+              <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">{t('onboarding.step3.sync.title')}</p>
               <button
                 onClick={() => setSyncChoice(!syncChoice)}
                 className={`relative w-10 h-6 rounded-full transition-colors ${
@@ -99,16 +100,15 @@ export default function OnboardingPage({ onComplete }: Props): React.JSX.Element
               </button>
             </div>
             <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-              在多台 Mac 之间通过 iCloud Drive 同步剪贴板数据。
-              可随时在设置中更改。
+              {t('onboarding.step3.sync.desc')}
             </p>
           </div>
         </div>
       )
     },
     {
-      title: '准备就绪！',
-      description: '开始使用 Z-Paste 提升你的效率',
+      title: t('onboarding.step4.title'),
+      description: t('onboarding.step4.description'),
       icon: '✨',
       content: (
         <div className="flex flex-col items-center gap-4">
@@ -116,9 +116,9 @@ export default function OnboardingPage({ onComplete }: Props): React.JSX.Element
             Z
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
-            一切准备就绪！
+            {t('onboarding.step4.ready')}
             <br />
-            复制任何内容后，按 ⇧⌘V 即可开始使用
+            {t('onboarding.step4.hint')}
           </p>
         </div>
       )
@@ -181,14 +181,14 @@ export default function OnboardingPage({ onComplete }: Props): React.JSX.Element
               onClick={handleSkip}
               className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              跳过
+              {t('onboarding.skip')}
             </button>
           )}
           <button
             onClick={handleNext}
             className="text-xs bg-blue-500 text-white px-4 py-1.5 rounded-md hover:bg-blue-600 transition-colors"
           >
-            {isLastStep ? '开始使用' : '下一步'}
+            {isLastStep ? t('onboarding.start') : t('onboarding.next')}
           </button>
         </div>
       </div>

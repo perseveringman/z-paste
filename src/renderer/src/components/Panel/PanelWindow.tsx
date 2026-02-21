@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
 import FilterTabs from './FilterTabs'
@@ -19,6 +20,7 @@ import { cn } from '../../lib/utils'
 type PanelView = 'clipboard' | 'templates' | 'settings'
 
 export default function PanelWindow(): React.JSX.Element {
+  const { t } = useTranslation()
   useKeyboard()
   useQueueToast()
   const items = useSearch()
@@ -111,12 +113,12 @@ export default function PanelWindow(): React.JSX.Element {
       <div className="flex items-center h-14 px-4 border-b bg-muted/30">
         <div className="flex items-center gap-1 p-1 bg-muted rounded-lg mr-4">
           <TabButton
-            label="剪贴板"
+            label={t('panel.tabs.clipboard')}
             active={view === 'clipboard'}
             onClick={() => setView('clipboard')}
           />
           <TabButton
-            label="模板"
+            label={t('panel.tabs.templates')}
             active={view === 'templates'}
             onClick={() => setView('templates')}
           />
@@ -127,7 +129,7 @@ export default function PanelWindow(): React.JSX.Element {
           size="icon"
           onClick={() => setView('settings')}
           className="ml-2 h-9 w-9 text-muted-foreground hover:text-foreground"
-          title="设置 (⌘,)"
+          title={t('panel.settings.tooltip')}
         >
           <Settings className="w-4 h-4" />
         </Button>
@@ -166,7 +168,7 @@ export default function PanelWindow(): React.JSX.Element {
                 <button
                   onClick={togglePreview}
                   className="shrink-0 flex items-center justify-center w-8 border-l bg-muted/10 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-colors"
-                  title="展开详情 (⌥)"
+                  title={t('panel.preview.expand')}
                 >
                   <PanelRightOpen className="w-3.5 h-3.5" />
                 </button>

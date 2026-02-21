@@ -34,6 +34,7 @@ const api = {
   deleteTemplate: (id: string) => ipcRenderer.invoke('templates:delete', id),
   setLaunchAtLogin: (enabled: boolean) => ipcRenderer.invoke('settings:setLaunchAtLogin', enabled),
   getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
+  setLanguage: (lang: string) => ipcRenderer.invoke('settings:setLanguage', lang),
   syncNow: () => ipcRenderer.invoke('sync:now'),
   listTags: () => ipcRenderer.invoke('tags:list'),
   applyTags: (itemId: string, slugs: string[]) => ipcRenderer.invoke('tags:apply', itemId, slugs),

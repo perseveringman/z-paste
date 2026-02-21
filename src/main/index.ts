@@ -164,6 +164,10 @@ app.whenReady().then(() => {
     return app.getLoginItemSettings().openAtLogin
   })
 
+  ipcMain.handle('settings:setLanguage', async (_, lang: string) => {
+    trayManager.setLanguage(lang)
+  })
+
   ipcMain.handle('sync:now', async () => {
     if (syncService) {
       syncService.syncNow()

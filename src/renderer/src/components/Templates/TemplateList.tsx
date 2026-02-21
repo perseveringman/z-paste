@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import TemplateEditor from './TemplateEditor'
 
 interface Template {
@@ -12,6 +13,7 @@ interface Template {
 }
 
 export default function TemplateList(): React.JSX.Element {
+  const { t } = useTranslation()
   const [templates, setTemplates] = useState<Template[]>([])
   const [editing, setEditing] = useState<Template | null>(null)
   const [creating, setCreating] = useState(false)
@@ -57,18 +59,18 @@ export default function TemplateList(): React.JSX.Element {
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
-        <span className="text-xs text-gray-400">模板片段</span>
+        <span className="text-xs text-gray-400">{t('template.title')}</span>
         <button
           onClick={() => setCreating(true)}
           className="text-xs text-blue-400 hover:text-blue-300"
         >
-          + 新建
+          {t('template.new')}
         </button>
       </div>
       <div className="flex-1 overflow-y-auto">
         {templates.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-600 text-xs">
-            暂无模板，点击上方"+ 新建"创建
+            {t('template.empty')}
           </div>
         ) : (
           templates.map((t) => (

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { cn } from '../../lib/utils'
 import { Tag, Plus, Check } from 'lucide-react'
@@ -17,6 +18,7 @@ function toSlug(name: string): string {
 }
 
 export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const { tags, applyTags, loadTags } = useTagStore()
   const [query, setQuery] = useState('')
   const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set())
@@ -39,13 +41,13 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
     }
     window.api.getSimilarTags(query).then((results: TagWithCount[]) => {
       const slug = toSlug(query)
-      setSimilar(results.filter((t) => t.slug !== slug))
+      setSimilar(results.filter((st) => st.slug !== slug))
     })
   }, [query])
 
   const filteredTags = query.trim()
-    ? tags.filter((t) =>
-        t.slug.includes(toSlug(query)) || t.name.toLowerCase().includes(query.toLowerCase())
+    ? tags.filter((tag) =>
+        tag.slug.includes(toSlug(query)) || tag.name.toLowerCase().includes(query.toLowerCase())
       )
     : tags
 
@@ -152,7 +154,7 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="搜索或新建标签..."
+          placeholder={t('tagPicker.placeholder')}
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
         />
       </div>
@@ -160,15 +162,15 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
       <div className="overflow-y-auto flex-1">
         {similar.length > 0 && query.trim() && (
           <div className="px-3 pt-2 pb-1">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">相似标签建议</p>
-            {similar.map((t) => (
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{t('tagPicker.similar')}</p>
+            {similar.map((st) => (
               <button
-                key={t.slug}
-                onClick={() => toggleTag(t.slug)}
+                key={st.slug}
+                onClick={() => toggleTag(st.slug)}
                 className="w-full flex items-center gap-2 px-2 py-1 text-xs rounded hover:bg-muted/60 text-muted-foreground"
               >
-                <span>使用 "{t.name}"</span>
-                {selectedSlugs.has(t.slug) && <Check className="w-3 h-3 ml-auto text-primary" />}
+                <span>{t('tagPicker.use', { name: st.name })}</span>
+                {selectedSlugs.has(st.slug) && <Check className="w-3 h-3 ml-auto text-primary" />}
               </button>
             ))}
             <div className="border-t my-1" />
@@ -215,23 +217,23 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
             )}
           >
             <Plus className="w-3.5 h-3.5 shrink-0" />
-            <span>新建 "{query.trim()}"</span>
+            <span>{t('tagPicker.create', { name: query.trim() })}</span>
           </button>
         )}
 
         {filteredTags.length === 0 && !showCreate && (
-          <p className="px-3 py-4 text-xs text-center text-muted-foreground">无标签，输入名称新建</p>
+          <p className="px-3 py-4 text-xs text-center text-muted-foreground">{t('tagPicker.empty')}</p>
         )}
       </div>
 
       {selectedSlugs.size > 0 && (
         <div className="px-3 py-2 border-t bg-muted/20 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">已选 {selectedSlugs.size} 个标签</span>
+          <span className="text-xs text-muted-foreground">{t('tagPicker.selected', { count: selectedSlugs.size })}</span>
           <button
             onClick={handleCommit}
             className="text-xs font-medium text-primary hover:underline"
           >
-            确认 (Enter)
+            {t('tagPicker.confirm')}
           </button>
         </div>
       )}

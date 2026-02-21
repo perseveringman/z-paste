@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { Badge } from '../ui/badge'
 import { cn } from '../../lib/utils'
-
-const TABS = [
-  { label: '全部', value: null },
-  { label: '文本', value: 'text' },
-  { label: '代码', value: 'code' },
-  { label: 'URL', value: 'url' },
-  { label: 'JSON', value: 'json' },
-  { label: '颜色', value: 'color' },
-  { label: '图片', value: 'image' }
-]
 
 interface SourceApp {
   name: string
@@ -22,7 +13,18 @@ interface SourceApp {
 const iconCache = new Map<string, string>()
 
 export default function FilterTabs(): React.JSX.Element {
+  const { t } = useTranslation()
   const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items } = useClipboardStore()
+
+  const tabs = [
+    { label: t('panel.filter.all'), value: null },
+    { label: t('panel.filter.text'), value: 'text' },
+    { label: t('panel.filter.code'), value: 'code' },
+    { label: t('panel.filter.url'), value: 'url' },
+    { label: t('panel.filter.json'), value: 'json' },
+    { label: t('panel.filter.color'), value: 'color' },
+    { label: t('panel.filter.image'), value: 'image' }
+  ]
   const [sourceApps, setSourceApps] = useState<SourceApp[]>([])
   const [appIcons, setAppIcons] = useState<Map<string, string>>(new Map())
 
@@ -50,7 +52,7 @@ export default function FilterTabs(): React.JSX.Element {
     <div className="border-b bg-muted/20">
       {/* Content type row */}
       <div className="flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto no-scrollbar">
-        {TABS.map(({ label, value }) => {
+        {tabs.map(({ label, value }) => {
           const isActive = filterType === value
           return (
             <Badge
@@ -81,7 +83,7 @@ export default function FilterTabs(): React.JSX.Element {
             )}
             onClick={() => setSourceAppFilter(null)}
           >
-            全部
+            {t('panel.filter.all')}
           </Badge>
           {sourceApps.map((app) => {
             const isActive = sourceAppFilter === app.bundleId

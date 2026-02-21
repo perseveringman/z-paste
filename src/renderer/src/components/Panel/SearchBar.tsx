@@ -1,10 +1,12 @@
 import { useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { Search, X } from 'lucide-react'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 
 export default function SearchBar(): React.JSX.Element {
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const { searchQuery, search, isVisible } = useClipboardStore()
 
@@ -24,7 +26,7 @@ export default function SearchBar(): React.JSX.Element {
         type="text"
         value={searchQuery}
         onChange={(e) => search(e.target.value)}
-        placeholder="搜索..."
+        placeholder={t('panel.search.placeholder')}
         className="h-9 pl-9 pr-8 bg-muted/50 border-transparent focus-visible:bg-background focus-visible:border-input shadow-none"
       />
       {searchQuery && (

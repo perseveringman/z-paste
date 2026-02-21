@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import { useClipboardStore, LeftFilter } from '../../stores/clipboardStore'
 import { cn } from '../../lib/utils'
 import { Star, Layers } from 'lucide-react'
 
 export default function Sidebar(): React.JSX.Element {
+  const { t } = useTranslation()
   const { leftFilter, setLeftFilter, items } = useClipboardStore()
 
   const starredCount = items.filter((i) => i.is_favorite).length
@@ -16,13 +18,13 @@ export default function Sidebar(): React.JSX.Element {
     <div className="w-44 shrink-0 border-r flex flex-col py-2 overflow-y-auto bg-muted/10">
       <NavItem
         icon={<Layers className="w-3.5 h-3.5" />}
-        label="全部"
+        label={t('panel.sidebar.all')}
         active={isActive({ type: 'all' })}
         onClick={() => setLeftFilter({ type: 'all' })}
       />
       <NavItem
         icon={<Star className="w-3.5 h-3.5" />}
-        label="已收藏"
+        label={t('panel.sidebar.starred')}
         count={starredCount}
         active={isActive({ type: 'starred' })}
         onClick={() => setLeftFilter({ type: 'starred' })}

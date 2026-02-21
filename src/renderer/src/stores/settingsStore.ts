@@ -1,9 +1,12 @@
 import { create } from 'zustand'
+import i18n from '../i18n'
 
 export type ThemeMode = 'auto' | 'dark' | 'light'
+export type LanguageMode = 'auto' | 'zh-CN' | 'en' | 'zh-TW'
 
 export interface Settings {
   theme: ThemeMode
+  language: LanguageMode
   launchAtLogin: boolean
   historyRetention: number // days, 0 = forever
   maxItems: number
@@ -20,6 +23,7 @@ export interface Settings {
 interface SettingsState extends Settings {
   resolvedTheme: 'dark' | 'light'
   setTheme: (theme: ThemeMode) => void
+  setLanguage: (lang: LanguageMode) => void
   setLaunchAtLogin: (value: boolean) => void
   setHistoryRetention: (days: number) => void
   setMaxItems: (count: number) => void
@@ -46,6 +50,15 @@ function resolveTheme(mode: ThemeMode): 'dark' | 'light' {
   return mode
 }
 
+function resolveLanguage(mode: LanguageMode): string {
+  if (mode !== 'auto') return mode
+  const sysLang = navigator.language || 'zh-CN'
+  if (sysLang.startsWith('zh-TW') || sysLang.startsWith('zh-Hant')) return 'zh-TW'
+  if (sysLang.startsWith('zh')) return 'zh-CN'
+  if (sysLang.startsWith('en')) return 'en'
+  return 'zh-CN'
+}
+
 function loadFromStorage(): Partial<Settings> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -66,6 +79,7 @@ function saveToStorage(settings: Settings): void {
 
 const defaults: Settings = {
   theme: 'auto',
+  language: 'auto',
   launchAtLogin: false,
   historyRetention: 30,
   maxItems: 2000,
@@ -91,6 +105,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ theme, resolvedTheme: resolved })
     get().saveSettings()
     applyTheme(resolved)
+  },
+
+  setLanguage: (lang) => {
+    set({ language: lang })
+    const resolved = resolveLanguage(lang)
+    i18n.changeLanguage(resolved)
+    window.api.setLanguage?.(resolved)
+    get().saveSettings()
   },
 
   setLaunchAtLogin: (value) => {
@@ -160,6 +182,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const state = get()
     const settings: Settings = {
       theme: state.theme,
+      language: state.language,
       launchAtLogin: state.launchAtLogin,
       historyRetention: state.historyRetention,
       maxItems: state.maxItems,

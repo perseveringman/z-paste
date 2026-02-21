@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useSettingsStore, ThemeMode } from '../../stores/settingsStore'
+import { useTranslation } from 'react-i18next'
+import { useSettingsStore, ThemeMode, LanguageMode } from '../../stores/settingsStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { Switch } from '../ui/switch'
 import {
@@ -31,37 +32,38 @@ import {
 
 type SettingsSection = 'general' | 'shortcuts' | 'sync' | 'privacy' | 'theme' | 'tags' | 'about'
 
-const SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
-  { id: 'general', label: '通用', icon: Settings },
-  { id: 'shortcuts', label: '快捷键', icon: Keyboard },
-  { id: 'sync', label: '同步', icon: Cloud },
-  { id: 'privacy', label: '隐私', icon: Lock },
-  { id: 'theme', label: '主题', icon: Palette },
-  { id: 'tags', label: '标签管理', icon: Tag },
-  { id: 'about', label: '关于', icon: Info }
-]
-
 interface Props {
   onClose: () => void
 }
 
 export default function SettingsPage({ onClose }: Props): React.JSX.Element {
   const [activeSection, setActiveSection] = useState<SettingsSection>('general')
+  const { t } = useTranslation()
+
+  const sections: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
+    { id: 'general', label: t('settings.nav.general'), icon: Settings },
+    { id: 'shortcuts', label: t('settings.nav.shortcuts'), icon: Keyboard },
+    { id: 'sync', label: t('settings.nav.sync'), icon: Cloud },
+    { id: 'privacy', label: t('settings.nav.privacy'), icon: Lock },
+    { id: 'theme', label: t('settings.nav.theme'), icon: Palette },
+    { id: 'tags', label: t('settings.nav.tags'), icon: Tag },
+    { id: 'about', label: t('settings.nav.about'), icon: Info }
+  ]
 
   return (
     <div className="flex flex-col h-full bg-background text-foreground">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b">
-        <h1 className="text-lg font-semibold">设置</h1>
+        <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
         <Button variant="ghost" size="sm" onClick={onClose}>
-          关闭
+          {t('common.close')}
         </Button>
       </div>
 
       <div className="flex flex-1 min-h-0">
         {/* Left nav */}
         <div className="w-48 shrink-0 border-r py-4">
-          {SECTIONS.map((section) => (
+          {sections.map((section) => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
@@ -136,19 +138,36 @@ function SettingsItem({
 }
 
 function GeneralSection(): React.JSX.Element {
+  const { t } = useTranslation()
   const {
     launchAtLogin,
     setLaunchAtLogin,
     historyRetention,
     setHistoryRetention,
     maxItems,
-    setMaxItems
+    setMaxItems,
+    language,
+    setLanguage
   } = useSettingsStore()
 
   return (
     <div>
-      <SectionTitle title="通用设置" />
-      <SettingsItem label="开机自启" description="登录 macOS 时自动启动 Z-Paste">
+      <SectionTitle title={t('settings.general.title')} />
+      <SettingsItem label={t('settings.general.language')} description={t('settings.general.language.desc')}>
+        <Select value={language} onValueChange={(v) => setLanguage(v as LanguageMode)}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="auto">{t('settings.general.language.auto')}</SelectItem>
+            <SelectItem value="zh-CN">{t('settings.general.language.zhCN')}</SelectItem>
+            <SelectItem value="en">{t('settings.general.language.en')}</SelectItem>
+            <SelectItem value="zh-TW">{t('settings.general.language.zhTW')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.general.launchAtLogin')} description={t('settings.general.launchAtLogin.desc')}>
         <Switch
           checked={launchAtLogin}
           onCheckedChange={(v) => {
@@ -158,7 +177,7 @@ function GeneralSection(): React.JSX.Element {
         />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="历史保留时长" description="超过时间的非收藏/非置顶记录将自动清理">
+      <SettingsItem label={t('settings.general.historyRetention')} description={t('settings.general.historyRetention.desc')}>
         <Select
           value={String(historyRetention)}
           onValueChange={(v) => setHistoryRetention(Number(v))}
@@ -167,15 +186,15 @@ function GeneralSection(): React.JSX.Element {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1">1 天</SelectItem>
-            <SelectItem value="7">7 天</SelectItem>
-            <SelectItem value="30">30 天</SelectItem>
-            <SelectItem value="0">永久</SelectItem>
+            <SelectItem value="1">{t('settings.general.retention.1day')}</SelectItem>
+            <SelectItem value="7">{t('settings.general.retention.7days')}</SelectItem>
+            <SelectItem value="30">{t('settings.general.retention.30days')}</SelectItem>
+            <SelectItem value="0">{t('settings.general.retention.forever')}</SelectItem>
           </SelectContent>
         </Select>
       </SettingsItem>
       <Separator />
-      <SettingsItem label="最大记录数" description="超过限制时自动删除最旧的非收藏记录">
+      <SettingsItem label={t('settings.general.maxItems')} description={t('settings.general.maxItems.desc')}>
         <Select value={String(maxItems)} onValueChange={(v) => setMaxItems(Number(v))}>
           <SelectTrigger className="w-[120px]">
             <SelectValue />
@@ -193,8 +212,8 @@ function GeneralSection(): React.JSX.Element {
 
 function formatShortcut(shortcut: string): string {
   return shortcut
-    .replace('CommandOrControl', '⌘')
-    .replace('Shift', '⇧')
+    .replace('CommandOrControl', '\u2318')
+    .replace('Shift', '\u21E7')
     .replace(/\+/g, ' ')
 }
 
@@ -207,35 +226,36 @@ function ShortcutBadge({ shortcut }: { shortcut: string }): React.JSX.Element {
 }
 
 function ShortcutsSection(): React.JSX.Element {
+  const { t } = useTranslation()
   const { customShortcut, sequencePasteShortcut, batchPasteShortcut, batchPasteSeparator, setBatchPasteSeparator } = useSettingsStore()
 
   const separatorOptions = [
-    { value: '\n', label: '换行' },
-    { value: '\t', label: 'Tab' },
-    { value: ', ', label: '逗号' },
-    { value: ' ', label: '空格' }
+    { value: '\n', label: t('settings.shortcuts.separator.newline') },
+    { value: '\t', label: t('settings.shortcuts.separator.tab') },
+    { value: ', ', label: t('settings.shortcuts.separator.comma') },
+    { value: ' ', label: t('settings.shortcuts.separator.space') }
   ]
 
   return (
     <div>
-      <SectionTitle title="快捷键" />
-      <SettingsItem label="唤起面板" description="全局快捷键，唤起/隐藏剪贴板面板">
+      <SectionTitle title={t('settings.shortcuts.title')} />
+      <SettingsItem label={t('settings.shortcuts.showPanel')} description={t('settings.shortcuts.showPanel.desc')}>
         <ShortcutBadge shortcut={customShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="序列粘贴" description="从队列中粘贴下一条内容">
+      <SettingsItem label={t('settings.shortcuts.sequencePaste')} description={t('settings.shortcuts.sequencePaste.desc')}>
         <ShortcutBadge shortcut={sequencePasteShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="批量粘贴" description="一次性粘贴队列中所有内容">
+      <SettingsItem label={t('settings.shortcuts.batchPaste')} description={t('settings.shortcuts.batchPaste.desc')}>
         <ShortcutBadge shortcut={batchPasteShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="添加到队列" description="在面板内将选中条目加入粘贴队列">
+      <SettingsItem label={t('settings.shortcuts.addToQueue')} description={t('settings.shortcuts.addToQueue.desc')}>
         <ShortcutBadge shortcut="Space" />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="批量粘贴分隔符" description="批量粘贴时，多条内容之间的分隔方式">
+      <SettingsItem label={t('settings.shortcuts.batchSeparator')} description={t('settings.shortcuts.batchSeparator.desc')}>
         <Select
           value={batchPasteSeparator}
           onValueChange={(v) => {
@@ -256,13 +276,14 @@ function ShortcutsSection(): React.JSX.Element {
         </Select>
       </SettingsItem>
       <p className="text-xs text-muted-foreground mt-4">
-        提示：在面板中使用 ⌘+Click 多选条目，按 Enter 批量加入队列
+        {t('settings.shortcuts.hint')}
       </p>
     </div>
   )
 }
 
 function SyncSection(): React.JSX.Element {
+  const { t } = useTranslation()
   const { iCloudSync, setICloudSync } = useSettingsStore()
   const [syncing, setSyncing] = useState(false)
 
@@ -278,12 +299,12 @@ function SyncSection(): React.JSX.Element {
 
   return (
     <div>
-      <SectionTitle title="iCloud 同步" />
-      <SettingsItem label="启用 iCloud 同步" description="通过 iCloud Drive 在多台 Mac 间同步剪贴板数据">
+      <SectionTitle title={t('settings.sync.title')} />
+      <SettingsItem label={t('settings.sync.enable')} description={t('settings.sync.enable.desc')}>
         <Switch checked={iCloudSync} onCheckedChange={setICloudSync} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="立即同步" description="手动触发一次同步">
+      <SettingsItem label={t('settings.sync.now')} description={t('settings.sync.now.desc')}>
         <Button
           variant="outline"
           size="sm"
@@ -293,10 +314,10 @@ function SyncSection(): React.JSX.Element {
           {syncing ? (
             <>
               <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-              同步中...
+              {t('settings.sync.syncing')}
             </>
           ) : (
-            '同步'
+            t('settings.sync.syncButton')
           )}
         </Button>
       </SettingsItem>
@@ -305,6 +326,7 @@ function SyncSection(): React.JSX.Element {
 }
 
 function PrivacySection(): React.JSX.Element {
+  const { t } = useTranslation()
   const { encryptionEnabled, setEncryptionEnabled } = useSettingsStore()
   const [confirming, setConfirming] = useState(false)
 
@@ -319,12 +341,12 @@ function PrivacySection(): React.JSX.Element {
 
   return (
     <div>
-      <SectionTitle title="隐私与安全" />
-      <SettingsItem label="加密存储" description="使用 AES-256-GCM 加密剪贴板内容（需设置密码）">
+      <SectionTitle title={t('settings.privacy.title')} />
+      <SettingsItem label={t('settings.privacy.encryption')} description={t('settings.privacy.encryption.desc')}>
         <Switch checked={encryptionEnabled} onCheckedChange={setEncryptionEnabled} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label="清空所有数据" description="删除所有剪贴板记录（不可恢复）">
+      <SettingsItem label={t('settings.privacy.clearAll')} description={t('settings.privacy.clearAll.desc')}>
         <Button
           variant={confirming ? 'destructive' : 'outline'}
           size="sm"
@@ -332,11 +354,11 @@ function PrivacySection(): React.JSX.Element {
           className={confirming ? '' : 'text-destructive hover:text-destructive'}
         >
           {confirming ? (
-            '确认清空？'
+            t('settings.privacy.confirmClear')
           ) : (
             <>
               <Trash2 className="w-3 h-3 mr-2" />
-              清空
+              {t('settings.privacy.clearButton')}
             </>
           )}
         </Button>
@@ -346,31 +368,32 @@ function PrivacySection(): React.JSX.Element {
 }
 
 function ThemeSection(): React.JSX.Element {
+  const { t } = useTranslation()
   const { theme, setTheme } = useSettingsStore()
 
   const themes: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
-    { value: 'auto', label: '自动', icon: Monitor },
-    { value: 'dark', label: '暗色', icon: Moon },
-    { value: 'light', label: '亮色', icon: Sun }
+    { value: 'auto', label: t('settings.theme.auto'), icon: Monitor },
+    { value: 'dark', label: t('settings.theme.dark'), icon: Moon },
+    { value: 'light', label: t('settings.theme.light'), icon: Sun }
   ]
 
   return (
     <div>
-      <SectionTitle title="主题" />
+      <SectionTitle title={t('settings.theme.title')} />
       <div className="grid grid-cols-3 gap-4">
-        {themes.map((t) => (
+        {themes.map((th) => (
           <button
-            key={t.value}
-            onClick={() => setTheme(t.value)}
+            key={th.value}
+            onClick={() => setTheme(th.value)}
             className={`flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-              theme === t.value
+              theme === th.value
                 ? 'border-primary bg-primary/5'
                 : 'border-transparent bg-muted hover:bg-muted/80'
             }`}
           >
-            <t.icon className={`w-6 h-6 ${theme === t.value ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-sm font-medium ${theme === t.value ? 'text-primary' : 'text-muted-foreground'}`}>
-              {t.label}
+            <th.icon className={`w-6 h-6 ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`} />
+            <span className={`text-sm font-medium ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}>
+              {th.label}
             </span>
           </button>
         ))}
@@ -380,6 +403,7 @@ function ThemeSection(): React.JSX.Element {
 }
 
 function TagManagementSection(): React.JSX.Element {
+  const { t } = useTranslation()
   const { tags, loadTags, renameTag, deleteTag, mergeTag } = useTagStore()
   const [stats, setStats] = useState<{ total: number; singleUse: number } | null>(null)
   const [renamingSlug, setRenamingSlug] = useState<string | null>(null)
@@ -434,16 +458,16 @@ function TagManagementSection(): React.JSX.Element {
 
   return (
     <div>
-      <SectionTitle title="标签管理" />
+      <SectionTitle title={t('settings.tags.title')} />
       {stats && (
         <div className="flex gap-4 mb-4">
           <div className="flex-1 bg-muted/40 rounded-lg p-3 text-center">
             <p className="text-xl font-semibold">{stats.total}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">总标签数</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('settings.tags.total')}</p>
           </div>
           <div className="flex-1 bg-muted/40 rounded-lg p-3 text-center">
             <p className="text-xl font-semibold">{stats.singleUse}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">仅 1 条内容</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('settings.tags.singleUse')}</p>
           </div>
         </div>
       )}
@@ -452,7 +476,7 @@ function TagManagementSection(): React.JSX.Element {
         <div className="flex items-start gap-2 mb-4 px-3 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
           <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
           <p className="text-xs text-yellow-700 dark:text-yellow-300">
-            标签数量超过 15 个，建议合并类似标签以保持高效率。
+            {t('settings.tags.tooMany')}
           </p>
         </div>
       )}
@@ -487,9 +511,9 @@ function TagManagementSection(): React.JSX.Element {
                 }}
                 className="flex-1 text-sm bg-background border rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value="">选择目标标签...</option>
-                {tags.filter((t) => t.slug !== tag.slug).map((t) => (
-                  <option key={t.slug} value={t.slug}>{t.name}</option>
+                <option value="">{t('settings.tags.selectTarget')}</option>
+                {tags.filter((tg) => tg.slug !== tag.slug).map((tg) => (
+                  <option key={tg.slug} value={tg.slug}>{tg.name}</option>
                 ))}
               </select>
             ) : (
@@ -500,34 +524,34 @@ function TagManagementSection(): React.JSX.Element {
 
             {renamingSlug === tag.slug ? (
               <>
-                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleRenameConfirm(tag.slug)}>确认</Button>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setRenamingSlug(null); setRenameValue('') }}>取消</Button>
+                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleRenameConfirm(tag.slug)}>{t('common.confirm')}</Button>
+                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setRenamingSlug(null); setRenameValue('') }}>{t('common.cancel')}</Button>
               </>
             ) : mergingSlug === tag.slug ? (
               <>
-                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleMerge(tag.slug)} disabled={!mergeTarget}>合并</Button>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setMergingSlug(null); setMergeTarget('') }}>取消</Button>
+                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleMerge(tag.slug)} disabled={!mergeTarget}>{t('settings.tags.merge')}</Button>
+                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setMergingSlug(null); setMergeTarget('') }}>{t('common.cancel')}</Button>
               </>
             ) : (
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => { setRenamingSlug(tag.slug); setRenameValue(tag.name) }}
                   className="p-1 rounded hover:bg-background/80 text-muted-foreground"
-                  title="重命名"
+                  title={t('settings.tags.rename')}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => { setMergingSlug(tag.slug); setMergeTarget('') }}
                   className="p-1 rounded hover:bg-background/80 text-muted-foreground"
-                  title="合并到..."
+                  title={t('settings.tags.mergeTo')}
                 >
                   <GitMerge className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handleDelete(tag.slug)}
                   className={`p-1 rounded hover:bg-background/80 ${confirmDelete === tag.slug ? 'text-destructive' : 'text-muted-foreground'}`}
-                  title={confirmDelete === tag.slug ? '再次点击确认删除' : '删除'}
+                  title={confirmDelete === tag.slug ? t('settings.tags.confirmDelete') : t('common.delete')}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -536,7 +560,7 @@ function TagManagementSection(): React.JSX.Element {
           </div>
         ))}
         {tags.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">暂无标签</p>
+          <p className="text-sm text-muted-foreground text-center py-8">{t('settings.tags.empty')}</p>
         )}
       </div>
     </div>
@@ -544,19 +568,20 @@ function TagManagementSection(): React.JSX.Element {
 }
 
 function AboutSection(): React.JSX.Element {
+  const { t } = useTranslation()
   return (
     <div>
-      <SectionTitle title="关于" />
+      <SectionTitle title={t('settings.about.title')} />
       <div className="flex flex-col items-center py-8 text-center space-y-4">
         <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
           Z
         </div>
         <div>
           <h3 className="text-lg font-semibold">Z-Paste</h3>
-          <p className="text-sm text-muted-foreground">版本 1.0.0</p>
+          <p className="text-sm text-muted-foreground">{t('settings.about.version', { version: '1.0.0' })}</p>
         </div>
         <p className="text-sm text-muted-foreground max-w-xs">
-          Mac 剪贴板管理器 — 让复制粘贴更高效
+          {t('settings.about.description')}
         </p>
         <Button variant="link" asChild>
           <a

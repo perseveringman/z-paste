@@ -57,6 +57,7 @@ interface ZPasteAPI {
   deleteTemplate: (id: string) => Promise<void>
   setLaunchAtLogin: (enabled: boolean) => Promise<void>
   getLaunchAtLogin: () => Promise<boolean>
+  setLanguage: (lang: string) => Promise<void>
   syncNow: () => Promise<void>
   listTags: () => Promise<TagWithCount[]>
   applyTags: (itemId: string, slugs: string[]) => Promise<void>

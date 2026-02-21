@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { useTagStore } from '../../stores/tagStore'
 import { Badge } from '../ui/badge'
@@ -6,6 +7,7 @@ import { cn } from '../../lib/utils'
 import { Star } from 'lucide-react'
 
 export default function TagBar(): React.JSX.Element {
+  const { t } = useTranslation()
   const { leftFilter, setLeftFilter, items } = useClipboardStore()
   const { tags, loadTags } = useTagStore()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -74,7 +76,7 @@ export default function TagBar(): React.JSX.Element {
           )}
           onClick={() => setLeftFilter({ type: 'all' })}
         >
-          全部
+          {t('common.all')}
         </Badge>
 
         {/* 已收藏 */}
@@ -94,7 +96,7 @@ export default function TagBar(): React.JSX.Element {
           }}
         >
           <Star className="w-3 h-3" />
-          收藏
+          {t('panel.tagBar.starred')}
           {starredCount > 0 && (
             <span className="ml-0.5 text-[9px] opacity-60">{starredCount}</span>
           )}
