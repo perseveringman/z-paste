@@ -39,10 +39,15 @@ export default function PreviewPanel({ item }: Props): React.JSX.Element {
     <div className="flex-1 flex flex-col min-w-0 border-l bg-muted/10">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded shrink-0">
             {item.content_type}
           </span>
+          {item.title && (
+            <span className="text-xs font-medium text-primary truncate">
+              {item.title}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-muted-foreground font-mono">
