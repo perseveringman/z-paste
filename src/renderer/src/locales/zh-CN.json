@@ -34,8 +34,10 @@
   "panel.context.unfavorite": "取消收藏",
   "panel.context.pin": "置顶",
   "panel.context.unpin": "取消置顶",
+  "panel.context.editTitle": "编辑标题",
   "panel.context.delete": "删除",
 
+  "panel.title.placeholder": "输入标题...",
   "panel.image.fallback": "图片",
 
   "time.justNow": "刚刚",

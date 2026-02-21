@@ -80,6 +80,10 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('clipboard:updateTitle', async (_, id: string, title: string | null) => {
+    return repository.updateItemTitle(id, title)
+  })
+
   ipcMain.handle('clipboard:clearAll', async () => {
     return repository.clearAll()
   })

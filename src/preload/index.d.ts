@@ -11,6 +11,7 @@ interface ClipboardItem {
   is_pinned: number
   source_app: string | null
   tags: string | null
+  title: string | null
   category_id: string | null
   created_at: number
   updated_at: number
@@ -46,6 +47,7 @@ interface ZPasteAPI {
   toggleFavorite: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
   pasteItem: (id: string) => Promise<void>
+  updateItemTitle: (id: string, title: string | null) => Promise<void>
   clearAll: () => Promise<void>
   getCategories: () => Promise<Array<{ id: string; name: string; color: string | null; sort_order: number; created_at: number }>>
   createCategory: (id: string, name: string, color: string | null) => Promise<void>

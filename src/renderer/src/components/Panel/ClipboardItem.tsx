@@ -17,7 +17,8 @@ import {
   Clipboard,
   Copy,
   Trash2,
-  Tag
+  Tag,
+  Pencil
 } from 'lucide-react'
 
 interface Props {
@@ -73,9 +74,12 @@ export default function ClipboardItemRow({
   onOpenTagPicker
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin, toggleSelectItem, isItemInQueue, getQueuePosition, selectedItems } = useClipboardStore()
+  const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin, toggleSelectItem, isItemInQueue, getQueuePosition, selectedItems, updateTitle } = useClipboardStore()
   const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [editingTitle, setEditingTitle] = useState('')
+  const titleInputRef = useRef<HTMLInputElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const inQueue = isItemInQueue(item.id)
   const queuePos = inQueue ? getQueuePosition(item.id) : 0
@@ -111,6 +115,24 @@ export default function ClipboardItemRow({
     },
     [index, setSelectedIndex]
   )
+
+  const startEditTitle = useCallback(() => {
+    setEditingTitle(item.title || '')
+    setIsEditingTitle(true)
+  }, [item.title])
+
+  const saveTitle = useCallback(() => {
+    const trimmed = editingTitle.trim()
+    updateTitle(item.id, trimmed || null)
+    setIsEditingTitle(false)
+  }, [editingTitle, item.id, updateTitle])
+
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus()
+      titleInputRef.current.select()
+    }
+  }, [isEditingTitle])
 
   useEffect(() => {
     if (!contextMenu) return
@@ -163,6 +185,32 @@ export default function ClipboardItemRow({
 
             {/* Content */}
             <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
+              {isEditingTitle ? (
+                <input
+                  ref={titleInputRef}
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  onBlur={saveTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveTitle()
+                    if (e.key === 'Escape') setIsEditingTitle(false)
+                    e.stopPropagation()
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs font-medium bg-transparent border-b border-primary outline-none text-foreground w-full mb-0.5"
+                  placeholder={t('panel.title.placeholder')}
+                />
+              ) : item.title ? (
+                <p
+                  className="text-xs font-medium text-primary truncate cursor-pointer mb-0.5"
+                  onDoubleClick={(e) => {
+                    e.stopPropagation()
+                    startEditTitle()
+                  }}
+                >
+                  {item.title}
+                </p>
+              ) : null}
               <p className={`text-sm truncate transition-colors ${isSelected ? 'font-medium' : ''}`}>
                 {item.preview || item.content}
               </p>
@@ -269,6 +317,14 @@ export default function ClipboardItemRow({
             }}
           />
           <div className="-mx-1 my-1 h-px bg-muted" />
+          <ContextMenuItem
+            icon={<Pencil className="w-4 h-4" />}
+            label={t('panel.context.editTitle')}
+            onClick={() => {
+              startEditTitle()
+              setContextMenu(null)
+            }}
+          />
           <ContextMenuItem
             icon={<Tag className="w-4 h-4" />}
             label={t('panel.context.tag')}

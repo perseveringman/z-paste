@@ -11,6 +11,7 @@ export interface ClipboardItem {
   is_pinned: number
   source_app: string | null
   tags: string | null
+  title: string | null
   category_id: string | null
   created_at: number
   updated_at: number
@@ -61,6 +62,7 @@ interface ClipboardState {
   toggleFavorite: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
   pasteItem: (id: string) => Promise<void>
+  updateTitle: (id: string, title: string | null) => Promise<void>
   clearAll: () => Promise<void>
   search: (query: string) => Promise<void>
 }
@@ -221,6 +223,13 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
 
   pasteItem: async (id) => {
     await window.api.pasteItem(id)
+  },
+
+  updateTitle: async (id, title) => {
+    await window.api.updateItemTitle(id, title)
+    set((state) => ({
+      items: state.items.map((i) => (i.id === id ? { ...i, title } : i))
+    }))
   },
 
   clearAll: async () => {

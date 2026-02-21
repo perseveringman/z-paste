@@ -34,8 +34,10 @@
   "panel.context.unfavorite": "取消收藏",
   "panel.context.pin": "置頂",
   "panel.context.unpin": "取消置頂",
+  "panel.context.editTitle": "編輯標題",
   "panel.context.delete": "刪除",
 
+  "panel.title.placeholder": "輸入標題...",
   "panel.image.fallback": "圖片",
 
   "time.justNow": "剛剛",

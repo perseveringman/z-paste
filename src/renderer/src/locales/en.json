@@ -34,8 +34,10 @@
   "panel.context.unfavorite": "Unfavorite",
   "panel.context.pin": "Pin",
   "panel.context.unpin": "Unpin",
+  "panel.context.editTitle": "Edit Title",
   "panel.context.delete": "Delete",
 
+  "panel.title.placeholder": "Enter title...",
   "panel.image.fallback": "Image",
 
   "time.justNow": "now",

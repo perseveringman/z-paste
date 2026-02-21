@@ -19,6 +19,7 @@ const api = {
   toggleFavorite: (id: string) => ipcRenderer.invoke('clipboard:toggleFavorite', id),
   togglePin: (id: string) => ipcRenderer.invoke('clipboard:togglePin', id),
   pasteItem: (id: string) => ipcRenderer.invoke('clipboard:pasteItem', id),
+  updateItemTitle: (id: string, title: string | null) => ipcRenderer.invoke('clipboard:updateTitle', id, title),
   clearAll: () => ipcRenderer.invoke('clipboard:clearAll'),
   getCategories: () => ipcRenderer.invoke('categories:getAll'),
   createCategory: (id: string, name: string, color: string | null) =>

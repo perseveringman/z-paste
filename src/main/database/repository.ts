@@ -12,6 +12,7 @@ export interface ClipboardItem {
   is_pinned: number
   source_app: string | null
   tags: string | null
+  title: string | null
   category_id: string | null
   created_at: number
   updated_at: number
@@ -193,12 +194,21 @@ export function searchItems(query: string): ClipboardItem[] {
          JOIN tags t ON t.id = cit.tag_id
          WHERE cit.item_id = ci.id) AS tag_slugs
        FROM clipboard_items ci
-       WHERE ci.content LIKE ? OR ci.preview LIKE ?
+       WHERE ci.content LIKE ? OR ci.preview LIKE ? OR ci.title LIKE ?
        ORDER BY ci.is_pinned DESC, ci.updated_at DESC
        LIMIT 50`
     )
-    .all(`%${query}%`, `%${query}%`) as ClipboardItem[]
+    .all(`%${query}%`, `%${query}%`, `%${query}%`) as ClipboardItem[]
   return items.map(maybeDecryptItem)
+}
+
+export function updateItemTitle(id: string, title: string | null): void {
+  const db = getDatabase()
+  db.prepare('UPDATE clipboard_items SET title = ?, updated_at = ? WHERE id = ?').run(
+    title,
+    Date.now(),
+    id
+  )
 }
 
 export function clearAll(): void {

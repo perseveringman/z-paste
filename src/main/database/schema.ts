@@ -67,6 +67,12 @@ export function createTables(): void {
     CREATE INDEX IF NOT EXISTS idx_item_tags_tag  ON clipboard_item_tags(tag_id);
   `)
 
+  // Add title column if missing
+  const cols = db.prepare("PRAGMA table_info(clipboard_items)").all() as { name: string }[]
+  if (!cols.some((c) => c.name === 'title')) {
+    db.exec(`ALTER TABLE clipboard_items ADD COLUMN title TEXT`)
+  }
+
   migrateOldTags()
 }
 
