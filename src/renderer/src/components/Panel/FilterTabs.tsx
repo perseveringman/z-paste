@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ArrowDownWideNarrow } from 'lucide-react'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { Badge } from '../ui/badge'
 import { cn } from '../../lib/utils'
@@ -14,7 +15,7 @@ const iconCache = new Map<string, string>()
 
 export default function FilterTabs(): React.JSX.Element {
   const { t } = useTranslation()
-  const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items } = useClipboardStore()
+  const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items, sortBy, setSortBy } = useClipboardStore()
 
   const tabs = [
     { label: t('panel.filter.all'), value: null },
@@ -69,6 +70,19 @@ export default function FilterTabs(): React.JSX.Element {
             </Badge>
           )
         })}
+        <div className="w-px h-4 bg-border mx-1" />
+        <Badge
+          variant={sortBy === 'usage' ? 'default' : 'secondary'}
+          className={cn(
+            'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px] flex items-center gap-1',
+            sortBy !== 'usage' &&
+              'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+          )}
+          onClick={() => setSortBy(sortBy === 'usage' ? 'recent' : 'usage')}
+        >
+          <ArrowDownWideNarrow className="w-3 h-3" />
+          {t('panel.filter.byUsage')}
+        </Badge>
       </div>
 
       {/* Source app row */}

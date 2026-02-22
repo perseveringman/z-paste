@@ -15,6 +15,7 @@ export interface ClipboardItem {
   category_id: string | null
   created_at: number
   updated_at: number
+  use_count: number
   tag_slugs?: string | null
 }
 
@@ -32,6 +33,7 @@ interface ClipboardState {
   leftFilter: LeftFilter
   previewCollapsed: boolean
   filtersCollapsed: boolean
+  sortBy: 'recent' | 'usage'
   sourceAppFilter: string | null
 
   // Sequence paste queue
@@ -58,6 +60,7 @@ interface ClipboardState {
   setFilterType: (type: string | null) => void
   setLeftFilter: (filter: LeftFilter) => void
   setSourceAppFilter: (bundleId: string | null) => void
+  setSortBy: (sortBy: 'recent' | 'usage') => void
   togglePreview: () => void
   toggleFilters: () => void
   deleteItem: (id: string) => Promise<void>
@@ -79,6 +82,7 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   previewCollapsed: false,
   filtersCollapsed: false,
   sourceAppFilter: null,
+  sortBy: 'recent',
 
   // Sequence paste queue
   sequenceQueue: [],
@@ -162,7 +166,8 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
       limit: 50,
       contentType: state.filterType || undefined,
       leftFilter: state.leftFilter,
-      sourceApp: state.sourceAppFilter || undefined
+      sourceApp: state.sourceAppFilter || undefined,
+      sortBy: state.sortBy
     })
     set({ items, selectedIndex: 0 })
   },
@@ -196,6 +201,11 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
 
   setSourceAppFilter: (bundleId) => {
     set({ sourceAppFilter: bundleId })
+    get().loadItems()
+  },
+
+  setSortBy: (sortBy) => {
+    set({ sortBy })
     get().loadItems()
   },
 

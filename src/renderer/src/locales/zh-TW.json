@@ -23,6 +23,7 @@
   "panel.filter.json": "JSON",
   "panel.filter.color": "顏色",
   "panel.filter.image": "圖片",
+  "panel.filter.byUsage": "按使用次數",
 
   "panel.tagBar.starred": "收集箱",
   "panel.sidebar.all": "全部",

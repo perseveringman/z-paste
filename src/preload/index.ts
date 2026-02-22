@@ -13,6 +13,7 @@ const api = {
     contentType?: string
     favoritesOnly?: boolean
     leftFilter?: LeftFilter
+    sortBy?: 'recent' | 'usage'
   }) => ipcRenderer.invoke('clipboard:getItems', options),
   searchItems: (query: string) => ipcRenderer.invoke('clipboard:searchItems', query),
   deleteItem: (id: string) => ipcRenderer.invoke('clipboard:deleteItem', id),

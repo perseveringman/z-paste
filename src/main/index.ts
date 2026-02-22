@@ -67,6 +67,7 @@ app.whenReady().then(() => {
   ipcMain.handle('clipboard:pasteItem', async (_, id: string) => {
     const item = repository.getItemById(id)
     if (item) {
+      repository.incrementUseCount(id)
       const { clipboard } = await import('electron')
       const { execSync } = require('child_process')
       clipboard.writeText(item.content)

@@ -16,6 +16,7 @@ export interface ClipboardItem {
   category_id: string | null
   created_at: number
   updated_at: number
+  use_count: number
   tag_slugs?: string | null
 }
 
@@ -31,6 +32,7 @@ export interface GetItemsOptions {
   favoritesOnly?: boolean
   leftFilter?: LeftFilter
   sourceApp?: string
+  sortBy?: 'recent' | 'usage'
 }
 
 export interface Tag {
@@ -97,7 +99,7 @@ function maybeDecryptItem(item: ClipboardItem): ClipboardItem {
 
 export function getItems(options: GetItemsOptions = {}): ClipboardItem[] {
   const db = getDatabase()
-  const { limit = 50, offset = 0, contentType, favoritesOnly, leftFilter, sourceApp } = options
+  const { limit = 50, offset = 0, contentType, favoritesOnly, leftFilter, sourceApp, sortBy = 'recent' } = options
 
   const conditions: string[] = []
   const params: unknown[] = []
@@ -134,7 +136,10 @@ export function getItems(options: GetItemsOptions = {}): ClipboardItem[] {
   if (conditions.length > 0) {
     query += ' WHERE ' + conditions.join(' AND ')
   }
-  query += ' ORDER BY ci.is_pinned DESC, ci.updated_at DESC LIMIT ? OFFSET ?'
+  const orderBy = sortBy === 'usage'
+    ? 'ci.is_pinned DESC, ci.use_count DESC, ci.updated_at DESC'
+    : 'ci.is_pinned DESC, ci.updated_at DESC'
+  query += ` ORDER BY ${orderBy} LIMIT ? OFFSET ?`
   params.push(limit, offset)
 
   const items = db.prepare(query).all(...params) as ClipboardItem[]
@@ -159,6 +164,11 @@ export function getItemByHash(hash: string): ClipboardItem | undefined {
 export function touchItem(id: string): void {
   const db = getDatabase()
   db.prepare('UPDATE clipboard_items SET updated_at = ? WHERE id = ?').run(Date.now(), id)
+}
+
+export function incrementUseCount(id: string): void {
+  const db = getDatabase()
+  db.prepare('UPDATE clipboard_items SET use_count = COALESCE(use_count, 0) + 1, updated_at = ? WHERE id = ?').run(Date.now(), id)
 }
 
 export function deleteItem(id: string): void {

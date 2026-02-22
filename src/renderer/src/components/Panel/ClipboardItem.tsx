@@ -222,6 +222,12 @@ export default function ClipboardItemRow({
                 <span className="text-[10px] text-muted-foreground">
                   {formatTime(item.created_at)}
                 </span>
+                {item.use_count > 0 && (
+                  <>
+                    <span className="text-[10px] text-muted-foreground/50">•</span>
+                    <span className="text-[10px] text-muted-foreground">{item.use_count}次</span>
+                  </>
+                )}
                 {sourceApp && (
                   <>
                     <span className="text-[10px] text-muted-foreground/50">•</span>

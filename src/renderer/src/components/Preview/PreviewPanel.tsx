@@ -50,6 +50,11 @@ export default function PreviewPanel({ item }: Props): React.JSX.Element {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {item.use_count > 0 && (
+            <span className="text-[10px] text-muted-foreground font-mono">
+              {item.use_count}次使用
+            </span>
+          )}
           <span className="text-[10px] text-muted-foreground font-mono">
             {new Date(item.created_at).toLocaleString('zh-CN')}
           </span>

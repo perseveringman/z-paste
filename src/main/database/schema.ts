@@ -72,6 +72,9 @@ export function createTables(): void {
   if (!cols.some((c) => c.name === 'title')) {
     db.exec(`ALTER TABLE clipboard_items ADD COLUMN title TEXT`)
   }
+  if (!cols.some((c) => c.name === 'use_count')) {
+    db.exec(`ALTER TABLE clipboard_items ADD COLUMN use_count INTEGER DEFAULT 0`)
+  }
 
   migrateOldTags()
 }

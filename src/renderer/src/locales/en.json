@@ -23,6 +23,7 @@
   "panel.filter.json": "JSON",
   "panel.filter.color": "Color",
   "panel.filter.image": "Image",
+  "panel.filter.byUsage": "By Usage",
 
   "panel.tagBar.starred": "Inbox",
   "panel.sidebar.all": "All",
