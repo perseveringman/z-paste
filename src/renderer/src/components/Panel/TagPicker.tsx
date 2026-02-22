@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
+import { useClipboardStore } from '../../stores/clipboardStore'
 import { cn } from '../../lib/utils'
 import { Tag, Plus, Check } from 'lucide-react'
 
@@ -20,9 +21,9 @@ function toSlug(name: string): string {
 export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const { tags, applyTags, removeTag, loadTags } = useTagStore()
+  const loadItems = useClipboardStore((s) => s.loadItems)
   const [query, setQuery] = useState('')
-  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set())
-  const [initialSlugs, setInitialSlugs] = useState<Set<string>>(new Set())
+  const [appliedSlugs, setAppliedSlugs] = useState<Set<string>>(new Set())
   const [cursorIndex, setCursorIndex] = useState(0)
   const [similar, setSimilar] = useState<TagWithCount[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
@@ -30,9 +31,7 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
 
   useEffect(() => {
     window.api.getItemTagSlugs(itemId).then((slugs: string[]) => {
-      const set = new Set(slugs)
-      setSelectedSlugs(set)
-      setInitialSlugs(set)
+      setAppliedSlugs(new Set(slugs))
     })
     inputRef.current?.focus()
   }, [itemId])
@@ -68,34 +67,22 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
   }, [query])
 
   const toggleTag = useCallback(
-    (slug: string) => {
-      setSelectedSlugs((prev) => {
-        const next = new Set(prev)
-        if (next.has(slug)) {
+    async (slug: string) => {
+      if (appliedSlugs.has(slug)) {
+        await removeTag(itemId, slug)
+        setAppliedSlugs((prev) => {
+          const next = new Set(prev)
           next.delete(slug)
-        } else {
-          next.add(slug)
-        }
-        return next
-      })
+          return next
+        })
+      } else {
+        await applyTags(itemId, [slug])
+        setAppliedSlugs((prev) => new Set([...prev, slug]))
+      }
+      loadItems()
     },
-    []
+    [appliedSlugs, itemId, applyTags, removeTag, loadItems]
   )
-
-  const handleCommit = useCallback(async () => {
-    const added = Array.from(selectedSlugs).filter((s) => !initialSlugs.has(s))
-    const removed = Array.from(initialSlugs).filter((s) => !selectedSlugs.has(s))
-    if (added.length > 0) {
-      await applyTags(itemId, added)
-    }
-    for (const slug of removed) {
-      await removeTag(itemId, slug)
-    }
-    if (added.length > 0 || removed.length > 0) {
-      await loadTags()
-    }
-    onClose()
-  }, [selectedSlugs, initialSlugs, itemId, applyTags, removeTag, loadTags, onClose])
 
   const handleCreateAndApply = useCallback(async () => {
     const name = query.trim()
@@ -104,8 +91,9 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
     await applyTags(itemId, [name])
     await loadTags()
     setQuery('')
-    setSelectedSlugs((prev) => new Set([...prev, slug]))
-  }, [query, itemId, applyTags, loadTags])
+    setAppliedSlugs((prev) => new Set([...prev, slug]))
+    loadItems()
+  }, [query, itemId, applyTags, loadTags, loadItems])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -127,7 +115,7 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
         e.preventDefault()
         const opt = allOptions[cursorIndex]
         if (!opt) {
-          handleCommit()
+          onClose()
           return
         }
         if (opt.type === 'create') {
@@ -138,18 +126,18 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
         return
       }
     },
-    [allOptions, cursorIndex, handleCommit, handleCreateAndApply, toggleTag, onClose]
+    [allOptions, cursorIndex, handleCreateAndApply, toggleTag, onClose]
   )
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent): void => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        handleCommit()
+        onClose()
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [handleCommit])
+  }, [onClose])
 
   return (
     <div
@@ -180,7 +168,7 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
                 className="w-full flex items-center gap-2 px-2 py-1 text-xs rounded hover:bg-muted/60 text-muted-foreground"
               >
                 <span>{t('tagPicker.use', { name: st.name })}</span>
-                {selectedSlugs.has(st.slug) && <Check className="w-3 h-3 ml-auto text-primary" />}
+                {appliedSlugs.has(st.slug) && <Check className="w-3 h-3 ml-auto text-primary" />}
               </button>
             ))}
             <div className="border-t my-1" />
@@ -188,18 +176,12 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
         )}
 
         {filteredTags.map((tag) => {
-          const isSelected = selectedSlugs.has(tag.slug)
+          const isSelected = appliedSlugs.has(tag.slug)
           const isCursor = allOptions[cursorIndex]?.type === 'tag' && allOptions[cursorIndex].tag.slug === tag.slug
           return (
             <button
               key={tag.slug}
-              onClick={(e) => {
-                if (e.metaKey || e.ctrlKey) {
-                  toggleTag(tag.slug)
-                } else {
-                  toggleTag(tag.slug)
-                }
-              }}
+              onClick={() => toggleTag(tag.slug)}
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors',
                 isCursor ? 'bg-accent text-accent-foreground' : 'hover:bg-muted/50',
@@ -235,18 +217,6 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
           <p className="px-3 py-4 text-xs text-center text-muted-foreground">{t('tagPicker.empty')}</p>
         )}
       </div>
-
-      {selectedSlugs.size > 0 && (
-        <div className="px-3 py-2 border-t bg-muted/20 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">{t('tagPicker.selected', { count: selectedSlugs.size })}</span>
-          <button
-            onClick={handleCommit}
-            className="text-xs font-medium text-primary hover:underline"
-          >
-            {t('tagPicker.confirm')}
-          </button>
-        </div>
-      )}
     </div>
   )
 }
