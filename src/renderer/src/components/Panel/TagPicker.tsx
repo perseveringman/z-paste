@@ -19,9 +19,10 @@ function toSlug(name: string): string {
 
 export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const { tags, applyTags, loadTags } = useTagStore()
+  const { tags, applyTags, removeTag, loadTags } = useTagStore()
   const [query, setQuery] = useState('')
   const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set())
+  const [initialSlugs, setInitialSlugs] = useState<Set<string>>(new Set())
   const [cursorIndex, setCursorIndex] = useState(0)
   const [similar, setSimilar] = useState<TagWithCount[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
@@ -29,7 +30,9 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
 
   useEffect(() => {
     window.api.getItemTagSlugs(itemId).then((slugs: string[]) => {
-      setSelectedSlugs(new Set(slugs))
+      const set = new Set(slugs)
+      setSelectedSlugs(set)
+      setInitialSlugs(set)
     })
     inputRef.current?.focus()
   }, [itemId])
@@ -80,12 +83,19 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
   )
 
   const handleCommit = useCallback(async () => {
-    const slugs = Array.from(selectedSlugs)
-    if (slugs.length > 0) {
-      await applyTags(itemId, slugs)
+    const added = Array.from(selectedSlugs).filter((s) => !initialSlugs.has(s))
+    const removed = Array.from(initialSlugs).filter((s) => !selectedSlugs.has(s))
+    if (added.length > 0) {
+      await applyTags(itemId, added)
+    }
+    for (const slug of removed) {
+      await removeTag(itemId, slug)
+    }
+    if (added.length > 0 || removed.length > 0) {
+      await loadTags()
     }
     onClose()
-  }, [selectedSlugs, itemId, applyTags, onClose])
+  }, [selectedSlugs, initialSlugs, itemId, applyTags, removeTag, loadTags, onClose])
 
   const handleCreateAndApply = useCallback(async () => {
     const name = query.trim()
