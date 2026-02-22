@@ -68,14 +68,28 @@ app.whenReady().then(() => {
     const item = repository.getItemById(id)
     if (item) {
       const { clipboard } = await import('electron')
+      const { execSync } = require('child_process')
       clipboard.writeText(item.content)
+
+      const previousApp = windowManager.getPreviousAppBundleId()
       windowManager.hide()
-      // Simulate Cmd+V after a short delay
+
+      // Reactivate previous app then simulate Cmd+V
       setTimeout(() => {
-        const { execSync } = require('child_process')
-        execSync(
-          `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
-        )
+        try {
+          if (previousApp) {
+            execSync(
+              `osascript -e 'tell application id "${previousApp}" to activate'`
+            )
+          }
+        } catch {
+          // ignore
+        }
+        setTimeout(() => {
+          execSync(
+            `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+          )
+        }, 50)
       }, 100)
     }
   })

@@ -7,6 +7,7 @@ export function useKeyboard(): void {
     selectedIndex,
     setSelectedIndex,
     pasteItem,
+    deleteItem,
     setVisible,
     addToQueue,
     addMultipleToQueue,
@@ -69,6 +70,15 @@ export function useKeyboard(): void {
             }
             return
           }
+          // 'd' to delete current item
+          if (e.key === 'd' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            if (isInput) return
+            if (items[selectedIndex]) {
+              e.preventDefault()
+              deleteItem(items[selectedIndex].id)
+            }
+            return
+          }
           // Printable character → focus search bar and let it type
           if (
             !isInput &&
@@ -87,6 +97,7 @@ export function useKeyboard(): void {
       selectedIndex,
       setSelectedIndex,
       pasteItem,
+      deleteItem,
       setVisible,
       addToQueue,
       addMultipleToQueue,

@@ -176,7 +176,7 @@ export default function ClipboardItemRow({
             <div className="w-8 flex items-center justify-center shrink-0 mr-2">
               {index < 9 ? (
                 <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                  ⌘{index + 1}
+                  {index + 1}
                 </span>
               ) : (
                 <TypeIcon type={item.content_type} />
@@ -301,51 +301,10 @@ export default function ClipboardItemRow({
           style={{ left: contextMenu.x, top: contextMenu.y }}
         >
           <ContextMenuItem
-            icon={<Clipboard className="w-4 h-4" />}
-            label={t('panel.context.paste')}
-            onClick={() => {
-              pasteItem(item.id)
-              setContextMenu(null)
-            }}
-          />
-          <ContextMenuItem
-            icon={<Copy className="w-4 h-4" />}
-            label={t('panel.context.copy')}
-            onClick={() => {
-              navigator.clipboard.writeText(item.content)
-              setContextMenu(null)
-            }}
-          />
-          <div className="-mx-1 my-1 h-px bg-muted" />
-          <ContextMenuItem
             icon={<Pencil className="w-4 h-4" />}
             label={t('panel.context.editTitle')}
             onClick={() => {
               startEditTitle()
-              setContextMenu(null)
-            }}
-          />
-          <ContextMenuItem
-            icon={<Tag className="w-4 h-4" />}
-            label={t('panel.context.tag')}
-            onClick={() => {
-              onOpenTagPicker?.(item.id)
-              setContextMenu(null)
-            }}
-          />
-          <ContextMenuItem
-            icon={<Star className="w-4 h-4" />}
-            label={item.is_favorite ? t('panel.context.unfavorite') : t('panel.context.favorite')}
-            onClick={() => {
-              toggleFavorite(item.id)
-              setContextMenu(null)
-            }}
-          />
-          <ContextMenuItem
-            icon={<Pin className="w-4 h-4" />}
-            label={item.is_pinned ? t('panel.context.unpin') : t('panel.context.pin')}
-            onClick={() => {
-              togglePin(item.id)
               setContextMenu(null)
             }}
           />

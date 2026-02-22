@@ -313,6 +313,7 @@ export function autoCleanup(maxItems: number = 2000): void {
        WHERE id IN (
          SELECT id FROM clipboard_items
          WHERE is_favorite = 0 AND is_pinned = 0
+           AND id NOT IN (SELECT DISTINCT item_id FROM clipboard_item_tags)
          ORDER BY updated_at ASC
          LIMIT ?
        )`

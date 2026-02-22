@@ -1,9 +1,11 @@
 import { BrowserWindow, screen } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import { execSync } from 'child_process'
 
 export class WindowManager {
   private mainWindow: BrowserWindow | null = null
+  private previousAppBundleId: string | null = null
 
   create(): BrowserWindow {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
@@ -58,6 +60,16 @@ export class WindowManager {
       this.create()
     }
 
+    // Capture the frontmost app before we steal focus
+    try {
+      this.previousAppBundleId = execSync(
+        `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
+        { encoding: 'utf-8' }
+      ).trim()
+    } catch {
+      this.previousAppBundleId = null
+    }
+
     const win = this.mainWindow!
     const cursorPoint = screen.getCursorScreenPoint()
     const display = screen.getDisplayNearestPoint(cursorPoint)
@@ -78,6 +90,10 @@ export class WindowManager {
       this.mainWindow.hide()
       this.mainWindow.webContents.send('panel:hidden')
     }
+  }
+
+  getPreviousAppBundleId(): string | null {
+    return this.previousAppBundleId
   }
 
   getWindow(): BrowserWindow | null {
