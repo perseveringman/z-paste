@@ -205,5 +205,8 @@
   "widget.title": "Recent Clipboard",
   "widget.empty": "No records",
   "widget.hint": "Shortcut: ⌥ + Number",
-  "tray.recentItems": "Recent Clipboard"
+  "tray.recentItems": "Recent Clipboard",
+
+  "panel.queue.active": "Selecting queue ({{count}} items)",
+  "panel.queue.abandon": "Abandon Queue"
 }

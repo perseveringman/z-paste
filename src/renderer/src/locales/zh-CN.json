@@ -205,5 +205,8 @@
   "widget.title": "最近剪贴板",
   "widget.empty": "暂无记录",
   "widget.hint": "快捷键: ⌥ + 数字",
-  "tray.recentItems": "最近剪贴板"
+  "tray.recentItems": "最近剪贴板",
+
+  "panel.queue.active": "正在选择队列 ({{count}} 条)",
+  "panel.queue.abandon": "放弃队列"
 }

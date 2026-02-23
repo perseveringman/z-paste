@@ -16,7 +16,7 @@ import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { matchShortcut } from '../../utils/shortcut'
-import { Settings, PanelRightOpen, HelpCircle } from 'lucide-react'
+import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
@@ -27,7 +27,7 @@ export default function PanelWindow(): React.JSX.Element {
   useKeyboard()
   useQueueToast()
   const items = useSearch()
-  const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters } = useClipboardStore()
+  const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters, isQueueActive, sequenceQueue, clearQueue } = useClipboardStore()
   const { toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut } = useSettingsStore()
   const selectedItem = items[selectedIndex] || null
 
@@ -207,6 +207,28 @@ export default function PanelWindow(): React.JSX.Element {
         </div>
       ) : (
         <TemplateList />
+      )}
+
+      {/* Queue status bar */}
+      {isQueueActive && (
+        <div className="flex items-center gap-2 px-4 py-2 border-t bg-primary/10">
+          <ListOrdered className="w-4 h-4 text-primary shrink-0" />
+          <span className="text-xs font-medium text-primary flex-1">
+            {t('panel.queue.active', { count: sequenceQueue.length })}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              clearQueue()
+              window.api.queueClear()
+            }}
+            className="h-6 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <X className="w-3 h-3 mr-1" />
+            {t('panel.queue.abandon')}
+          </Button>
+        </div>
       )}
     </div>
   )
