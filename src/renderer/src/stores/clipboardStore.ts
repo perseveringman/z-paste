@@ -192,21 +192,25 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   setFilterType: (type) => {
     set({ filterType: type })
     get().loadItems()
+    syncWidgetFilter(get())
   },
 
   setLeftFilter: (filter) => {
     set({ leftFilter: filter })
     get().loadItems()
+    syncWidgetFilter(get())
   },
 
   setSourceAppFilter: (bundleId) => {
     set({ sourceAppFilter: bundleId })
     get().loadItems()
+    syncWidgetFilter(get())
   },
 
   setSortBy: (sortBy) => {
     set({ sortBy })
     get().loadItems()
+    syncWidgetFilter(get())
   },
 
   togglePreview: () => set((state) => ({ previewCollapsed: !state.previewCollapsed })),
@@ -261,3 +265,12 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
     set({ items, selectedIndex: 0 })
   }
 }))
+
+function syncWidgetFilter(state: ClipboardState): void {
+  window.api.widgetSyncFilter?.({
+    contentType: state.filterType || undefined,
+    leftFilter: state.leftFilter,
+    sourceApp: state.sourceAppFilter || undefined,
+    sortBy: state.sortBy
+  })
+}

@@ -27,10 +27,11 @@ import {
   Tag,
   Pencil,
   GitMerge,
-  AlertTriangle
+  AlertTriangle,
+  LayoutGrid
 } from 'lucide-react'
 
-type SettingsSection = 'general' | 'shortcuts' | 'sync' | 'privacy' | 'theme' | 'tags' | 'about'
+type SettingsSection = 'general' | 'shortcuts' | 'widget' | 'sync' | 'privacy' | 'theme' | 'tags' | 'about'
 
 interface Props {
   onClose: () => void
@@ -43,6 +44,7 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
   const sections: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
     { id: 'general', label: t('settings.nav.general'), icon: Settings },
     { id: 'shortcuts', label: t('settings.nav.shortcuts'), icon: Keyboard },
+    { id: 'widget', label: t('settings.nav.widget'), icon: LayoutGrid },
     { id: 'sync', label: t('settings.nav.sync'), icon: Cloud },
     { id: 'privacy', label: t('settings.nav.privacy'), icon: Lock },
     { id: 'theme', label: t('settings.nav.theme'), icon: Palette },
@@ -94,6 +96,8 @@ function SectionContent({ section }: { section: SettingsSection }): React.JSX.El
       return <GeneralSection />
     case 'shortcuts':
       return <ShortcutsSection />
+    case 'widget':
+      return <WidgetSection />
     case 'sync':
       return <SyncSection />
     case 'privacy':
@@ -630,6 +634,89 @@ function TagManagementSection(): React.JSX.Element {
           <p className="text-sm text-muted-foreground text-center py-8">{t('settings.tags.empty')}</p>
         )}
       </div>
+    </div>
+  )
+}
+
+function WidgetSection(): React.JSX.Element {
+  const { t } = useTranslation()
+  const {
+    widgetFollowFilter,
+    setWidgetFollowFilter,
+    widgetToggleShortcut,
+    setWidgetToggleShortcut,
+    widgetQuickPastePrefix,
+    setWidgetQuickPastePrefix
+  } = useSettingsStore()
+
+  const prefixOptions = [
+    { value: 'Alt', label: '⌥ Option' },
+    { value: 'Control', label: '⌃ Control' },
+    { value: 'CommandOrControl', label: '⌘ Command' }
+  ]
+
+  return (
+    <div>
+      <SectionTitle title={t('settings.nav.widget')} />
+      <SettingsItem
+        label={t('settings.general.widgetFollowFilter')}
+        description={t('settings.general.widgetFollowFilter.desc')}
+      >
+        <Select
+          value={widgetFollowFilter ? 'follow' : 'independent'}
+          onValueChange={(v) => {
+            const follow = v === 'follow'
+            setWidgetFollowFilter(follow)
+            window.api.widgetSetFollowFilter(follow)
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="independent">
+              {t('settings.general.widgetFollowFilter.independent')}
+            </SelectItem>
+            <SelectItem value="follow">
+              {t('settings.general.widgetFollowFilter.follow')}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </SettingsItem>
+      <Separator />
+      <SettingsItem
+        label={t('settings.shortcuts.widgetToggle')}
+        description={t('settings.shortcuts.widgetToggle.desc')}
+      >
+        <ShortcutRecorder value={widgetToggleShortcut} onChange={(v) => {
+          setWidgetToggleShortcut(v)
+          window.api.updateShortcuts({ widgetToggle: v })
+        }} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem
+        label={t('settings.shortcuts.widgetQuickPastePrefix')}
+        description={t('settings.shortcuts.widgetQuickPastePrefix.desc')}
+      >
+        <Select
+          value={widgetQuickPastePrefix}
+          onValueChange={(v) => {
+            setWidgetQuickPastePrefix(v)
+            window.api.updateShortcuts({ widgetQuickPastePrefix: v })
+          }}
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {prefixOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </SettingsItem>
     </div>
   )
 }

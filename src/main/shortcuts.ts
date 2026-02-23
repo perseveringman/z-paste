@@ -1,6 +1,8 @@
 import { globalShortcut, clipboard } from 'electron'
 import { execSync } from 'child_process'
 import { WindowManager } from './window'
+import { WidgetWindowManager } from './widget'
+import * as repository from './database/repository'
 
 interface QueueItem {
   id: string
@@ -9,11 +11,18 @@ interface QueueItem {
 
 export class ShortcutManager {
   private windowManager: WindowManager
+  private widgetManager: WidgetWindowManager | null = null
   private sequenceQueue: QueueItem[] = []
   private queueIndex = 0
+  private widgetToggleShortcut = 'Alt+W'
+  private widgetQuickPastePrefix = 'Alt'
 
   constructor(windowManager: WindowManager) {
     this.windowManager = windowManager
+  }
+
+  setWidgetManager(widgetManager: WidgetWindowManager): void {
+    this.widgetManager = widgetManager
   }
 
   register(): void {
@@ -23,6 +32,67 @@ export class ShortcutManager {
 
     this.registerSequencePaste('CommandOrControl+;')
     this.registerBatchPaste("CommandOrControl+'")
+    this.registerWidgetShortcuts()
+  }
+
+  private registerWidgetShortcuts(): void {
+    // Widget toggle
+    try {
+      globalShortcut.register(this.widgetToggleShortcut, () => {
+        this.widgetManager?.toggle()
+      })
+    } catch {
+      // ignore if shortcut registration fails
+    }
+
+    // Widget quick paste: prefix + 1~5
+    for (let i = 1; i <= 5; i++) {
+      const accelerator = `${this.widgetQuickPastePrefix}+${i}`
+      try {
+        globalShortcut.register(accelerator, () => {
+          this.quickPasteByIndex(i - 1)
+        })
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  private quickPasteByIndex(index: number): void {
+    const items = repository.getItems({ limit: 5 })
+    if (index >= items.length) return
+
+    const item = items[index]
+    repository.incrementUseCount(item.id)
+    clipboard.writeText(item.content)
+
+    // Get frontmost app before we do anything
+    let previousApp: string | null = null
+    try {
+      previousApp = execSync(
+        `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
+        { encoding: 'utf-8' }
+      ).trim()
+    } catch {
+      // ignore
+    }
+
+    setTimeout(() => {
+      try {
+        if (previousApp) {
+          execSync(
+            `osascript -e 'tell application id "${previousApp}" to activate'`
+          )
+        }
+      } catch {
+        // ignore
+      }
+      setTimeout(() => {
+        execSync(
+          `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+        )
+      }, 50)
+    }, 100)
   }
 
   private registerSequencePaste(accelerator: string): void {
@@ -118,8 +188,13 @@ export class ShortcutManager {
     panelShortcut?: string
     sequencePaste?: string
     batchPaste?: string
+    widgetToggle?: string
+    widgetQuickPastePrefix?: string
   }): void {
     globalShortcut.unregisterAll()
+
+    if (config.widgetToggle) this.widgetToggleShortcut = config.widgetToggle
+    if (config.widgetQuickPastePrefix) this.widgetQuickPastePrefix = config.widgetQuickPastePrefix
 
     globalShortcut.register(config.panelShortcut || 'Shift+CommandOrControl+V', () => {
       this.windowManager.toggle()
@@ -127,6 +202,7 @@ export class ShortcutManager {
 
     this.registerSequencePaste(config.sequencePaste || 'CommandOrControl+;')
     this.registerBatchPaste(config.batchPaste || "CommandOrControl+'")
+    this.registerWidgetShortcuts()
   }
 
   private notifyRenderer(channel: string, data: unknown): void {

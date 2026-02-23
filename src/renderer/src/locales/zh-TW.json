@@ -54,7 +54,8 @@
   "settings.nav.privacy": "隱私",
   "settings.nav.theme": "主題",
   "settings.nav.tags": "標籤管理",
-  "settings.nav.about": "關於",
+  "settings.nav.widget": "小組件",
+"settings.nav.about": "關於",
 
   "settings.general.title": "一般設定",
   "settings.general.language": "語言",
@@ -191,5 +192,18 @@
 
   "tray.openPanel": "開啟面板",
   "tray.launchAtLogin": "開機自啟",
-  "tray.quit": "結束"
+  "tray.quit": "結束",
+
+  "settings.general.widgetFollowFilter": "小組件資料來源",
+  "settings.general.widgetFollowFilter.desc": "小組件展示的內容是否跟隨主面板的篩選條件",
+  "settings.general.widgetFollowFilter.independent": "獨立（最新 5 條）",
+  "settings.general.widgetFollowFilter.follow": "跟隨主面板",
+  "settings.shortcuts.widgetToggle": "切換懸浮小組件",
+  "settings.shortcuts.widgetToggle.desc": "顯示/隱藏桌面懸浮小組件",
+  "settings.shortcuts.widgetQuickPastePrefix": "小組件快捷貼上前綴",
+  "settings.shortcuts.widgetQuickPastePrefix.desc": "配合數字鍵 1-5 快速貼上小組件中的對應條目",
+  "widget.title": "最近剪貼簿",
+  "widget.empty": "暫無記錄",
+  "widget.hint": "快捷鍵: ⌥ + 數字",
+  "tray.recentItems": "最近剪貼簿"
 }

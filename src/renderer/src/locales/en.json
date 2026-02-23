@@ -54,7 +54,8 @@
   "settings.nav.privacy": "Privacy",
   "settings.nav.theme": "Theme",
   "settings.nav.tags": "Tags",
-  "settings.nav.about": "About",
+  "settings.nav.widget": "Widget",
+"settings.nav.about": "About",
 
   "settings.general.title": "General",
   "settings.general.language": "Language",
@@ -191,5 +192,18 @@
 
   "tray.openPanel": "Open Panel",
   "tray.launchAtLogin": "Launch at Login",
-  "tray.quit": "Quit"
+  "tray.quit": "Quit",
+
+  "settings.general.widgetFollowFilter": "Widget Data Source",
+  "settings.general.widgetFollowFilter.desc": "Whether the widget follows the main panel's filters",
+  "settings.general.widgetFollowFilter.independent": "Independent (Latest 5)",
+  "settings.general.widgetFollowFilter.follow": "Follow Main Panel",
+  "settings.shortcuts.widgetToggle": "Toggle Widget",
+  "settings.shortcuts.widgetToggle.desc": "Show/hide the floating desktop widget",
+  "settings.shortcuts.widgetQuickPastePrefix": "Widget Quick Paste Prefix",
+  "settings.shortcuts.widgetQuickPastePrefix.desc": "Combined with number keys 1-5 to quick paste widget items",
+  "widget.title": "Recent Clipboard",
+  "widget.empty": "No records",
+  "widget.hint": "Shortcut: ⌥ + Number",
+  "tray.recentItems": "Recent Clipboard"
 }

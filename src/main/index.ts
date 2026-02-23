@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { WindowManager } from './window'
+import { WidgetWindowManager } from './widget'
 import { ShortcutManager } from './shortcuts'
 import { TrayManager } from './tray'
 import { ClipboardMonitor } from './clipboard/monitor'
@@ -11,6 +12,7 @@ import { iCloudSync } from './sync/icloud'
 import { getAppIcon } from './clipboard/app-icon'
 
 let windowManager: WindowManager
+let widgetManager: WidgetWindowManager
 let shortcutManager: ShortcutManager
 let trayManager: TrayManager
 let clipboardMonitor: ClipboardMonitor
@@ -30,7 +32,9 @@ app.whenReady().then(() => {
   createTables()
 
   windowManager = new WindowManager()
+  widgetManager = new WidgetWindowManager()
   shortcutManager = new ShortcutManager(windowManager)
+  shortcutManager.setWidgetManager(widgetManager)
   trayManager = new TrayManager(windowManager)
   clipboardMonitor = new ClipboardMonitor()
 
@@ -229,8 +233,109 @@ app.whenReady().then(() => {
     panelShortcut?: string
     sequencePaste?: string
     batchPaste?: string
+    widgetToggle?: string
+    widgetQuickPastePrefix?: string
   }) => {
     shortcutManager.updateShortcuts(config)
+    if (config.widgetQuickPastePrefix) {
+      trayManager.setQuickPastePrefix(config.widgetQuickPastePrefix)
+    }
+  })
+
+  // Widget state
+  let widgetFollowFilter = false
+  let currentPanelFilter: {
+    contentType?: string
+    leftFilter?: { type: string; slug?: string }
+    sourceApp?: string
+    sortBy?: string
+  } = {}
+
+  ipcMain.handle('widget:syncFilter', async (_, filter) => {
+    currentPanelFilter = filter
+    // Notify widget to refresh
+    const widgetWin = widgetManager.getWindow()
+    if (widgetWin && !widgetWin.isDestroyed()) {
+      widgetWin.webContents.send('widget:filterChanged')
+    }
+  })
+
+  ipcMain.handle('widget:setFollowFilter', async (_, value: boolean) => {
+    widgetFollowFilter = value
+    // Notify widget to refresh
+    const widgetWin = widgetManager.getWindow()
+    if (widgetWin && !widgetWin.isDestroyed()) {
+      widgetWin.webContents.send('widget:filterChanged')
+    }
+  })
+
+  ipcMain.handle('widget:getItems', async () => {
+    if (widgetFollowFilter) {
+      return repository.getItems({
+        limit: 5,
+        contentType: currentPanelFilter.contentType || undefined,
+        leftFilter: currentPanelFilter.leftFilter as repository.LeftFilter | undefined,
+        sourceApp: currentPanelFilter.sourceApp || undefined,
+        sortBy: (currentPanelFilter.sortBy as 'recent' | 'usage') || 'recent'
+      })
+    }
+    return repository.getItems({ limit: 5 })
+  })
+
+  // Widget IPC handlers
+  ipcMain.handle('widget:setPinned', async (_, pinned: boolean) => {
+    widgetManager.setPinned(pinned)
+  })
+
+  ipcMain.handle('widget:savePosition', async (_, x: number, y: number) => {
+    widgetManager.savePosition(x, y)
+  })
+
+  ipcMain.handle('widget:toggle', async () => {
+    widgetManager.toggle()
+  })
+
+  ipcMain.handle('widget:pasteItem', async (_, id: string) => {
+    const item = repository.getItemById(id)
+    if (item) {
+      repository.incrementUseCount(id)
+      const { clipboard } = await import('electron')
+      const { execSync } = require('child_process')
+      clipboard.writeText(item.content)
+
+      // Hide widget if not pinned
+      if (!widgetManager.getPinned()) {
+        widgetManager.hide()
+      }
+
+      // Get frontmost app and simulate paste
+      let previousApp: string | null = null
+      try {
+        previousApp = execSync(
+          `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
+          { encoding: 'utf-8' }
+        ).trim()
+      } catch {
+        // ignore
+      }
+
+      setTimeout(() => {
+        try {
+          if (previousApp) {
+            execSync(
+              `osascript -e 'tell application id "${previousApp}" to activate'`
+            )
+          }
+        } catch {
+          // ignore
+        }
+        setTimeout(() => {
+          execSync(
+            `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+          )
+        }, 50)
+      }, 100)
+    }
   })
 
   ipcMain.handle('queue:setSeparator', async (_, separator: string) => {

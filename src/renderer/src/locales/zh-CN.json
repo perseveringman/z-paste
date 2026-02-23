@@ -54,7 +54,8 @@
   "settings.nav.privacy": "隐私",
   "settings.nav.theme": "主题",
   "settings.nav.tags": "标签管理",
-  "settings.nav.about": "关于",
+  "settings.nav.widget": "小组件",
+"settings.nav.about": "关于",
 
   "settings.general.title": "通用设置",
   "settings.general.language": "语言",
@@ -191,5 +192,18 @@
 
   "tray.openPanel": "打开面板",
   "tray.launchAtLogin": "开机自启",
-  "tray.quit": "退出"
+  "tray.quit": "退出",
+
+  "settings.general.widgetFollowFilter": "小组件数据源",
+  "settings.general.widgetFollowFilter.desc": "小组件展示的内容是否跟随主面板的筛选条件",
+  "settings.general.widgetFollowFilter.independent": "独立（最新 5 条）",
+  "settings.general.widgetFollowFilter.follow": "跟随主面板",
+  "settings.shortcuts.widgetToggle": "切换悬浮小组件",
+  "settings.shortcuts.widgetToggle.desc": "显示/隐藏桌面悬浮小组件",
+  "settings.shortcuts.widgetQuickPastePrefix": "小组件快捷粘贴前缀",
+  "settings.shortcuts.widgetQuickPastePrefix.desc": "配合数字键 1-5 快速粘贴小组件中的对应条目",
+  "widget.title": "最近剪贴板",
+  "widget.empty": "暂无记录",
+  "widget.hint": "快捷键: ⌥ + 数字",
+  "tray.recentItems": "最近剪贴板"
 }

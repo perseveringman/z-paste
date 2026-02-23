@@ -22,6 +22,9 @@ export interface Settings {
   togglePreviewShortcut: string
   openTagShortcut: string
   openSettingsShortcut: string
+  widgetFollowFilter: boolean
+  widgetToggleShortcut: string
+  widgetQuickPastePrefix: string
 }
 
 interface SettingsState extends Settings {
@@ -43,6 +46,9 @@ interface SettingsState extends Settings {
   setTogglePreviewShortcut: (shortcut: string) => void
   setOpenTagShortcut: (shortcut: string) => void
   setOpenSettingsShortcut: (shortcut: string) => void
+  setWidgetFollowFilter: (value: boolean) => void
+  setWidgetToggleShortcut: (shortcut: string) => void
+  setWidgetQuickPastePrefix: (prefix: string) => void
   loadSettings: () => void
   saveSettings: () => void
 }
@@ -102,7 +108,10 @@ const defaults: Settings = {
   toggleFilterShortcut: 'CommandOrControl+F',
   togglePreviewShortcut: 'Alt',
   openTagShortcut: 'T',
-  openSettingsShortcut: 'CommandOrControl+,'
+  openSettingsShortcut: 'CommandOrControl+,',
+  widgetFollowFilter: false,
+  widgetToggleShortcut: 'Alt+W',
+  widgetQuickPastePrefix: 'Alt'
 }
 
 const stored = loadFromStorage()
@@ -202,6 +211,21 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     get().saveSettings()
   },
 
+  setWidgetFollowFilter: (value) => {
+    set({ widgetFollowFilter: value })
+    get().saveSettings()
+  },
+
+  setWidgetToggleShortcut: (shortcut) => {
+    set({ widgetToggleShortcut: shortcut })
+    get().saveSettings()
+  },
+
+  setWidgetQuickPastePrefix: (prefix) => {
+    set({ widgetQuickPastePrefix: prefix })
+    get().saveSettings()
+  },
+
   loadSettings: () => {
     const stored = loadFromStorage()
     const merged = { ...defaults, ...stored }
@@ -229,7 +253,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       toggleFilterShortcut: state.toggleFilterShortcut,
       togglePreviewShortcut: state.togglePreviewShortcut,
       openTagShortcut: state.openTagShortcut,
-      openSettingsShortcut: state.openSettingsShortcut
+      openSettingsShortcut: state.openSettingsShortcut,
+      widgetFollowFilter: state.widgetFollowFilter,
+      widgetToggleShortcut: state.widgetToggleShortcut,
+      widgetQuickPastePrefix: state.widgetQuickPastePrefix
     }
     saveToStorage(settings)
   }

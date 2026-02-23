@@ -57,7 +57,7 @@ const api = {
   queueGetCount: () => ipcRenderer.invoke('queue:getCount'),
   queueGetItems: () => ipcRenderer.invoke('queue:getItems'),
   queueSetSeparator: (separator: string) => ipcRenderer.invoke('queue:setSeparator', separator),
-  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string }) =>
+  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string; widgetToggle?: string; widgetQuickPastePrefix?: string }) =>
     ipcRenderer.invoke('shortcuts:update', config),
   onQueueUpdated: (callback: (data: { count: number }) => void) => {
     ipcRenderer.on('queue:updated', (_, data) => callback(data))
@@ -86,6 +86,20 @@ const api = {
   onPanelHidden: (callback: () => void) => {
     ipcRenderer.on('panel:hidden', () => callback())
     return () => ipcRenderer.removeAllListeners('panel:hidden')
+  },
+  // Widget
+  widgetSetPinned: (pinned: boolean) => ipcRenderer.invoke('widget:setPinned', pinned),
+  widgetSavePosition: (x: number, y: number) => ipcRenderer.invoke('widget:savePosition', x, y),
+  widgetSyncFilter: (filter: { contentType?: string; leftFilter?: unknown; sourceApp?: string; sortBy?: string }) =>
+    ipcRenderer.invoke('widget:syncFilter', filter),
+  widgetSetFollowFilter: (value: boolean) => ipcRenderer.invoke('widget:setFollowFilter', value),
+  onWidgetShown: (callback: () => void) => {
+    ipcRenderer.on('widget:shown', () => callback())
+    return () => ipcRenderer.removeAllListeners('widget:shown')
+  },
+  onWidgetPinnedChanged: (callback: (pinned: boolean) => void) => {
+    ipcRenderer.on('widget:pinnedChanged', (_, pinned) => callback(pinned))
+    return () => ipcRenderer.removeAllListeners('widget:pinnedChanged')
   }
 }
 

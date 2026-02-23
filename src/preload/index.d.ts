@@ -80,7 +80,7 @@ interface ZPasteAPI {
   queueGetCount: () => Promise<number>
   queueGetItems: () => Promise<{ id: string; content: string }[]>
   queueSetSeparator: (separator: string) => Promise<void>
-  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string }) => Promise<void>
+  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string; widgetToggle?: string; widgetQuickPastePrefix?: string }) => Promise<void>
   onQueueUpdated: (callback: (data: { count: number }) => void) => () => void
   onQueuePasted: (callback: (data: { index: number; total: number }) => void) => () => void
   onQueueBatchPasted: (callback: (data: { count: number }) => void) => () => void
@@ -88,6 +88,13 @@ interface ZPasteAPI {
   onNewItem: (callback: (item: ClipboardItem) => void) => () => void
   onPanelShown: (callback: () => void) => () => void
   onPanelHidden: (callback: () => void) => () => void
+  // Widget
+  widgetSetPinned: (pinned: boolean) => Promise<void>
+  widgetSavePosition: (x: number, y: number) => Promise<void>
+  widgetSyncFilter: (filter: { contentType?: string; leftFilter?: unknown; sourceApp?: string; sortBy?: string }) => Promise<void>
+  widgetSetFollowFilter: (value: boolean) => Promise<void>
+  onWidgetShown: (callback: () => void) => () => void
+  onWidgetPinnedChanged: (callback: (pinned: boolean) => void) => () => void
 }
 
 declare global {
