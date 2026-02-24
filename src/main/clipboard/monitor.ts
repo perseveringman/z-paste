@@ -33,26 +33,29 @@ export class ClipboardMonitor {
     if (this.polling) return
     this.polling = true
     try {
-      this.checkText()
-      this.checkImage()
+      const textChanged = this.checkText()
+      // Skip image check if text just changed (likely the same clipboard event)
+      if (!textChanged) {
+        this.checkImage()
+      }
     } finally {
       this.polling = false
     }
   }
 
-  private checkText(): void {
+  private checkText(): boolean {
     const text = clipboard.readText()
-    if (!text || text.trim().length === 0) return
+    if (!text || text.trim().length === 0) return false
 
     const hash = this.computeHash(text)
-    if (hash === this.lastTextHash) return
+    if (hash === this.lastTextHash) return false
     this.lastTextHash = hash
 
     const existing = repository.getItemByHash(hash)
     if (existing) {
       repository.touchItem(existing.id)
       this.notifyRenderer(existing)
-      return
+      return true
     }
 
     const { type, metadata } = detectContentType(text)
@@ -76,6 +79,7 @@ export class ClipboardMonitor {
 
     repository.insertItem(item)
     this.notifyRenderer(item)
+    return true
   }
 
   private checkImage(): void {
@@ -130,7 +134,7 @@ export class ClipboardMonitor {
     try {
       const result = execSync(
         `osascript -e 'tell application "System Events"' -e 'set fp to first application process whose frontmost is true' -e 'set appName to name of fp' -e 'set bid to bundle identifier of fp' -e 'return appName & "|" & bid' -e 'end tell'`,
-        { encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'] }
+        { encoding: 'utf-8', timeout: 1000, stdio: ['pipe', 'pipe', 'pipe'] }
       ).trim()
       const sep = result.indexOf('|')
       if (sep === -1) return null
