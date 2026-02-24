@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, clipboard } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
@@ -10,6 +10,7 @@ import { createTables } from './database/schema'
 import * as repository from './database/repository'
 import { iCloudSync } from './sync/icloud'
 import { getAppIcon } from './clipboard/app-icon'
+import { exec } from 'child_process'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -70,33 +71,36 @@ app.whenReady().then(() => {
 
   ipcMain.handle('clipboard:pasteItem', async (_, id: string) => {
     const item = repository.getItemById(id)
-    if (item) {
-      repository.incrementUseCount(id)
-      const { clipboard } = await import('electron')
-      const { execSync } = require('child_process')
-      clipboard.writeText(item.content)
+    if (!item) return
 
-      const previousApp = windowManager.getPreviousAppBundleId()
-      windowManager.hide()
+    clipboard.writeText(item.content)
+    const previousApp = windowManager.getPreviousAppBundleId()
+    windowManager.hide()
 
-      // Reactivate previous app then simulate Cmd+V
-      setTimeout(() => {
-        try {
-          if (previousApp) {
-            execSync(
-              `osascript -e 'tell application id "${previousApp}" to activate'`
-            )
+    // Defer use count update — not on the critical paste path
+    process.nextTick(() => repository.incrementUseCount(id))
+
+    // Reactivate previous app then simulate Cmd+V
+    setTimeout(() => {
+      if (previousApp) {
+        exec(
+          `osascript -e 'tell application id "${previousApp}" to activate'`,
+          () => {
+            setTimeout(() => {
+              exec(
+                `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+              )
+            }, 20)
           }
-        } catch {
-          // ignore
-        }
+        )
+      } else {
         setTimeout(() => {
-          execSync(
+          exec(
             `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
           )
-        }, 50)
-      }, 100)
-    }
+        }, 20)
+      }
+    }, 30)
   })
 
   ipcMain.handle('clipboard:updateTitle', async (_, id: string, title: string | null) => {
@@ -297,45 +301,45 @@ app.whenReady().then(() => {
 
   ipcMain.handle('widget:pasteItem', async (_, id: string) => {
     const item = repository.getItemById(id)
-    if (item) {
-      repository.incrementUseCount(id)
-      const { clipboard } = await import('electron')
-      const { execSync } = require('child_process')
-      clipboard.writeText(item.content)
+    if (!item) return
 
-      // Hide widget if not pinned
-      if (!widgetManager.getPinned()) {
-        widgetManager.hide()
-      }
+    clipboard.writeText(item.content)
 
-      // Get frontmost app and simulate paste
-      let previousApp: string | null = null
-      try {
-        previousApp = execSync(
-          `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
-          { encoding: 'utf-8' }
-        ).trim()
-      } catch {
-        // ignore
-      }
-
-      setTimeout(() => {
-        try {
-          if (previousApp) {
-            execSync(
-              `osascript -e 'tell application id "${previousApp}" to activate'`
-            )
-          }
-        } catch {
-          // ignore
-        }
-        setTimeout(() => {
-          execSync(
-            `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
-          )
-        }, 50)
-      }, 100)
+    // Hide widget if not pinned
+    if (!widgetManager.getPinned()) {
+      widgetManager.hide()
     }
+
+    // Defer use count update
+    process.nextTick(() => repository.incrementUseCount(id))
+
+    // Get frontmost app and simulate paste
+    exec(
+      `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
+      (err, stdout) => {
+        const previousApp = err ? null : stdout.trim()
+        setTimeout(() => {
+          if (previousApp) {
+            exec(
+              `osascript -e 'tell application id "${previousApp}" to activate'`,
+              () => {
+                setTimeout(() => {
+                  exec(
+                    `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+                  )
+                }, 20)
+              }
+            )
+          } else {
+            setTimeout(() => {
+              exec(
+                `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+              )
+            }, 20)
+          }
+        }, 30)
+      }
+    )
   })
 
   ipcMain.handle('queue:setSeparator', async (_, separator: string) => {

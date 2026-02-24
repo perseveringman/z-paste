@@ -1,5 +1,5 @@
 import { globalShortcut, clipboard } from 'electron'
-import { execSync } from 'child_process'
+import { exec } from 'child_process'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
 import * as repository from './database/repository'
@@ -63,36 +63,34 @@ export class ShortcutManager {
     if (index >= items.length) return
 
     const item = items[index]
-    repository.incrementUseCount(item.id)
     clipboard.writeText(item.content)
+    process.nextTick(() => repository.incrementUseCount(item.id))
 
-    // Get frontmost app before we do anything
-    let previousApp: string | null = null
-    try {
-      previousApp = execSync(
-        `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
-        { encoding: 'utf-8' }
-      ).trim()
-    } catch {
-      // ignore
-    }
-
-    setTimeout(() => {
-      try {
-        if (previousApp) {
-          execSync(
-            `osascript -e 'tell application id "${previousApp}" to activate'`
-          )
-        }
-      } catch {
-        // ignore
+    // Get frontmost app before paste
+    exec(
+      `osascript -e 'tell application "System Events" to get bundle identifier of first application process whose frontmost is true'`,
+      (err, stdout) => {
+        const previousApp = err ? null : stdout.trim()
+        setTimeout(() => {
+          if (previousApp) {
+            exec(
+              `osascript -e 'tell application id "${previousApp}" to activate'`,
+              () => {
+                setTimeout(() => {
+                  exec(
+                    `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+                  )
+                }, 20)
+              }
+            )
+          } else {
+            exec(
+              `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+            )
+          }
+        }, 30)
       }
-      setTimeout(() => {
-        execSync(
-          `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
-        )
-      }, 50)
-    }, 100)
+    )
   }
 
   private registerSequencePaste(accelerator: string): void {
@@ -113,7 +111,7 @@ export class ShortcutManager {
       })
 
       setTimeout(() => {
-        execSync(
+        exec(
           `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
         )
       }, 100)
@@ -136,7 +134,7 @@ export class ShortcutManager {
       this.notifyRenderer('queue:batch-pasted', { count: this.sequenceQueue.length })
 
       setTimeout(() => {
-        execSync(
+        exec(
           `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
         )
       }, 100)
