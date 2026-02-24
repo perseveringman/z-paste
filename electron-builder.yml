@@ -24,7 +24,7 @@ mac:
         - arm64
         - x64
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
   contents:
     - x: 130
       y: 220
