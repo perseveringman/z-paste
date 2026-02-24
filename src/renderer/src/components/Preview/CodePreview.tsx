@@ -6,6 +6,10 @@ interface Props {
   language: string
 }
 
+// Module-level cache: key = `${code}|${lang}|${theme}` → html
+const htmlCache = new Map<string, string>()
+const MAX_CACHE_SIZE = 50
+
 export default function CodePreview({ code, language }: Props): React.JSX.Element {
   const [html, setHtml] = useState<string>('')
   const isDark = document.documentElement.classList.contains('dark')
@@ -14,10 +18,24 @@ export default function CodePreview({ code, language }: Props): React.JSX.Elemen
     let cancelled = false
     const lang = mapLanguage(language === 'plaintext' ? guessLanguage(code) : language)
     const theme = isDark ? 'vitesse-dark' : 'vitesse-light'
+    const cacheKey = `${code}|${lang}|${theme}`
+
+    const cached = htmlCache.get(cacheKey)
+    if (cached) {
+      setHtml(cached)
+      return
+    }
 
     codeToHtml(code, { lang, theme })
       .then((result) => {
-        if (!cancelled) setHtml(result)
+        if (!cancelled) {
+          if (htmlCache.size >= MAX_CACHE_SIZE) {
+            const firstKey = htmlCache.keys().next().value
+            if (firstKey) htmlCache.delete(firstKey)
+          }
+          htmlCache.set(cacheKey, result)
+          setHtml(result)
+        }
       })
       .catch(() => {
         if (!cancelled) setHtml('')
