@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect, useMemo } from 'react'
+import { useCallback, useState, useRef, useEffect, useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
@@ -66,7 +66,7 @@ function formatTime(timestamp: number): string {
   return i18n.t('time.daysAgo', { count: days })
 }
 
-export default function ClipboardItemRow({
+function ClipboardItemRow({
   item,
   index,
   isSelected,
@@ -329,6 +329,8 @@ export default function ClipboardItemRow({
     </>
   )
 }
+
+export default memo(ClipboardItemRow)
 
 function ImageRow({
   item,
