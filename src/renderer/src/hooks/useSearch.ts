@@ -12,12 +12,12 @@ const fuseOptions = {
 export function useSearch(): ClipboardItem[] {
   const { items, searchQuery } = useClipboardStore()
 
+  const fuse = useMemo(() => new Fuse(items, fuseOptions), [items])
+
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return items
-
-    const fuse = new Fuse(items, fuseOptions)
     return fuse.search(searchQuery).map((result) => result.item)
-  }, [items, searchQuery])
+  }, [fuse, items, searchQuery])
 
   return filteredItems
 }
