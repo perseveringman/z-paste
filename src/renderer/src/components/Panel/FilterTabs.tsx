@@ -113,14 +113,16 @@ export default function FilterTabs(): React.JSX.Element {
                 )}
                 onClick={() => setSourceAppFilter(isActive ? null : app.bundleId)}
               >
-                {icon && (
+                {icon ? (
                   <img
                     src={`data:image/png;base64,${icon}`}
-                    alt=""
+                    alt={app.name}
+                    title={app.name}
                     className="w-3.5 h-3.5 rounded-sm"
                   />
+                ) : (
+                  <span className="max-w-[80px] truncate">{app.name}</span>
                 )}
-                <span className="max-w-[80px] truncate">{app.name}</span>
                 <span className="text-[10px] opacity-60">{app.count}</span>
               </Badge>
             )

@@ -231,16 +231,16 @@ function ClipboardItemRow({
                 {sourceApp && (
                   <>
                     <span className="text-[10px] text-muted-foreground/50">•</span>
-                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      {appIcon && (
-                        <img
-                          src={`data:image/png;base64,${appIcon}`}
-                          alt=""
-                          className="w-3 h-3 rounded-sm"
-                        />
-                      )}
-                      <span className="max-w-[80px] truncate">{sourceApp.name}</span>
-                    </span>
+                    {appIcon ? (
+                      <img
+                        src={`data:image/png;base64,${appIcon}`}
+                        alt={sourceApp.name}
+                        title={sourceApp.name}
+                        className="w-3.5 h-3.5 rounded-sm"
+                      />
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground max-w-[80px] truncate">{sourceApp.name}</span>
+                    )}
                   </>
                 )}
               </div>
