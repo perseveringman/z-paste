@@ -118,7 +118,7 @@ export default function FilterTabs(): React.JSX.Element {
                     src={`data:image/png;base64,${icon}`}
                     alt={app.name}
                     title={app.name}
-                    className="w-3.5 h-3.5 rounded-sm"
+                    className="w-4 h-4 rounded-sm"
                   />
                 ) : (
                   <span className="max-w-[80px] truncate">{app.name}</span>
