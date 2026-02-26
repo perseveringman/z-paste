@@ -25,7 +25,7 @@ type PanelView = 'clipboard' | 'templates' | 'vault' | 'settings' | 'onboarding'
 
 export default function PanelWindow(): React.JSX.Element {
   const { t } = useTranslation()
-  useKeyboard()
+  useKeyboard(view)
   useQueueToast()
   const items = useSearch()
   const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters, isQueueActive, sequenceQueue, clearQueue } = useClipboardStore()

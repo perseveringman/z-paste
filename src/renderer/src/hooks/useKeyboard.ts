@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { useClipboardStore } from '../stores/clipboardStore'
 
-export function useKeyboard(): void {
+export function useKeyboard(view: string): void {
   const {
     items,
     selectedIndex,
@@ -17,6 +17,7 @@ export function useKeyboard(): void {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      if (view === 'vault') return
       const target = document.activeElement?.tagName
       const isInput = target === 'INPUT' || target === 'TEXTAREA'
 
@@ -93,6 +94,7 @@ export function useKeyboard(): void {
       }
     },
     [
+      view,
       items,
       selectedIndex,
       setSelectedIndex,
