@@ -356,6 +356,7 @@ export default function VaultView(): React.JSX.Element {
                 <div className="flex gap-2">
                   <Input
                     type="password"
+                    autoFocus
                     value={unlockPassword}
                     onChange={(e) => setUnlockPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && unlockPassword && !loading && unlock(unlockPassword)}
