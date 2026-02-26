@@ -1,7 +1,8 @@
 import { useEffect, useCallback } from 'react'
 import { useClipboardStore } from '../stores/clipboardStore'
+import type { PanelView } from '../components/Panel/PanelWindow'
 
-export function useKeyboard(view: string): void {
+export function useKeyboard(view: PanelView): void {
   const {
     items,
     selectedIndex,

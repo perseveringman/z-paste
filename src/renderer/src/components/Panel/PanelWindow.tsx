@@ -21,7 +21,7 @@ import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X } from 'lucide-rea
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
-type PanelView = 'clipboard' | 'templates' | 'vault' | 'settings' | 'onboarding'
+export type PanelView = 'clipboard' | 'templates' | 'vault' | 'settings' | 'onboarding'
 
 export default function PanelWindow(): React.JSX.Element {
   const { t } = useTranslation()
