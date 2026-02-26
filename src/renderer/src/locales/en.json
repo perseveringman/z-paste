@@ -217,5 +217,65 @@
   "tray.recentItems": "Recent Clipboard",
 
   "panel.queue.active": "Selecting queue ({{count}} items)",
-  "panel.queue.abandon": "Abandon Queue"
+  "panel.queue.abandon": "Abandon Queue",
+
+  "vault.setup.title": "Vault Setup",
+  "vault.setup.description": "Set a master password. Save your recovery key in a safe place.",
+  "vault.setup.masterPassword": "Master Password",
+  "vault.setup.confirmPassword": "Confirm Password",
+  "vault.setup.settingUp": "Setting up...",
+  "vault.setup.setMasterPassword": "Set Master Password",
+  "vault.setup.recoveryKeyLabel": "Recovery Key — save this in a safe place!",
+  "vault.setup.copyRecoveryKey": "Copy Recovery Key",
+
+  "vault.locked.title": "Vault Locked",
+  "vault.locked.description": "Unlock with master password or recovery key.",
+  "vault.locked.masterPassword": "Master Password",
+  "vault.locked.unlock": "Unlock",
+  "vault.locked.recoveryKey": "Recovery Key",
+  "vault.locked.unlockByRecoveryKey": "Unlock by Recovery Key",
+  "vault.locked.unlockWithBiometric": "Unlock with Touch ID / Keychain",
+
+  "vault.search.placeholder": "Search vault...",
+  "vault.lock": "Lock",
+  "vault.empty": "No vault items",
+  "vault.newLogin": "New Login",
+  "vault.newSecureNote": "New Secure Note",
+
+  "vault.field.title": "Title",
+  "vault.field.website": "Website",
+  "vault.field.username": "Username",
+  "vault.field.password": "Password",
+  "vault.field.notes": "Notes",
+  "vault.field.totpSecret": "TOTP Secret (base32, optional)",
+  "vault.field.secureNoteContent": "Secure note content",
+  "vault.field.content": "Content",
+
+  "vault.action.hide": "Hide",
+  "vault.action.show": "Show",
+  "vault.action.generate": "Generate",
+  "vault.action.saving": "Saving...",
+  "vault.action.save": "Save",
+  "vault.action.edit": "Edit",
+  "vault.action.delete": "Delete",
+  "vault.action.cancel": "Cancel",
+  "vault.action.copy": "Copy",
+  "vault.action.copyNote": "Copy Note",
+  "vault.action.getTotpCode": "Get & Copy Code",
+  "vault.action.autoType": "Auto Type",
+  "vault.action.autoTypeEnter": "Auto Type + Enter",
+
+  "vault.confirm.question": "Confirm?",
+  "vault.confirm.yes": "Yes",
+  "vault.confirm.no": "No",
+
+  "vault.detail.selectItem": "Select an item to view details",
+  "vault.detail.login": "Login",
+  "vault.detail.secureNote": "Secure Note",
+
+  "vault.autoType.sent": "Auto-Type sent.",
+  "vault.autoType.fallback": "Auto-Type failed, password copied as fallback.",
+
+  "vault.item.loginFallback": "Login",
+  "vault.item.secureNote": "Secure Note"
 }
