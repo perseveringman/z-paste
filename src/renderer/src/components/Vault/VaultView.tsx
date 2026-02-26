@@ -386,7 +386,7 @@ export default function VaultView(): React.JSX.Element {
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => { setShowResetFlow(true); setResetStep('verify'); setResetHintAnswer(''); setResetNewPassword(''); setResetNewPasswordConfirm('') }}
                 >
-                  Forgot password?
+                  {t('vault.locked.forgotPassword')}
                 </button>
               </div>
             )}
@@ -398,12 +398,12 @@ export default function VaultView(): React.JSX.Element {
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setShowResetFlow(false)}
               >
-                ← Back
+                {t('vault.reset.back')}
               </button>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className={resetStep === 'verify' ? 'text-foreground font-medium' : ''}>1. Verify</span>
-                <span>→</span>
-                <span className={resetStep === 'newpw' ? 'text-foreground font-medium' : ''}>2. New Password</span>
+                <span className={resetStep === 'verify' ? 'text-foreground font-medium' : ''}>{t('vault.reset.step1')}</span>
+                <span>{t('vault.reset.stepArrow')}</span>
+                <span className={resetStep === 'newpw' ? 'text-foreground font-medium' : ''}>{t('vault.reset.step2')}</span>
               </div>
             </div>
 
@@ -413,7 +413,7 @@ export default function VaultView(): React.JSX.Element {
                   <div className="space-y-2">
                     <p className="text-sm font-medium">{security.hintQuestion}</p>
                     <Input
-                      placeholder="Your answer"
+                      placeholder={t('vault.reset.answerPlaceholder')}
                       value={resetHintAnswer}
                       onChange={(e) => setResetHintAnswer(e.target.value)}
                       onKeyDown={async (e) => {
@@ -427,7 +427,7 @@ export default function VaultView(): React.JSX.Element {
                       onClick={async () => { try { await unlockWithHint(resetHintAnswer); setResetStep('newpw') } catch { /* error in store */ } }}
                       disabled={!resetHintAnswer.trim() || loading}
                     >
-                      {loading ? 'Verifying...' : 'Verify'}
+                      {loading ? t('vault.reset.verifying') : t('vault.reset.verify')}
                     </Button>
                   </div>
                 )}
@@ -440,7 +440,7 @@ export default function VaultView(): React.JSX.Element {
                       onClick={async () => { try { await unlockWithBiometric(); setResetStep('newpw') } catch { /* error in store */ } }}
                       disabled={loading}
                     >
-                      Verify with Touch ID
+                      {t('vault.reset.verifyWithTouchId')}
                     </Button>
                   </>
                 )}
@@ -448,11 +448,11 @@ export default function VaultView(): React.JSX.Element {
             ) : (
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <FieldLabel>New Password</FieldLabel>
+                  <FieldLabel>{t('vault.reset.newPassword')}</FieldLabel>
                   <Input type="password" value={resetNewPassword} onChange={(e) => setResetNewPassword(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <FieldLabel>Confirm New Password</FieldLabel>
+                  <FieldLabel>{t('vault.reset.confirmNewPassword')}</FieldLabel>
                   <Input
                     type="password"
                     value={resetNewPasswordConfirm}
@@ -466,7 +466,7 @@ export default function VaultView(): React.JSX.Element {
                   />
                 </div>
                 {resetNewPassword.length > 0 && resetNewPasswordConfirm.length > 0 && resetNewPassword !== resetNewPasswordConfirm && (
-                  <p className="text-xs text-destructive">Passwords do not match</p>
+                  <p className="text-xs text-destructive">{t('vault.reset.passwordMismatch')}</p>
                 )}
                 <Button
                   className="w-full"
@@ -476,7 +476,7 @@ export default function VaultView(): React.JSX.Element {
                   }}
                   disabled={resetNewPassword.length < 8 || resetNewPassword !== resetNewPasswordConfirm || loading}
                 >
-                  {loading ? 'Resetting...' : 'Reset Password'}
+                  {loading ? t('vault.reset.resetting') : t('vault.reset.resetPassword')}
                 </Button>
                 {recoveryKey && (
                   <div className="rounded-md border bg-muted/30 p-3 space-y-1">
@@ -538,12 +538,12 @@ export default function VaultView(): React.JSX.Element {
         <div className="p-3 border-t">
           {resetVaultConfirm ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-destructive flex-1">Delete all vault data?</span>
+              <span className="text-xs text-destructive flex-1">{t('vault.resetVault.prompt')}</span>
               <Button variant="destructive" size="sm" onClick={async () => { await resetVault(); setResetVaultConfirm(false) }}>
-                Delete
+                {t('vault.resetVault.delete')}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setResetVaultConfirm(false)}>
-                Cancel
+                {t('vault.resetVault.cancel')}
               </Button>
             </div>
           ) : (
@@ -551,7 +551,7 @@ export default function VaultView(): React.JSX.Element {
               className="text-xs text-muted-foreground hover:text-destructive transition-colors"
               onClick={() => setResetVaultConfirm(true)}
             >
-              Reset Vault…
+              {t('vault.resetVault.button')}
             </button>
           )}
         </div>

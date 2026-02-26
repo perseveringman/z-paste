@@ -288,5 +288,26 @@
   "vault.autoType.fallback": "自動輸入失敗，已複製密碼。",
 
   "vault.item.loginFallback": "登入",
-  "vault.item.secureNote": "安全備忘錄"
+  "vault.item.secureNote": "安全備忘錄",
+
+  "vault.locked.forgotPassword": "忘記密碼？",
+
+  "vault.reset.back": "← 返回",
+  "vault.reset.step1": "1. 驗證",
+  "vault.reset.stepArrow": "→",
+  "vault.reset.step2": "2. 新密碼",
+  "vault.reset.answerPlaceholder": "你的答案",
+  "vault.reset.verifying": "驗證中...",
+  "vault.reset.verify": "驗證",
+  "vault.reset.verifyWithTouchId": "使用 Touch ID 驗證",
+  "vault.reset.newPassword": "新密碼",
+  "vault.reset.confirmNewPassword": "確認新密碼",
+  "vault.reset.passwordMismatch": "兩次密碼不一致",
+  "vault.reset.resetting": "重設中...",
+  "vault.reset.resetPassword": "重設密碼",
+
+  "vault.resetVault.prompt": "刪除所有保險庫資料？",
+  "vault.resetVault.delete": "刪除",
+  "vault.resetVault.cancel": "取消",
+  "vault.resetVault.button": "重設保險庫…"
 }

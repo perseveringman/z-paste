@@ -288,5 +288,26 @@
   "vault.autoType.fallback": "Auto-Type failed, password copied as fallback.",
 
   "vault.item.loginFallback": "Login",
-  "vault.item.secureNote": "Secure Note"
+  "vault.item.secureNote": "Secure Note",
+
+  "vault.locked.forgotPassword": "Forgot password?",
+
+  "vault.reset.back": "← Back",
+  "vault.reset.step1": "1. Verify",
+  "vault.reset.stepArrow": "→",
+  "vault.reset.step2": "2. New Password",
+  "vault.reset.answerPlaceholder": "Your answer",
+  "vault.reset.verifying": "Verifying...",
+  "vault.reset.verify": "Verify",
+  "vault.reset.verifyWithTouchId": "Verify with Touch ID",
+  "vault.reset.newPassword": "New Password",
+  "vault.reset.confirmNewPassword": "Confirm New Password",
+  "vault.reset.passwordMismatch": "Passwords do not match",
+  "vault.reset.resetting": "Resetting...",
+  "vault.reset.resetPassword": "Reset Password",
+
+  "vault.resetVault.prompt": "Delete all vault data?",
+  "vault.resetVault.delete": "Delete",
+  "vault.resetVault.cancel": "Cancel",
+  "vault.resetVault.button": "Reset Vault…"
 }

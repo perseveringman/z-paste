@@ -288,5 +288,26 @@
   "vault.autoType.fallback": "自动输入失败，已复制密码。",
 
   "vault.item.loginFallback": "登录",
-  "vault.item.secureNote": "安全备注"
+  "vault.item.secureNote": "安全备注",
+
+  "vault.locked.forgotPassword": "忘记密码？",
+
+  "vault.reset.back": "← 返回",
+  "vault.reset.step1": "1. 验证",
+  "vault.reset.stepArrow": "→",
+  "vault.reset.step2": "2. 新密码",
+  "vault.reset.answerPlaceholder": "你的答案",
+  "vault.reset.verifying": "验证中...",
+  "vault.reset.verify": "验证",
+  "vault.reset.verifyWithTouchId": "使用 Touch ID 验证",
+  "vault.reset.newPassword": "新密码",
+  "vault.reset.confirmNewPassword": "确认新密码",
+  "vault.reset.passwordMismatch": "两次密码不一致",
+  "vault.reset.resetting": "重置中...",
+  "vault.reset.resetPassword": "重置密码",
+
+  "vault.resetVault.prompt": "删除所有保险库数据？",
+  "vault.resetVault.delete": "删除",
+  "vault.resetVault.cancel": "取消",
+  "vault.resetVault.button": "重置保险库…"
 }
