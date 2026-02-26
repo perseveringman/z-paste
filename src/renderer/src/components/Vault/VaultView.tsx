@@ -133,9 +133,9 @@ export default function VaultView(): React.JSX.Element {
       if (inInput) return
 
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault()
         const currentIndex = items.findIndex((item) => item.id === detail?.meta.id)
         if (items.length === 0) return
+        e.preventDefault()
         let nextIndex: number
         if (currentIndex === -1) {
           nextIndex = 0
