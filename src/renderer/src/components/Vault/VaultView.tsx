@@ -255,7 +255,7 @@ export default function VaultView(): React.JSX.Element {
               {t('vault.setup.copyRecoveryKey')}
             </Button>
           </div>
-          <Button onClick={() => setPendingRecoveryKey(null)}>
+          <Button onClick={() => { setPendingRecoveryKey(null); useVaultStore.setState({ recoveryKey: null }) }}>
             {t('vault.setup.savedContinue')}
           </Button>
         </div>
