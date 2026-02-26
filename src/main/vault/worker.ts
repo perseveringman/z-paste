@@ -2,8 +2,10 @@ import { randomBytes } from 'crypto'
 import {
   VaultKdfParams,
   VaultKdfType,
+  deriveKey,
   decryptVaultPayload,
   encryptVaultPayload,
+  generateRecoveryKey,
   setupVaultKeys,
   unwrapDEKWithMasterPassword,
   unwrapDEKWithRecoveryKey
@@ -20,6 +22,7 @@ type WorkerAction =
   | 'encryptItemPayload'
   | 'decryptItemPayload'
   | 'reencryptItemPayload'
+  | 'changeMasterPassword'
   | 'shutdown'
 
 interface WorkerRequest {
@@ -76,15 +79,26 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
   switch (request.action) {
     case 'setupMasterPassword': {
       const masterPassword = asString(payload.masterPassword, 'master password')
+      const hintAnswer = typeof payload.hintAnswer === 'string' && payload.hintAnswer.length > 0
+        ? payload.hintAnswer
+        : null
       const keys = await setupVaultKeys(masterPassword)
       activeDEK = keys.dek
+
+      let dekWrappedByHint: string | null = null
+      if (hintAnswer) {
+        const hintKey = await deriveKey(hintAnswer.trim().toLowerCase(), Buffer.from(keys.salt, 'base64'), keys.kdfType, keys.kdfParams)
+        dekWrappedByHint = encryptVaultPayload(keys.dek.toString('base64'), hintKey)
+      }
+
       return {
         salt: keys.salt,
         kdfType: keys.kdfType,
         kdfParams: keys.kdfParams,
         dekWrappedByMaster: keys.dekWrappedByMaster,
         dekWrappedByRecovery: keys.dekWrappedByRecovery,
-        recoveryKey: keys.recoveryKey
+        recoveryKey: keys.recoveryKey,
+        dekWrappedByHint
       }
     }
 
@@ -154,6 +168,46 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
       const itemKeyB64 = decryptVaultPayload(wrappedItemKey, getActiveDEKOrThrow())
       const itemKey = Buffer.from(itemKeyB64, 'base64')
       return { encryptedPayload: encryptVaultPayload(plaintext, itemKey) }
+    }
+
+    case 'changeMasterPassword': {
+      const dek = getActiveDEKOrThrow()
+      const newMasterPassword = asString(payload.newMasterPassword, 'new master password')
+      const hintAnswer = typeof payload.hintAnswer === 'string' && payload.hintAnswer.length > 0
+        ? payload.hintAnswer
+        : null
+
+      const salt = randomBytes(32)
+      const kdfType: VaultKdfType = 'argon2id'
+      const kdfParams: VaultKdfParams = {
+        memoryCost: 19456,
+        timeCost: 3,
+        parallelism: 1,
+        outputLen: 32
+      }
+
+      const masterKey = await deriveKey(newMasterPassword, salt, kdfType, kdfParams)
+      const dekWrappedByMaster = encryptVaultPayload(dek.toString('base64'), masterKey)
+
+      const recoveryKey = generateRecoveryKey()
+      const recoveryDerivedKey = await deriveKey(recoveryKey, salt, kdfType, kdfParams)
+      const dekWrappedByRecovery = encryptVaultPayload(dek.toString('base64'), recoveryDerivedKey)
+
+      let dekWrappedByHint: string | null = null
+      if (hintAnswer) {
+        const hintKey = await deriveKey(hintAnswer.trim().toLowerCase(), salt, kdfType, kdfParams)
+        dekWrappedByHint = encryptVaultPayload(dek.toString('base64'), hintKey)
+      }
+
+      return {
+        salt: salt.toString('base64'),
+        kdfType,
+        kdfParams,
+        dekWrappedByMaster,
+        dekWrappedByRecovery,
+        recoveryKey,
+        dekWrappedByHint
+      }
     }
 
     case 'shutdown': {

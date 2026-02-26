@@ -123,6 +123,18 @@ export function createTables(): void {
   }
 
   migrateOldTags()
+
+  // Vault relaxed mode columns
+  const vaultMetaCols = db.prepare("PRAGMA table_info(vault_crypto_meta)").all() as { name: string }[]
+  if (!vaultMetaCols.some(c => c.name === 'security_mode')) {
+    db.exec(`ALTER TABLE vault_crypto_meta ADD COLUMN security_mode TEXT NOT NULL DEFAULT 'strict'`)
+  }
+  if (!vaultMetaCols.some(c => c.name === 'hint_question')) {
+    db.exec(`ALTER TABLE vault_crypto_meta ADD COLUMN hint_question TEXT`)
+  }
+  if (!vaultMetaCols.some(c => c.name === 'dek_wrapped_by_hint')) {
+    db.exec(`ALTER TABLE vault_crypto_meta ADD COLUMN dek_wrapped_by_hint TEXT`)
+  }
 }
 
 function toSlug(name: string): string {

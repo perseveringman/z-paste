@@ -144,13 +144,18 @@ const api = {
   }) => ipcRenderer.invoke('vault:updateItem', input),
   vaultGetItemDetail: (id: string) => ipcRenderer.invoke('vault:getItemDetail', id),
   vaultDeleteItem: (id: string) => ipcRenderer.invoke('vault:delete', id),
-  vaultSetupMasterPassword: (masterPassword: string) =>
-    ipcRenderer.invoke('vault:setupMasterPassword', masterPassword),
+  vaultSetupMasterPassword: (input: {
+    masterPassword: string
+    securityMode: 'strict' | 'relaxed'
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => ipcRenderer.invoke('vault:setupMasterPassword', input),
   vaultUnlock: (masterPassword: string) => ipcRenderer.invoke('vault:unlock', masterPassword),
   vaultUnlockWithRecoveryKey: (recoveryKey: string) =>
     ipcRenderer.invoke('vault:unlockWithRecoveryKey', recoveryKey),
   vaultUnlockWithBiometric: () => ipcRenderer.invoke('vault:unlockWithBiometric'),
   vaultLock: () => ipcRenderer.invoke('vault:lock'),
+  vaultResetVault: () => ipcRenderer.invoke('vault:resetVault'),
   vaultGetSecurityState: () => ipcRenderer.invoke('vault:getSecurityState'),
   vaultListAuditEvents: (limit?: number) => ipcRenderer.invoke('vault:listAuditEvents', limit),
   vaultGeneratePassword: (options?: {
@@ -162,7 +167,14 @@ const api = {
   }) => ipcRenderer.invoke('vault:generatePassword', options),
   vaultGetTotpCode: (id: string) => ipcRenderer.invoke('vault:getTotpCode', id),
   vaultAutoType: (input: { id: string; submit?: boolean; stepDelayMs?: number }) =>
-    ipcRenderer.invoke('vault:autoType', input)
+    ipcRenderer.invoke('vault:autoType', input),
+  vaultResetPassword: (input: {
+    newMasterPassword: string
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => ipcRenderer.invoke('vault:resetPassword', input),
+  vaultUnlockWithHint: (hintAnswer: string) =>
+    ipcRenderer.invoke('vault:unlockWithHint', hintAnswer)
 }
 
 if (process.contextIsolated) {

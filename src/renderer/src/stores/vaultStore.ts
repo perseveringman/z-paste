@@ -37,8 +37,10 @@ export interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
-  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null
+  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null
   hasBiometricUnlock: boolean
+  securityMode: 'strict' | 'relaxed'
+  hintQuestion: string | null
 }
 
 interface VaultState {
@@ -53,10 +55,21 @@ interface VaultState {
 
   setQuery: (query: string) => void
   refreshSecurity: () => Promise<void>
-  setupMasterPassword: (masterPassword: string) => Promise<void>
+  setupMasterPassword: (input: {
+    masterPassword: string
+    securityMode: 'strict' | 'relaxed'
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => Promise<void>
   unlock: (masterPassword: string) => Promise<void>
   unlockWithRecoveryKey: (recoveryKey: string) => Promise<void>
   unlockWithBiometric: () => Promise<void>
+  unlockWithHint: (hintAnswer: string) => Promise<void>
+  resetPassword: (input: {
+    newMasterPassword: string
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => Promise<void>
   lock: () => Promise<void>
   loadItems: () => Promise<void>
   selectItem: (id: string) => Promise<void>
@@ -80,6 +93,7 @@ interface VaultState {
   }) => Promise<string>
   getTotpCode: (id: string) => Promise<{ code: string; remainingSeconds: number } | null>
   autoType: (id: string, submit?: boolean) => Promise<{ ok: true; fallbackCopied: boolean }>
+  resetVault: () => Promise<void>
 }
 
 const defaultSecurityState: VaultSecurityState = {
@@ -87,7 +101,9 @@ const defaultSecurityState: VaultSecurityState = {
   hasVaultSetup: false,
   autoLockMinutes: 10,
   lastUnlockMethod: null,
-  hasBiometricUnlock: false
+  hasBiometricUnlock: false,
+  securityMode: 'strict',
+  hintQuestion: null
 }
 
 export const useVaultStore = create<VaultState>((set, get) => ({
@@ -113,10 +129,10 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     }
   },
 
-  setupMasterPassword: async (masterPassword) => {
+  setupMasterPassword: async (input) => {
     set({ loading: true, error: null })
     try {
-      const result = await window.api.vaultSetupMasterPassword(masterPassword)
+      const result = await window.api.vaultSetupMasterPassword(input)
       await get().refreshSecurity()
       set({ recoveryKey: result.recoveryKey })
       await get().loadItems()
@@ -161,6 +177,32 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await get().loadItems()
     } catch (e) {
       set({ error: e instanceof Error ? e.message : 'Biometric unlock failed' })
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  unlockWithHint: async (hintAnswer) => {
+    set({ loading: true, error: null })
+    try {
+      await window.api.vaultUnlockWithHint(hintAnswer)
+      await get().refreshSecurity()
+      await get().loadItems()
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Hint unlock failed' })
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  resetPassword: async (input) => {
+    set({ loading: true, error: null })
+    try {
+      const result = await window.api.vaultResetPassword(input)
+      set({ recoveryKey: result.recoveryKey })
+      await get().refreshSecurity()
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Password reset failed' })
     } finally {
       set({ loading: false })
     }
@@ -239,5 +281,18 @@ export const useVaultStore = create<VaultState>((set, get) => ({
 
   autoType: async (id, submit) => {
     return window.api.vaultAutoType({ id, submit, stepDelayMs: 80 })
+  },
+
+  resetVault: async () => {
+    set({ loading: true, error: null })
+    try {
+      await window.api.vaultResetVault()
+      set({ items: [], selectedId: null, detail: null, recoveryKey: null })
+      await get().refreshSecurity()
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Reset vault failed' })
+    } finally {
+      set({ loading: false })
+    }
   }
 }))

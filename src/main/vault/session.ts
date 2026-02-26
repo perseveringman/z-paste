@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid'
 import * as vaultRepository from '../database/vault-repository'
 import { VaultKdfParams, VaultKdfType } from './crypto'
-import { hasBiometricDEK, loadBiometricDEK, saveBiometricDEK } from './biometric'
+import { clearBiometricDEK, hasBiometricDEK, loadBiometricDEK, saveBiometricDEK } from './biometric'
 import { VaultCryptoWorkerClient } from './worker-client'
 
 const DEFAULT_AUTO_LOCK_MINUTES = 10
@@ -11,8 +11,10 @@ export interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
-  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null
+  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null
   hasBiometricUnlock: boolean
+  securityMode: 'strict' | 'relaxed'
+  hintQuestion: string | null
 }
 
 export class VaultSessionManager {
@@ -20,16 +22,24 @@ export class VaultSessionManager {
 
   private autoLockMinutes = DEFAULT_AUTO_LOCK_MINUTES
   private autoLockTimer: ReturnType<typeof setTimeout> | null = null
-  private lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null = null
+  private lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null = null
 
-  async setupMasterPassword(masterPassword: string): Promise<{ recoveryKey: string }> {
+  async setupMasterPassword(input: {
+    masterPassword: string
+    securityMode: 'strict' | 'relaxed'
+    hintQuestion?: string
+    hintAnswer?: string
+  }): Promise<{ recoveryKey: string }> {
     const existingMeta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (existingMeta) {
       throw new Error('Vault is already initialized')
     }
 
     const now = Date.now()
-    const keys = await this.cryptoWorker.setupMasterPassword(masterPassword)
+    const keys = await this.cryptoWorker.setupMasterPassword(
+      input.masterPassword,
+      input.securityMode === 'relaxed' ? input.hintAnswer : undefined
+    )
     vaultRepository.upsertVaultCryptoMeta({
       id: META_ID,
       kdf_type: keys.kdfType,
@@ -37,6 +47,9 @@ export class VaultSessionManager {
       salt: keys.salt,
       dek_wrapped_by_master: keys.dekWrappedByMaster,
       dek_wrapped_by_recovery: keys.dekWrappedByRecovery,
+      security_mode: input.securityMode,
+      hint_question: input.securityMode === 'relaxed' ? (input.hintQuestion || null) : null,
+      dek_wrapped_by_hint: keys.dekWrappedByHint,
       created_at: now,
       updated_at: now
     })
@@ -177,6 +190,90 @@ export class VaultSessionManager {
     })
   }
 
+  async unlockWithHintAnswer(hintAnswer: string): Promise<void> {
+    const meta = vaultRepository.getVaultCryptoMeta(META_ID)
+    if (!meta) {
+      throw new Error('Vault is not initialized')
+    }
+    if (meta.security_mode !== 'relaxed' || !meta.dek_wrapped_by_hint) {
+      throw new Error('Hint unlock is not available in strict mode')
+    }
+
+    try {
+      const kdfParams = JSON.parse(meta.kdf_params) as VaultKdfParams
+      await this.cryptoWorker.unlockWithRecoveryKey({
+        wrapped: meta.dek_wrapped_by_hint,
+        recoveryKey: hintAnswer.trim().toLowerCase(),
+        salt: meta.salt,
+        kdfType: this.normalizeKdfType(meta.kdf_type),
+        kdfParams
+      })
+      this.lastUnlockMethod = 'hint'
+      this.touch()
+      await this.persistBiometricDEK()
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'unlock_hint',
+        result: 'success',
+        reason_code: null,
+        created_at: Date.now()
+      })
+    } catch {
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'unlock_hint',
+        result: 'failed',
+        reason_code: 'invalid_hint_answer',
+        created_at: Date.now()
+      })
+      throw new Error('Invalid hint answer')
+    }
+  }
+
+  async resetPassword(input: {
+    newMasterPassword: string
+    hintQuestion?: string
+    hintAnswer?: string
+  }): Promise<{ recoveryKey: string }> {
+    await this.ensureUnlocked()
+
+    const meta = vaultRepository.getVaultCryptoMeta(META_ID)
+    if (!meta) {
+      throw new Error('Vault is not initialized')
+    }
+
+    const keys = await this.cryptoWorker.changeMasterPassword(
+      input.newMasterPassword,
+      input.hintAnswer
+    )
+
+    vaultRepository.upsertVaultCryptoMeta({
+      id: META_ID,
+      kdf_type: keys.kdfType,
+      kdf_params: JSON.stringify(keys.kdfParams),
+      salt: keys.salt,
+      dek_wrapped_by_master: keys.dekWrappedByMaster,
+      dek_wrapped_by_recovery: keys.dekWrappedByRecovery,
+      security_mode: meta.security_mode,
+      hint_question: input.hintQuestion !== undefined ? (input.hintQuestion || null) : meta.hint_question,
+      dek_wrapped_by_hint: keys.dekWrappedByHint,
+      created_at: meta.created_at,
+      updated_at: Date.now()
+    })
+
+    await this.persistBiometricDEK()
+
+    vaultRepository.appendVaultAuditEvent({
+      id: nanoid(),
+      event_type: 'reset_password',
+      result: 'success',
+      reason_code: null,
+      created_at: Date.now()
+    })
+
+    return { recoveryKey: keys.recoveryKey }
+  }
+
   async lock(): Promise<void> {
     await this.cryptoWorker.lock()
     this.clearTimer()
@@ -202,13 +299,24 @@ export class VaultSessionManager {
   }
 
   async getSecurityState(): Promise<VaultSecurityState> {
+    const meta = vaultRepository.getVaultCryptoMeta(META_ID)
     return {
       locked: !(await this.isUnlocked()),
-      hasVaultSetup: !!vaultRepository.getVaultCryptoMeta(META_ID),
+      hasVaultSetup: !!meta,
       autoLockMinutes: this.autoLockMinutes,
       lastUnlockMethod: this.lastUnlockMethod,
-      hasBiometricUnlock: await hasBiometricDEK()
+      hasBiometricUnlock: await hasBiometricDEK(),
+      securityMode: (meta?.security_mode as 'strict' | 'relaxed') || 'strict',
+      hintQuestion: meta?.hint_question || null
     }
+  }
+
+  async resetVault(): Promise<void> {
+    await this.cryptoWorker.lock()
+    this.clearTimer()
+    this.lastUnlockMethod = null
+    await clearBiometricDEK()
+    vaultRepository.deleteAllVaultData()
   }
 
   setAutoLockMinutes(minutes: number): void {

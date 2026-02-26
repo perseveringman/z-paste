@@ -28,6 +28,9 @@ export interface VaultCryptoMeta {
   salt: string
   dek_wrapped_by_master: string
   dek_wrapped_by_recovery: string
+  security_mode: string
+  hint_question: string | null
+  dek_wrapped_by_hint: string | null
   created_at: number
   updated_at: number
 }
@@ -188,14 +191,17 @@ export function deleteVaultItem(id: string): void {
 export function upsertVaultCryptoMeta(meta: VaultCryptoMeta): void {
   const db = getDatabase()
   db.prepare(
-    `INSERT INTO vault_crypto_meta (id, kdf_type, kdf_params, salt, dek_wrapped_by_master, dek_wrapped_by_recovery, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO vault_crypto_meta (id, kdf_type, kdf_params, salt, dek_wrapped_by_master, dek_wrapped_by_recovery, security_mode, hint_question, dek_wrapped_by_hint, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        kdf_type = excluded.kdf_type,
        kdf_params = excluded.kdf_params,
        salt = excluded.salt,
        dek_wrapped_by_master = excluded.dek_wrapped_by_master,
        dek_wrapped_by_recovery = excluded.dek_wrapped_by_recovery,
+       security_mode = excluded.security_mode,
+       hint_question = excluded.hint_question,
+       dek_wrapped_by_hint = excluded.dek_wrapped_by_hint,
        updated_at = excluded.updated_at`
   ).run(
     meta.id,
@@ -204,6 +210,9 @@ export function upsertVaultCryptoMeta(meta: VaultCryptoMeta): void {
     meta.salt,
     meta.dek_wrapped_by_master,
     meta.dek_wrapped_by_recovery,
+    meta.security_mode,
+    meta.hint_question,
+    meta.dek_wrapped_by_hint,
     meta.created_at,
     meta.updated_at
   )
@@ -214,6 +223,17 @@ export function getVaultCryptoMeta(id: string = 'primary'): VaultCryptoMeta | un
   return db.prepare('SELECT * FROM vault_crypto_meta WHERE id = ?').get(id) as
     | VaultCryptoMeta
     | undefined
+}
+
+export function deleteAllVaultData(): void {
+  const db = getDatabase()
+  const run = db.transaction(() => {
+    db.prepare('DELETE FROM vault_item_secrets').run()
+    db.prepare('DELETE FROM vault_items').run()
+    db.prepare('DELETE FROM vault_crypto_meta').run()
+    db.prepare('DELETE FROM vault_audit_events').run()
+  })
+  run()
 }
 
 export function appendVaultAuditEvent(event: VaultAuditEvent): void {

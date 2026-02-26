@@ -220,8 +220,13 @@ app.whenReady().then(() => {
     await vaultService.deleteItem(id)
   })
 
-  ipcMain.handle('vault:setupMasterPassword', async (_, masterPassword: string) => {
-    return vaultSession.setupMasterPassword(masterPassword)
+  ipcMain.handle('vault:setupMasterPassword', async (_, input: {
+    masterPassword: string
+    securityMode: 'strict' | 'relaxed'
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => {
+    return vaultSession.setupMasterPassword(input)
   })
 
   ipcMain.handle('vault:unlock', async (_, masterPassword: string) => {
@@ -242,6 +247,24 @@ app.whenReady().then(() => {
   ipcMain.handle('vault:lock', async () => {
     await vaultSession.lock()
     return { ok: true }
+  })
+
+  ipcMain.handle('vault:resetVault', async () => {
+    await vaultSession.resetVault()
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:unlockWithHint', async (_, hintAnswer: string) => {
+    await vaultSession.unlockWithHintAnswer(hintAnswer)
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:resetPassword', async (_, input: {
+    newMasterPassword: string
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => {
+    return vaultSession.resetPassword(input)
   })
 
   ipcMain.handle('vault:getSecurityState', async () => {

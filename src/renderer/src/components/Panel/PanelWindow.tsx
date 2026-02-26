@@ -214,7 +214,9 @@ export default function PanelWindow(): React.JSX.Element {
       ) : view === 'templates' ? (
         <TemplateList />
       ) : (
-        <VaultView />
+        <div className="flex-1 min-h-0">
+          <VaultView />
+        </div>
       )}
 
       {/* Queue status bar */}

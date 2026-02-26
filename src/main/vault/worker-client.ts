@@ -28,6 +28,7 @@ export interface WorkerSetupResult {
   dekWrappedByMaster: string
   dekWrappedByRecovery: string
   recoveryKey: string
+  dekWrappedByHint: string | null
 }
 
 export class VaultCryptoWorkerClient {
@@ -115,8 +116,8 @@ export class VaultCryptoWorkerClient {
     })
   }
 
-  async setupMasterPassword(masterPassword: string): Promise<WorkerSetupResult> {
-    return this.request<WorkerSetupResult>('setupMasterPassword', { masterPassword })
+  async setupMasterPassword(masterPassword: string, hintAnswer?: string): Promise<WorkerSetupResult> {
+    return this.request<WorkerSetupResult>('setupMasterPassword', { masterPassword, hintAnswer })
   }
 
   async unlockWithMasterPassword(input: {
@@ -176,6 +177,10 @@ export class VaultCryptoWorkerClient {
     wrappedItemKey: string
   }): Promise<{ encryptedPayload: string }> {
     return this.request('reencryptItemPayload', input)
+  }
+
+  async changeMasterPassword(newMasterPassword: string, hintAnswer?: string): Promise<WorkerSetupResult> {
+    return this.request<WorkerSetupResult>('changeMasterPassword', { newMasterPassword, hintAnswer })
   }
 
   async shutdown(): Promise<void> {
