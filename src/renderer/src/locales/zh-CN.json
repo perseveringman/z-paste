@@ -217,5 +217,65 @@
   "tray.recentItems": "最近剪贴板",
 
   "panel.queue.active": "正在选择队列 ({{count}} 条)",
-  "panel.queue.abandon": "放弃队列"
+  "panel.queue.abandon": "放弃队列",
+
+  "vault.setup.title": "保险库设置",
+  "vault.setup.description": "设置主密码，将恢复密钥保存在安全位置。",
+  "vault.setup.masterPassword": "主密码",
+  "vault.setup.confirmPassword": "确认密码",
+  "vault.setup.settingUp": "设置中...",
+  "vault.setup.setMasterPassword": "设置主密码",
+  "vault.setup.recoveryKeyLabel": "恢复密钥 — 请保存在安全的地方！",
+  "vault.setup.copyRecoveryKey": "复制恢复密钥",
+
+  "vault.locked.title": "保险库已锁定",
+  "vault.locked.description": "使用主密码或恢复密钥解锁。",
+  "vault.locked.masterPassword": "主密码",
+  "vault.locked.unlock": "解锁",
+  "vault.locked.recoveryKey": "恢复密钥",
+  "vault.locked.unlockByRecoveryKey": "通过恢复密钥解锁",
+  "vault.locked.unlockWithBiometric": "使用 Touch ID / 钥匙串解锁",
+
+  "vault.search.placeholder": "搜索保险库...",
+  "vault.lock": "锁定",
+  "vault.empty": "暂无保险库条目",
+  "vault.newLogin": "新建登录",
+  "vault.newSecureNote": "新建安全备注",
+
+  "vault.field.title": "标题",
+  "vault.field.website": "网站",
+  "vault.field.username": "用户名",
+  "vault.field.password": "密码",
+  "vault.field.notes": "备注",
+  "vault.field.totpSecret": "TOTP 密钥（base32，可选）",
+  "vault.field.secureNoteContent": "安全备注内容",
+  "vault.field.content": "内容",
+
+  "vault.action.hide": "隐藏",
+  "vault.action.show": "显示",
+  "vault.action.generate": "生成",
+  "vault.action.saving": "保存中...",
+  "vault.action.save": "保存",
+  "vault.action.edit": "编辑",
+  "vault.action.delete": "删除",
+  "vault.action.cancel": "取消",
+  "vault.action.copy": "复制",
+  "vault.action.copyNote": "复制备注",
+  "vault.action.getTotpCode": "获取并复制",
+  "vault.action.autoType": "自动输入",
+  "vault.action.autoTypeEnter": "自动输入 + 回车",
+
+  "vault.confirm.question": "确认删除？",
+  "vault.confirm.yes": "是",
+  "vault.confirm.no": "否",
+
+  "vault.detail.selectItem": "选择一个条目查看详情",
+  "vault.detail.login": "登录",
+  "vault.detail.secureNote": "安全备注",
+
+  "vault.autoType.sent": "自动输入已发送。",
+  "vault.autoType.fallback": "自动输入失败，已复制密码。",
+
+  "vault.item.loginFallback": "登录",
+  "vault.item.secureNote": "安全备注"
 }
