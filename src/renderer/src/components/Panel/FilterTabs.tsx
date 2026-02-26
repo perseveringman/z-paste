@@ -107,7 +107,7 @@ export default function FilterTabs(): React.JSX.Element {
                 key={app.bundleId}
                 variant={isActive ? 'default' : 'secondary'}
                 className={cn(
-                  'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px] flex items-center gap-1',
+                  'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px] flex items-center gap-1 px-1.5',
                   !isActive &&
                     'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
                 )}
@@ -118,7 +118,7 @@ export default function FilterTabs(): React.JSX.Element {
                     src={`data:image/png;base64,${icon}`}
                     alt={app.name}
                     title={app.name}
-                    className="w-4 h-4 rounded-sm"
+                    className="w-5 h-5 rounded-sm object-contain"
                   />
                 ) : (
                   <span className="max-w-[80px] truncate">{app.name}</span>
