@@ -272,19 +272,19 @@ export default function VaultView(): React.JSX.Element {
         </p>
         <div className="space-y-4 max-w-md">
           <div className="space-y-2">
-            <FieldLabel>Security Mode</FieldLabel>
+            <FieldLabel>{t('vault.setup.securityMode')}</FieldLabel>
             <div className="flex gap-2">
               <Button size="sm" variant={securityMode === 'strict' ? 'default' : 'outline'} onClick={() => setSecurityMode('strict')}>
-                Strict
+                {t('vault.setup.strict')}
               </Button>
               <Button size="sm" variant={securityMode === 'relaxed' ? 'default' : 'outline'} onClick={() => setSecurityMode('relaxed')}>
-                Relaxed
+                {t('vault.setup.relaxed')}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               {securityMode === 'strict'
-                ? 'Recovery key only. If lost, data cannot be recovered.'
-                : 'Allows password reset via security question or Touch ID.'}
+                ? t('vault.setup.strictDesc')
+                : t('vault.setup.relaxedDesc')}
             </p>
           </div>
           <div className="space-y-1">
@@ -297,7 +297,7 @@ export default function VaultView(): React.JSX.Element {
           </div>
           {securityMode === 'relaxed' && (
             <div className="space-y-2 rounded-md border p-3 bg-muted/20">
-              <FieldLabel>Security Question</FieldLabel>
+              <FieldLabel>{t('vault.setup.securityQuestion')}</FieldLabel>
               <div className="flex flex-wrap gap-1">
                 {HINT_QUESTIONS.map((q) => (
                   <button
@@ -311,9 +311,9 @@ export default function VaultView(): React.JSX.Element {
                   </button>
                 ))}
               </div>
-              <Input placeholder="Or type a custom question..." value={hintQuestion} onChange={(e) => setHintQuestion(e.target.value)} />
-              <FieldLabel>Answer</FieldLabel>
-              <Input placeholder="Your answer (case-insensitive)" value={hintAnswer} onChange={(e) => setHintAnswer(e.target.value)} />
+              <Input placeholder={t('vault.setup.customQuestionPlaceholder')} value={hintQuestion} onChange={(e) => setHintQuestion(e.target.value)} />
+              <FieldLabel>{t('vault.setup.answer')}</FieldLabel>
+              <Input placeholder={t('vault.setup.answerPlaceholder')} value={hintAnswer} onChange={(e) => setHintAnswer(e.target.value)} />
             </div>
           )}
           <Button
