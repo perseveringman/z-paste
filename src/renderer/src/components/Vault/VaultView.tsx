@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useVaultStore } from '../../stores/vaultStore'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -8,6 +9,7 @@ function FieldLabel({ children }: { children: string }): React.JSX.Element {
 }
 
 export default function VaultView(): React.JSX.Element {
+  const { t } = useTranslation()
   const {
     items,
     detail,
@@ -170,25 +172,25 @@ export default function VaultView(): React.JSX.Element {
   if (!security.hasVaultSetup) {
     return (
       <div className="h-full p-6 overflow-auto">
-        <h2 className="text-lg font-semibold mb-2">Vault Setup</h2>
+        <h2 className="text-lg font-semibold mb-2">{t('vault.setup.title')}</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Set a master password. Save your recovery key in a safe place.
+          {t('vault.setup.description')}
         </p>
         <div className="space-y-3 max-w-md">
           <div className="space-y-1">
-            <FieldLabel>Master Password</FieldLabel>
+            <FieldLabel>{t('vault.setup.masterPassword')}</FieldLabel>
             <Input type="password" value={masterPassword} onChange={(e) => setMasterPassword(e.target.value)} />
           </div>
           <div className="space-y-1">
-            <FieldLabel>Confirm Password</FieldLabel>
+            <FieldLabel>{t('vault.setup.confirmPassword')}</FieldLabel>
             <Input
               type="password"
               value={masterPasswordConfirm}
               onChange={(e) => setMasterPasswordConfirm(e.target.value)}
             />
           </div>
-          <Button disabled={!canSetup || loading} onClick={() => setupMasterPassword(masterPassword)}>
-            {loading ? 'Setting up...' : 'Set Master Password'}
+          <Button disabled={!canSetup || loading} onClick={() => setupMasterPassword({ masterPassword, securityMode: 'strict' })}>
+            {loading ? t('vault.setup.settingUp') : t('vault.setup.setMasterPassword')}
           </Button>
           {error && (
             <p className="text-sm text-destructive cursor-pointer" onClick={clearError}>
@@ -197,10 +199,10 @@ export default function VaultView(): React.JSX.Element {
           )}
           {recoveryKey && (
             <div className="rounded-md border bg-muted/30 p-3">
-              <p className="text-xs text-muted-foreground mb-1">Recovery Key — save this in a safe place!</p>
+              <p className="text-xs text-muted-foreground mb-1">{t('vault.setup.recoveryKeyLabel')}</p>
               <p className="font-mono text-sm break-all">{recoveryKey}</p>
               <Button variant="outline" size="sm" className="mt-2" onClick={() => copyText(recoveryKey)}>
-                Copy Recovery Key
+                {t('vault.setup.copyRecoveryKey')}
               </Button>
             </div>
           )}
@@ -212,28 +214,28 @@ export default function VaultView(): React.JSX.Element {
   if (security.locked) {
     return (
       <div className="h-full p-6 overflow-auto">
-        <h2 className="text-lg font-semibold mb-2">Vault Locked</h2>
-        <p className="text-sm text-muted-foreground mb-4">Unlock with master password or recovery key.</p>
+        <h2 className="text-lg font-semibold mb-2">{t('vault.locked.title')}</h2>
+        <p className="text-sm text-muted-foreground mb-4">{t('vault.locked.description')}</p>
         <div className="grid grid-cols-2 gap-4 max-w-2xl">
           <div className="space-y-2">
-            <FieldLabel>Master Password</FieldLabel>
+            <FieldLabel>{t('vault.locked.masterPassword')}</FieldLabel>
             <Input type="password" value={unlockPassword} onChange={(e) => setUnlockPassword(e.target.value)} />
             <Button onClick={() => unlock(unlockPassword)} disabled={!unlockPassword || loading}>
-              Unlock
+              {t('vault.locked.unlock')}
             </Button>
           </div>
           <div className="space-y-2">
-            <FieldLabel>Recovery Key</FieldLabel>
+            <FieldLabel>{t('vault.locked.recoveryKey')}</FieldLabel>
             <Input value={unlockRecoveryKey} onChange={(e) => setUnlockRecoveryKey(e.target.value)} />
             <Button onClick={() => unlockWithRecoveryKey(unlockRecoveryKey)} disabled={!unlockRecoveryKey || loading}>
-              Unlock by Recovery Key
+              {t('vault.locked.unlockByRecoveryKey')}
             </Button>
           </div>
         </div>
         {security.hasBiometricUnlock && (
           <div className="mt-4">
             <Button variant="outline" onClick={() => unlockWithBiometric()} disabled={loading}>
-              Unlock with Touch ID / Keychain
+              {t('vault.locked.unlockWithBiometric')}
             </Button>
           </div>
         )}
@@ -252,12 +254,12 @@ export default function VaultView(): React.JSX.Element {
         <div className="p-3 border-b space-y-2">
           <div className="flex items-center gap-2">
             <Input
-              placeholder="Search vault..."
+              placeholder={t('vault.search.placeholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             <Button variant="outline" onClick={() => lock()}>
-              Lock
+              {t('vault.lock')}
             </Button>
           </div>
         </div>
@@ -273,10 +275,12 @@ export default function VaultView(): React.JSX.Element {
               }`}
             >
               <p className="text-sm font-medium truncate">{item.title}</p>
-              <p className="text-xs text-muted-foreground">{item.type === 'login' ? item.website || 'Login' : 'Secure Note'}</p>
+              <p className="text-xs text-muted-foreground">
+                {item.type === 'login' ? item.website || t('vault.item.loginFallback') : t('vault.item.secureNote')}
+              </p>
             </button>
           ))}
-          {items.length === 0 && <p className="text-sm text-muted-foreground p-2">No vault items</p>}
+          {items.length === 0 && <p className="text-sm text-muted-foreground p-2">{t('vault.empty')}</p>}
         </div>
       </div>
 
@@ -288,35 +292,35 @@ export default function VaultView(): React.JSX.Element {
               variant={createType === 'login' ? 'default' : 'outline'}
               onClick={() => setCreateType('login')}
             >
-              New Login
+              {t('vault.newLogin')}
             </Button>
             <Button
               size="sm"
               variant={createType === 'secure_note' ? 'default' : 'outline'}
               onClick={() => setCreateType('secure_note')}
             >
-              New Secure Note
+              {t('vault.newSecureNote')}
             </Button>
           </div>
           <div className="space-y-2">
-            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input placeholder={t('vault.field.title')} value={title} onChange={(e) => setTitle(e.target.value)} />
             {createType === 'login' ? (
               <>
-                <Input placeholder="Website" value={website} onChange={(e) => setWebsite(e.target.value)} />
-                <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <Input placeholder={t('vault.field.website')} value={website} onChange={(e) => setWebsite(e.target.value)} />
+                <Input placeholder={t('vault.field.username')} value={username} onChange={(e) => setUsername(e.target.value)} />
                 <div className="flex gap-2">
-                  <Input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input type={showPassword ? 'text' : 'password'} placeholder={t('vault.field.password')} value={password} onChange={(e) => setPassword(e.target.value)} />
                   <Button variant="ghost" size="sm" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? 'Hide' : 'Show'}
+                    {showPassword ? t('vault.action.hide') : t('vault.action.show')}
                   </Button>
                   <Button variant="outline" onClick={handleGeneratePassword}>
-                    Generate
+                    {t('vault.action.generate')}
                   </Button>
                 </div>
-                <Input placeholder="TOTP Secret (base32, optional)" value={totpSecret} onChange={(e) => setTotpSecret(e.target.value)} />
+                <Input placeholder={t('vault.field.totpSecret')} value={totpSecret} onChange={(e) => setTotpSecret(e.target.value)} />
                 <textarea
                   className="w-full min-h-20 rounded-md border bg-background px-3 py-2 text-sm"
-                  placeholder="Notes"
+                  placeholder={t('vault.field.notes')}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
@@ -324,57 +328,57 @@ export default function VaultView(): React.JSX.Element {
             ) : (
               <textarea
                 className="w-full min-h-24 rounded-md border bg-background px-3 py-2 text-sm"
-                placeholder="Secure note content"
+                placeholder={t('vault.field.secureNoteContent')}
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
               />
             )}
           </div>
           <Button onClick={handleCreate} disabled={loading || !title.trim()}>
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? t('vault.action.saving') : t('vault.action.save')}
           </Button>
         </div>
 
         <div className="rounded-md border p-3">
           {!detail ? (
-            <p className="text-sm text-muted-foreground">Select an item to view details</p>
+            <p className="text-sm text-muted-foreground">{t('vault.detail.selectItem')}</p>
           ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold">{selectedTitle}</h3>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={startEditing}>
-                    Edit
+                    {t('vault.action.edit')}
                   </Button>
                   {deleteConfirmId === detail.meta.id ? (
                     <div className="flex items-center gap-1">
-                      <span className="text-xs text-destructive">Confirm?</span>
+                      <span className="text-xs text-destructive">{t('vault.confirm.question')}</span>
                       <Button variant="destructive" size="sm" onClick={() => { deleteItem(detail.meta.id); setDeleteConfirmId(null) }}>
-                        Yes
+                        {t('vault.confirm.yes')}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => setDeleteConfirmId(null)}>
-                        No
+                        {t('vault.confirm.no')}
                       </Button>
                     </div>
                   ) : (
                     <Button variant="destructive" size="sm" onClick={() => setDeleteConfirmId(detail.meta.id)}>
-                      Delete
+                      {t('vault.action.delete')}
                     </Button>
                   )}
                 </div>
               </div>
               {editingItem && (
                 <div className="space-y-2 rounded-md border p-3 bg-muted/20">
-                  <Input placeholder="Title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                  <Input placeholder={t('vault.field.title')} value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
                   {detail.type === 'login' ? (
                     <>
-                      <Input placeholder="Website" value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} />
-                      <Input placeholder="Username" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
-                      <Input type="password" placeholder="Password" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
-                      <Input placeholder="TOTP Secret" value={editTotpSecret} onChange={(e) => setEditTotpSecret(e.target.value)} />
+                      <Input placeholder={t('vault.field.website')} value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} />
+                      <Input placeholder={t('vault.field.username')} value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
+                      <Input type="password" placeholder={t('vault.field.password')} value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
+                      <Input placeholder={t('vault.field.totpSecret')} value={editTotpSecret} onChange={(e) => setEditTotpSecret(e.target.value)} />
                       <textarea
                         className="w-full min-h-20 rounded-md border bg-background px-3 py-2 text-sm"
-                        placeholder="Notes"
+                        placeholder={t('vault.field.notes')}
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
                       />
@@ -382,14 +386,14 @@ export default function VaultView(): React.JSX.Element {
                   ) : (
                     <textarea
                       className="w-full min-h-24 rounded-md border bg-background px-3 py-2 text-sm"
-                      placeholder="Content"
+                      placeholder={t('vault.field.content')}
                       value={editNoteContent}
                       onChange={(e) => setEditNoteContent(e.target.value)}
                     />
                   )}
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={handleUpdate} disabled={loading}>Save</Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingItem(false)}>Cancel</Button>
+                    <Button size="sm" onClick={handleUpdate} disabled={loading}>{t('vault.action.save')}</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingItem(false)}>{t('vault.action.cancel')}</Button>
                   </div>
                 </div>
               )}
@@ -403,12 +407,12 @@ export default function VaultView(): React.JSX.Element {
                         const result = await autoType(detail.meta.id, false)
                         setAutoTypeNotice(
                           result.fallbackCopied
-                            ? 'Auto-Type failed, password copied as fallback.'
-                            : 'Auto-Type sent.'
+                            ? t('vault.autoType.fallback')
+                            : t('vault.autoType.sent')
                         )
                       }}
                     >
-                      Auto Type
+                      {t('vault.action.autoType')}
                     </Button>
                     <Button
                       size="sm"
@@ -417,27 +421,27 @@ export default function VaultView(): React.JSX.Element {
                         const result = await autoType(detail.meta.id, true)
                         setAutoTypeNotice(
                           result.fallbackCopied
-                            ? 'Auto-Type failed, password copied as fallback.'
-                            : 'Auto-Type sent.'
+                            ? t('vault.autoType.fallback')
+                            : t('vault.autoType.sent')
                         )
                       }}
                     >
-                      Auto Type + Enter
+                      {t('vault.action.autoTypeEnter')}
                     </Button>
                     {autoTypeNotice && <span className="text-xs text-muted-foreground">{autoTypeNotice}</span>}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-24 text-muted-foreground">Username</span>
+                    <span className="w-24 text-muted-foreground">{t('vault.field.username')}</span>
                     <span className="font-mono">{detail.fields.username}</span>
-                    <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.username)}>Copy</Button>
+                    <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.username)}>{t('vault.action.copy')}</Button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-24 text-muted-foreground">Password</span>
+                    <span className="w-24 text-muted-foreground">{t('vault.field.password')}</span>
                     <span className="font-mono">{showDetailPassword ? detail.fields.password : '••••••••'}</span>
                     <Button size="sm" variant="ghost" onClick={() => setShowDetailPassword(!showDetailPassword)}>
-                      {showDetailPassword ? 'Hide' : 'Show'}
+                      {showDetailPassword ? t('vault.action.hide') : t('vault.action.show')}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.password)}>Copy</Button>
+                    <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.password)}>{t('vault.action.copy')}</Button>
                   </div>
                   {detail.fields.totpSecret && (
                     <div className="flex items-center gap-2">
@@ -454,7 +458,7 @@ export default function VaultView(): React.JSX.Element {
                           }
                         }}
                       >
-                        Get & Copy Code
+                        {t('vault.action.getTotpCode')}
                       </Button>
                       {totpCode && (
                         <span className="font-mono">{totpCode} ({totpRemain}s)</span>
@@ -463,14 +467,14 @@ export default function VaultView(): React.JSX.Element {
                   )}
                   {detail.fields.notes && (
                     <div className="space-y-1">
-                      <p className="text-muted-foreground">Notes</p>
+                      <p className="text-muted-foreground">{t('vault.field.notes')}</p>
                       <p className="whitespace-pre-wrap">{detail.fields.notes}</p>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.content)}>Copy Note</Button>
+                  <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.content)}>{t('vault.action.copyNote')}</Button>
                   <p className="text-sm whitespace-pre-wrap">{detail.fields.content}</p>
                 </div>
               )}
