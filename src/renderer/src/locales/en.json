@@ -248,6 +248,7 @@
   "vault.field.password": "Password",
   "vault.field.notes": "Notes",
   "vault.field.totpSecret": "TOTP Secret (base32, optional)",
+  "vault.field.totp": "TOTP",
   "vault.field.secureNoteContent": "Secure note content",
   "vault.field.content": "Content",
 

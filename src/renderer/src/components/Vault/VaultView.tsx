@@ -445,7 +445,7 @@ export default function VaultView(): React.JSX.Element {
                   </div>
                   {detail.fields.totpSecret && (
                     <div className="flex items-center gap-2">
-                      <span className="w-24 text-muted-foreground">TOTP</span>
+                      <span className="w-24 text-muted-foreground">{t('vault.field.totp')}</span>
                       <Button
                         size="sm"
                         variant="outline"

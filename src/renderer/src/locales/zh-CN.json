@@ -248,6 +248,7 @@
   "vault.field.password": "密码",
   "vault.field.notes": "备注",
   "vault.field.totpSecret": "TOTP 密钥（base32，可选）",
+  "vault.field.totp": "TOTP",
   "vault.field.secureNoteContent": "安全备注内容",
   "vault.field.content": "内容",
 
