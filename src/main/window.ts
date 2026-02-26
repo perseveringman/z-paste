@@ -85,6 +85,18 @@ export class WindowManager {
     win.webContents.send('panel:shown')
   }
 
+  showWithView(view: 'clipboard' | 'vault'): void {
+    const wasVisible = this.mainWindow?.isVisible()
+    this.show()
+    if (!wasVisible) {
+      // wait for renderer to mount before sending view switch
+      this.mainWindow?.webContents.once('did-finish-load', () => {
+        this.mainWindow?.webContents.send('panel:set-view', view)
+      })
+    }
+    this.mainWindow?.webContents.send('panel:set-view', view)
+  }
+
   hide(): void {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.hide()

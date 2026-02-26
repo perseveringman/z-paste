@@ -75,6 +75,13 @@ export default function PanelWindow(): React.JSX.Element {
   }, [])
 
   useEffect(() => {
+    const unsub = window.api.onPanelSetView((view) => {
+      setView(view)
+    })
+    return unsub
+  }, [])
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (matchShortcut(e, openSettingsShortcut)) {
         e.preventDefault()

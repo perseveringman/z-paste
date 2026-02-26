@@ -27,7 +27,11 @@ export class ShortcutManager {
 
   register(): void {
     globalShortcut.register('Shift+CommandOrControl+V', () => {
-      this.windowManager.toggle()
+      this.windowManager.showWithView('clipboard')
+    })
+
+    globalShortcut.register('Shift+CommandOrControl+P', () => {
+      this.windowManager.showWithView('vault')
     })
 
     this.registerSequencePaste('CommandOrControl+;')
@@ -195,7 +199,11 @@ export class ShortcutManager {
     if (config.widgetQuickPastePrefix) this.widgetQuickPastePrefix = config.widgetQuickPastePrefix
 
     globalShortcut.register(config.panelShortcut || 'Shift+CommandOrControl+V', () => {
-      this.windowManager.toggle()
+      this.windowManager.showWithView('clipboard')
+    })
+
+    globalShortcut.register('Shift+CommandOrControl+P', () => {
+      this.windowManager.showWithView('vault')
     })
 
     this.registerSequencePaste(config.sequencePaste || 'CommandOrControl+;')

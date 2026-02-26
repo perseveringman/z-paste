@@ -139,6 +139,7 @@ interface ZPasteAPI {
   onNewItem: (callback: (item: ClipboardItem) => void) => () => void
   onPanelShown: (callback: () => void) => () => void
   onPanelHidden: (callback: () => void) => () => void
+  onPanelSetView: (callback: (view: 'clipboard' | 'vault') => void) => () => void
   // Widget
   widgetSetPinned: (pinned: boolean) => Promise<void>
   widgetSavePosition: (x: number, y: number) => Promise<void>

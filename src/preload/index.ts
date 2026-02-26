@@ -96,6 +96,10 @@ const api = {
     ipcRenderer.on('panel:hidden', () => callback())
     return () => ipcRenderer.removeAllListeners('panel:hidden')
   },
+  onPanelSetView: (callback: (view: 'clipboard' | 'vault') => void) => {
+    ipcRenderer.on('panel:set-view', (_, view) => callback(view))
+    return () => ipcRenderer.removeAllListeners('panel:set-view')
+  },
   // Widget
   widgetSetPinned: (pinned: boolean) => ipcRenderer.invoke('widget:setPinned', pinned),
   widgetSavePosition: (x: number, y: number) => ipcRenderer.invoke('widget:savePosition', x, y),
