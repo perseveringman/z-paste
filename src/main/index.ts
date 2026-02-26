@@ -13,6 +13,7 @@ import { getAppIcon } from './clipboard/app-icon'
 import { exec } from 'child_process'
 import * as vaultRepository from './database/vault-repository'
 import { VaultSessionManager } from './vault/session'
+import { VaultService } from './vault/service'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -21,6 +22,7 @@ let trayManager: TrayManager
 let clipboardMonitor: ClipboardMonitor
 let syncService: iCloudSync | null = null
 let vaultSession: VaultSessionManager
+let vaultService: VaultService
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
@@ -42,6 +44,7 @@ app.whenReady().then(() => {
   trayManager = new TrayManager(windowManager)
   clipboardMonitor = new ClipboardMonitor()
   vaultSession = new VaultSessionManager()
+  vaultService = new VaultService(vaultSession)
 
   shortcutManager.register()
   trayManager.create()
@@ -243,6 +246,26 @@ app.whenReady().then(() => {
 
   ipcMain.handle('vault:getSecurityState', async () => {
     return vaultSession.getSecurityState()
+  })
+
+  ipcMain.handle('vault:listItems', async (_, options) => {
+    return vaultService.listItems(options)
+  })
+
+  ipcMain.handle('vault:createLogin', async (_, input) => {
+    return vaultService.createLogin(input)
+  })
+
+  ipcMain.handle('vault:createSecureNote', async (_, input) => {
+    return vaultService.createSecureNote(input)
+  })
+
+  ipcMain.handle('vault:updateItem', async (_, input) => {
+    vaultService.updateItem(input)
+  })
+
+  ipcMain.handle('vault:getItemDetail', async (_, id: string) => {
+    return vaultService.getItemDetail(id)
   })
 
   // Source app IPC handlers

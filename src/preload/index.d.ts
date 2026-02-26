@@ -34,6 +34,46 @@ interface TagWithCount {
   count: number
 }
 
+type VaultItemType = 'login' | 'secure_note'
+
+interface VaultItemMeta {
+  id: string
+  type: VaultItemType
+  title: string
+  website: string | null
+  favorite: number
+  tags: string | null
+  created_at: number
+  updated_at: number
+  last_used_at: number | null
+}
+
+type VaultItemDetail =
+  | {
+      meta: VaultItemMeta
+      type: 'login'
+      fields: {
+        username: string
+        password: string
+        notes: string | null
+        totpSecret: string | null
+      }
+    }
+  | {
+      meta: VaultItemMeta
+      type: 'secure_note'
+      fields: {
+        content: string
+      }
+    }
+
+interface VaultSecurityState {
+  locked: boolean
+  hasVaultSetup: boolean
+  autoLockMinutes: number
+  lastUnlockMethod: 'master' | 'recovery' | null
+}
+
 interface ZPasteAPI {
   getItems: (options?: {
     limit?: number
@@ -97,6 +137,52 @@ interface ZPasteAPI {
   widgetSetFollowFilter: (value: boolean) => Promise<void>
   onWidgetShown: (callback: () => void) => () => void
   onWidgetPinnedChanged: (callback: (pinned: boolean) => void) => () => void
+  // Vault
+  vaultListItems: (options?: {
+    query?: string
+    type?: VaultItemType
+    limit?: number
+    offset?: number
+  }) => Promise<VaultItemMeta[]>
+  vaultCreateLogin: (input: {
+    title: string
+    website?: string | null
+    username: string
+    password: string
+    notes?: string | null
+    totpSecret?: string | null
+    favorite?: boolean
+    tags?: string[] | null
+  }) => Promise<VaultItemMeta>
+  vaultCreateSecureNote: (input: {
+    title: string
+    content: string
+    favorite?: boolean
+    tags?: string[] | null
+  }) => Promise<VaultItemMeta>
+  vaultUpdateItem: (input: {
+    id: string
+    title?: string
+    website?: string | null
+    favorite?: boolean
+    tags?: string[] | null
+    loginFields?: {
+      username: string
+      password: string
+      notes?: string | null
+      totpSecret?: string | null
+    }
+    secureNoteFields?: {
+      content: string
+    }
+  }) => Promise<void>
+  vaultGetItemDetail: (id: string) => Promise<VaultItemDetail | null>
+  vaultDeleteItem: (id: string) => Promise<void>
+  vaultSetupMasterPassword: (masterPassword: string) => Promise<{ recoveryKey: string }>
+  vaultUnlock: (masterPassword: string) => Promise<{ ok: true }>
+  vaultUnlockWithRecoveryKey: (recoveryKey: string) => Promise<{ ok: true }>
+  vaultLock: () => Promise<{ ok: true }>
+  vaultGetSecurityState: () => Promise<VaultSecurityState>
 }
 
 declare global {

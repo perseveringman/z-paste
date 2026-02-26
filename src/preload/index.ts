@@ -6,6 +6,15 @@ type LeftFilter =
   | { type: 'starred' }
   | { type: 'tag'; slug: string }
 
+type VaultItemType = 'login' | 'secure_note'
+
+type VaultListOptions = {
+  query?: string
+  type?: VaultItemType
+  limit?: number
+  offset?: number
+}
+
 const api = {
   getItems: (options?: {
     limit?: number
@@ -100,7 +109,48 @@ const api = {
   onWidgetPinnedChanged: (callback: (pinned: boolean) => void) => {
     ipcRenderer.on('widget:pinnedChanged', (_, pinned) => callback(pinned))
     return () => ipcRenderer.removeAllListeners('widget:pinnedChanged')
-  }
+  },
+  // Vault
+  vaultListItems: (options?: VaultListOptions) => ipcRenderer.invoke('vault:listItems', options),
+  vaultCreateLogin: (input: {
+    title: string
+    website?: string | null
+    username: string
+    password: string
+    notes?: string | null
+    totpSecret?: string | null
+    favorite?: boolean
+    tags?: string[] | null
+  }) => ipcRenderer.invoke('vault:createLogin', input),
+  vaultCreateSecureNote: (input: {
+    title: string
+    content: string
+    favorite?: boolean
+    tags?: string[] | null
+  }) => ipcRenderer.invoke('vault:createSecureNote', input),
+  vaultUpdateItem: (input: {
+    id: string
+    title?: string
+    website?: string | null
+    favorite?: boolean
+    tags?: string[] | null
+    loginFields?: {
+      username: string
+      password: string
+      notes?: string | null
+      totpSecret?: string | null
+    }
+    secureNoteFields?: { content: string }
+  }) => ipcRenderer.invoke('vault:updateItem', input),
+  vaultGetItemDetail: (id: string) => ipcRenderer.invoke('vault:getItemDetail', id),
+  vaultDeleteItem: (id: string) => ipcRenderer.invoke('vault:delete', id),
+  vaultSetupMasterPassword: (masterPassword: string) =>
+    ipcRenderer.invoke('vault:setupMasterPassword', masterPassword),
+  vaultUnlock: (masterPassword: string) => ipcRenderer.invoke('vault:unlock', masterPassword),
+  vaultUnlockWithRecoveryKey: (recoveryKey: string) =>
+    ipcRenderer.invoke('vault:unlockWithRecoveryKey', recoveryKey),
+  vaultLock: () => ipcRenderer.invoke('vault:lock'),
+  vaultGetSecurityState: () => ipcRenderer.invoke('vault:getSecurityState')
 }
 
 if (process.contextIsolated) {
