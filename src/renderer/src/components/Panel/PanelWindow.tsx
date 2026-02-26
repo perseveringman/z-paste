@@ -16,8 +16,9 @@ import { useQueueToast } from '../../hooks/useQueueToast'
 import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { useVaultStore } from '../../stores/vaultStore'
 import { matchShortcut } from '../../utils/shortcut'
-import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X } from 'lucide-react'
+import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X, Lock, Unlock } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
@@ -31,6 +32,7 @@ export default function PanelWindow(): React.JSX.Element {
   const items = useSearch()
   const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters, isQueueActive, sequenceQueue, clearQueue } = useClipboardStore()
   const { toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut } = useSettingsStore()
+  const { security, lock: lockVault } = useVaultStore()
   const selectedItem = items[selectedIndex] || null
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [tagPickerItemId, setTagPickerItemId] = useState<string | null>(null)
@@ -153,7 +155,23 @@ export default function PanelWindow(): React.JSX.Element {
             onClick={() => setView('vault')}
           />
         </div>
-        {view !== 'vault' ? <SearchBar /> : <div className="flex-1" />}
+        <SearchBar view={view} />
+        {view === 'vault' && !security.locked && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => lockVault()}
+            className="ml-2 h-9 w-9 text-muted-foreground hover:text-destructive"
+            title={t('vault.lock')}
+          >
+            <Unlock className="w-4 h-4" />
+          </Button>
+        )}
+        {view === 'vault' && security.locked && (
+          <div className="ml-2 h-9 w-9 flex items-center justify-center text-muted-foreground">
+            <Lock className="w-4 h-4" />
+          </div>
+        )}
         <Button
           variant="ghost"
           size="icon"
