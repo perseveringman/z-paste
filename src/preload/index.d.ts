@@ -191,6 +191,10 @@ interface ZPasteAPI {
     useSymbols?: boolean
   }) => Promise<string>
   vaultGetTotpCode: (id: string) => Promise<{ code: string; remainingSeconds: number } | null>
+  vaultAutoType: (input: { id: string; submit?: boolean; stepDelayMs?: number }) => Promise<{
+    ok: true
+    fallbackCopied: boolean
+  }>
 }
 
 declare global {

@@ -29,7 +29,8 @@ export default function VaultView(): React.JSX.Element {
     deleteItem,
     clearError,
     generatePassword,
-    getTotpCode
+    getTotpCode,
+    autoType
   } = useVaultStore()
 
   const [masterPassword, setMasterPassword] = useState('')
@@ -47,6 +48,7 @@ export default function VaultView(): React.JSX.Element {
   const [noteContent, setNoteContent] = useState('')
   const [totpCode, setTotpCode] = useState<string | null>(null)
   const [totpRemain, setTotpRemain] = useState<number | null>(null)
+  const [autoTypeNotice, setAutoTypeNotice] = useState<string | null>(null)
 
   useEffect(() => {
     refreshSecurity()
@@ -279,6 +281,37 @@ export default function VaultView(): React.JSX.Element {
               {detail.type === 'login' ? (
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const result = await autoType(detail.meta.id, false)
+                        setAutoTypeNotice(
+                          result.fallbackCopied
+                            ? 'Auto-Type failed, password copied as fallback.'
+                            : 'Auto-Type sent.'
+                        )
+                      }}
+                    >
+                      Auto Type
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const result = await autoType(detail.meta.id, true)
+                        setAutoTypeNotice(
+                          result.fallbackCopied
+                            ? 'Auto-Type failed, password copied as fallback.'
+                            : 'Auto-Type sent.'
+                        )
+                      }}
+                    >
+                      Auto Type + Enter
+                    </Button>
+                    {autoTypeNotice && <span className="text-xs text-muted-foreground">{autoTypeNotice}</span>}
+                  </div>
+                  <div className="flex items-center gap-2">
                     <span className="w-24 text-muted-foreground">Username</span>
                     <span className="font-mono">{detail.fields.username}</span>
                     <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.username)}>Copy</Button>
@@ -330,4 +363,3 @@ export default function VaultView(): React.JSX.Element {
     </div>
   )
 }
-

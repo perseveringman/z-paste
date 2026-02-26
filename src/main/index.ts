@@ -14,6 +14,7 @@ import { exec } from 'child_process'
 import * as vaultRepository from './database/vault-repository'
 import { VaultSessionManager } from './vault/session'
 import { VaultService } from './vault/service'
+import { AutoTypeAgent } from './vault/auto-type'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -23,6 +24,7 @@ let clipboardMonitor: ClipboardMonitor
 let syncService: iCloudSync | null = null
 let vaultSession: VaultSessionManager
 let vaultService: VaultService
+let autoTypeAgent: AutoTypeAgent
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
@@ -45,6 +47,7 @@ app.whenReady().then(() => {
   clipboardMonitor = new ClipboardMonitor()
   vaultSession = new VaultSessionManager()
   vaultService = new VaultService(vaultSession)
+  autoTypeAgent = new AutoTypeAgent()
 
   shortcutManager.register()
   trayManager.create()
@@ -274,6 +277,28 @@ app.whenReady().then(() => {
 
   ipcMain.handle('vault:getTotpCode', async (_, id: string) => {
     return vaultService.getTotpCode(id)
+  })
+
+  ipcMain.handle('vault:autoType', async (_, input: { id: string; submit?: boolean; stepDelayMs?: number }) => {
+    const detail = vaultService.getItemDetail(input.id)
+    if (!detail || detail.type !== 'login') {
+      throw new Error('Vault login item not found')
+    }
+
+    const previousApp = windowManager.getPreviousAppBundleId()
+    windowManager.hide()
+    try {
+      await autoTypeAgent.run(previousApp, {
+        username: detail.fields.username,
+        password: detail.fields.password,
+        submit: input.submit,
+        stepDelayMs: input.stepDelayMs
+      })
+      return { ok: true, fallbackCopied: false }
+    } catch {
+      clipboard.writeText(detail.fields.password)
+      return { ok: true, fallbackCopied: true }
+    }
   })
 
   // Source app IPC handlers

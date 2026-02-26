@@ -77,6 +77,7 @@ interface VaultState {
     useSymbols?: boolean
   }) => Promise<string>
   getTotpCode: (id: string) => Promise<{ code: string; remainingSeconds: number } | null>
+  autoType: (id: string, submit?: boolean) => Promise<{ ok: true; fallbackCopied: boolean }>
 }
 
 const defaultSecurityState: VaultSecurityState = {
@@ -218,6 +219,9 @@ export const useVaultStore = create<VaultState>((set, get) => ({
 
   getTotpCode: async (id) => {
     return window.api.vaultGetTotpCode(id)
+  },
+
+  autoType: async (id, submit) => {
+    return window.api.vaultAutoType({ id, submit, stepDelayMs: 80 })
   }
 }))
-

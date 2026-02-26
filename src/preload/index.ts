@@ -158,7 +158,9 @@ const api = {
     useNumbers?: boolean
     useSymbols?: boolean
   }) => ipcRenderer.invoke('vault:generatePassword', options),
-  vaultGetTotpCode: (id: string) => ipcRenderer.invoke('vault:getTotpCode', id)
+  vaultGetTotpCode: (id: string) => ipcRenderer.invoke('vault:getTotpCode', id),
+  vaultAutoType: (input: { id: string; submit?: boolean; stepDelayMs?: number }) =>
+    ipcRenderer.invoke('vault:autoType', input)
 }
 
 if (process.contextIsolated) {
