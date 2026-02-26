@@ -150,7 +150,15 @@ const api = {
   vaultUnlockWithRecoveryKey: (recoveryKey: string) =>
     ipcRenderer.invoke('vault:unlockWithRecoveryKey', recoveryKey),
   vaultLock: () => ipcRenderer.invoke('vault:lock'),
-  vaultGetSecurityState: () => ipcRenderer.invoke('vault:getSecurityState')
+  vaultGetSecurityState: () => ipcRenderer.invoke('vault:getSecurityState'),
+  vaultGeneratePassword: (options?: {
+    length?: number
+    useUppercase?: boolean
+    useLowercase?: boolean
+    useNumbers?: boolean
+    useSymbols?: boolean
+  }) => ipcRenderer.invoke('vault:generatePassword', options),
+  vaultGetTotpCode: (id: string) => ipcRenderer.invoke('vault:getTotpCode', id)
 }
 
 if (process.contextIsolated) {

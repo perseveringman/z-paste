@@ -268,6 +268,14 @@ app.whenReady().then(() => {
     return vaultService.getItemDetail(id)
   })
 
+  ipcMain.handle('vault:generatePassword', async (_, options) => {
+    return vaultService.generatePassword(options)
+  })
+
+  ipcMain.handle('vault:getTotpCode', async (_, id: string) => {
+    return vaultService.getTotpCode(id)
+  })
+
   // Source app IPC handlers
   ipcMain.handle('sourceApps:getAll', async () => {
     return repository.getSourceApps()

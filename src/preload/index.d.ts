@@ -183,6 +183,14 @@ interface ZPasteAPI {
   vaultUnlockWithRecoveryKey: (recoveryKey: string) => Promise<{ ok: true }>
   vaultLock: () => Promise<{ ok: true }>
   vaultGetSecurityState: () => Promise<VaultSecurityState>
+  vaultGeneratePassword: (options?: {
+    length?: number
+    useUppercase?: boolean
+    useLowercase?: boolean
+    useNumbers?: boolean
+    useSymbols?: boolean
+  }) => Promise<string>
+  vaultGetTotpCode: (id: string) => Promise<{ code: string; remainingSeconds: number } | null>
 }
 
 declare global {

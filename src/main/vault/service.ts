@@ -3,6 +3,8 @@ import { nanoid } from 'nanoid'
 import * as vaultRepository from '../database/vault-repository'
 import { decryptVaultPayload, encryptVaultPayload } from './crypto'
 import { VaultSessionManager } from './session'
+import { generatePassword, PasswordGenerateOptions } from './password-generator'
+import { generateTotpCode } from './totp'
 
 export interface CreateLoginInput {
   title: string
@@ -223,5 +225,17 @@ export class VaultService {
     this.session.getDEKOrThrow()
     vaultRepository.deleteVaultItem(id)
   }
-}
 
+  generatePassword(options?: PasswordGenerateOptions): string {
+    this.session.getDEKOrThrow()
+    return generatePassword(options)
+  }
+
+  getTotpCode(itemId: string): { code: string; remainingSeconds: number } | null {
+    this.session.getDEKOrThrow()
+    const detail = this.getItemDetail(itemId)
+    if (!detail || detail.type !== 'login') return null
+    if (!detail.fields.totpSecret) return null
+    return generateTotpCode(detail.fields.totpSecret)
+  }
+}
