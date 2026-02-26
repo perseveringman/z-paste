@@ -1,12 +1,8 @@
 import { nanoid } from 'nanoid'
 import * as vaultRepository from '../database/vault-repository'
-import {
-  VaultKdfParams,
-  setupVaultKeys,
-  unwrapDEKWithMasterPassword,
-  unwrapDEKWithRecoveryKey
-} from './crypto'
+import { VaultKdfParams, VaultKdfType } from './crypto'
 import { hasBiometricDEK, loadBiometricDEK, saveBiometricDEK } from './biometric'
+import { VaultCryptoWorkerClient } from './worker-client'
 
 const DEFAULT_AUTO_LOCK_MINUTES = 10
 const META_ID = 'primary'
@@ -20,7 +16,8 @@ export interface VaultSecurityState {
 }
 
 export class VaultSessionManager {
-  private dek: Buffer | null = null
+  constructor(private readonly cryptoWorker: VaultCryptoWorkerClient) {}
+
   private autoLockMinutes = DEFAULT_AUTO_LOCK_MINUTES
   private autoLockTimer: ReturnType<typeof setTimeout> | null = null
   private lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null = null
@@ -32,7 +29,7 @@ export class VaultSessionManager {
     }
 
     const now = Date.now()
-    const keys = await setupVaultKeys(masterPassword)
+    const keys = await this.cryptoWorker.setupMasterPassword(masterPassword)
     vaultRepository.upsertVaultCryptoMeta({
       id: META_ID,
       kdf_type: keys.kdfType,
@@ -44,10 +41,9 @@ export class VaultSessionManager {
       updated_at: now
     })
 
-    this.dek = keys.dek
     this.lastUnlockMethod = 'master'
     this.touch()
-    await saveBiometricDEK(keys.dek)
+    await this.persistBiometricDEK()
 
     vaultRepository.appendVaultAuditEvent({
       id: nanoid(),
@@ -68,16 +64,16 @@ export class VaultSessionManager {
 
     try {
       const kdfParams = JSON.parse(meta.kdf_params) as VaultKdfParams
-      this.dek = await unwrapDEKWithMasterPassword(
-        meta.dek_wrapped_by_master,
+      await this.cryptoWorker.unlockWithMasterPassword({
+        wrapped: meta.dek_wrapped_by_master,
         masterPassword,
-        meta.salt,
-        (meta.kdf_type as 'argon2id' | 'pbkdf2') || 'pbkdf2',
+        salt: meta.salt,
+        kdfType: this.normalizeKdfType(meta.kdf_type),
         kdfParams
-      )
+      })
       this.lastUnlockMethod = 'master'
       this.touch()
-      await saveBiometricDEK(this.dek)
+      await this.persistBiometricDEK()
       vaultRepository.appendVaultAuditEvent({
         id: nanoid(),
         event_type: 'unlock',
@@ -105,16 +101,16 @@ export class VaultSessionManager {
 
     try {
       const kdfParams = JSON.parse(meta.kdf_params) as VaultKdfParams
-      this.dek = await unwrapDEKWithRecoveryKey(
-        meta.dek_wrapped_by_recovery,
+      await this.cryptoWorker.unlockWithRecoveryKey({
+        wrapped: meta.dek_wrapped_by_recovery,
         recoveryKey,
-        meta.salt,
-        (meta.kdf_type as 'argon2id' | 'pbkdf2') || 'pbkdf2',
+        salt: meta.salt,
+        kdfType: this.normalizeKdfType(meta.kdf_type),
         kdfParams
-      )
+      })
       this.lastUnlockMethod = 'recovery'
       this.touch()
-      await saveBiometricDEK(this.dek)
+      await this.persistBiometricDEK()
       vaultRepository.appendVaultAuditEvent({
         id: nanoid(),
         event_type: 'unlock_recovery',
@@ -152,7 +148,7 @@ export class VaultSessionManager {
       throw new Error('Biometric unlock is not available')
     }
 
-    this.dek = dek
+    await this.cryptoWorker.setDEK(dek.toString('base64'))
     this.lastUnlockMethod = 'biometric'
     this.touch()
     vaultRepository.appendVaultAuditEvent({
@@ -164,8 +160,8 @@ export class VaultSessionManager {
     })
   }
 
-  lock(): void {
-    this.dek = null
+  async lock(): Promise<void> {
+    await this.cryptoWorker.lock()
     this.clearTimer()
     vaultRepository.appendVaultAuditEvent({
       id: nanoid(),
@@ -176,21 +172,21 @@ export class VaultSessionManager {
     })
   }
 
-  isUnlocked(): boolean {
-    return this.dek !== null
+  async isUnlocked(): Promise<boolean> {
+    return this.cryptoWorker.isUnlocked()
   }
 
-  getDEKOrThrow(): Buffer {
-    if (!this.dek) {
+  async ensureUnlocked(): Promise<void> {
+    const unlocked = await this.isUnlocked()
+    if (!unlocked) {
       throw new Error('Vault is locked')
     }
     this.touch()
-    return this.dek
   }
 
   async getSecurityState(): Promise<VaultSecurityState> {
     return {
-      locked: !this.isUnlocked(),
+      locked: !(await this.isUnlocked()),
       hasVaultSetup: !!vaultRepository.getVaultCryptoMeta(META_ID),
       autoLockMinutes: this.autoLockMinutes,
       lastUnlockMethod: this.lastUnlockMethod,
@@ -200,15 +196,17 @@ export class VaultSessionManager {
 
   setAutoLockMinutes(minutes: number): void {
     this.autoLockMinutes = Math.max(1, minutes)
-    if (this.isUnlocked()) {
-      this.touch()
-    }
+    void this.isUnlocked()
+      .then(unlocked => {
+        if (unlocked) this.touch()
+      })
+      .catch(() => undefined)
   }
 
   private touch(): void {
     this.clearTimer()
     this.autoLockTimer = setTimeout(() => {
-      this.lock()
+      void this.lock()
     }, this.autoLockMinutes * 60 * 1000)
   }
 
@@ -217,5 +215,14 @@ export class VaultSessionManager {
       clearTimeout(this.autoLockTimer)
       this.autoLockTimer = null
     }
+  }
+
+  private normalizeKdfType(value: string): VaultKdfType {
+    return value === 'argon2id' ? 'argon2id' : 'pbkdf2'
+  }
+
+  private async persistBiometricDEK(): Promise<void> {
+    const { dekBase64 } = await this.cryptoWorker.exportDEK()
+    await saveBiometricDEK(Buffer.from(dekBase64, 'base64'))
   }
 }

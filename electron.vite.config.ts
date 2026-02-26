@@ -4,7 +4,18 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['nanoid'] })]
+    plugins: [externalizeDepsPlugin({ exclude: ['nanoid'] })],
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve(__dirname, 'src/main/index.ts'),
+          'vault-worker': resolve(__dirname, 'src/main/vault/worker.ts')
+        },
+        output: {
+          entryFileNames: '[name].js'
+        }
+      }
+    }
   },
   preload: {
     plugins: [externalizeDepsPlugin()]

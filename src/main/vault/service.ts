@@ -1,10 +1,9 @@
-import { randomBytes } from 'crypto'
 import { nanoid } from 'nanoid'
 import * as vaultRepository from '../database/vault-repository'
-import { decryptVaultPayload, encryptVaultPayload } from './crypto'
 import { VaultSessionManager } from './session'
 import { generatePassword, PasswordGenerateOptions } from './password-generator'
 import { generateTotpCode } from './totp'
+import { VaultCryptoWorkerClient } from './worker-client'
 
 export interface CreateLoginInput {
   title: string
@@ -44,24 +43,32 @@ export type VaultItemDetail =
     }
 
 export class VaultService {
-  constructor(private readonly session: VaultSessionManager) {}
+  constructor(
+    private readonly session: VaultSessionManager,
+    private readonly cryptoWorker: VaultCryptoWorkerClient
+  ) {}
 
-  listItems(options?: { query?: string; type?: vaultRepository.VaultItemType; limit?: number; offset?: number }) {
-    this.session.getDEKOrThrow()
+  async listItems(options?: {
+    query?: string
+    type?: vaultRepository.VaultItemType
+    limit?: number
+    offset?: number
+  }): Promise<vaultRepository.VaultItemMeta[]> {
+    await this.session.ensureUnlocked()
     return vaultRepository.listVaultItems(options)
   }
 
-  createLogin(input: CreateLoginInput): vaultRepository.VaultItemMeta {
+  async createLogin(input: CreateLoginInput): Promise<vaultRepository.VaultItemMeta> {
+    await this.session.ensureUnlocked()
     const now = Date.now()
     const id = nanoid()
-    const itemKey = randomBytes(32)
-    const dek = this.session.getDEKOrThrow()
     const payload = {
       username: input.username,
       password: input.password,
       notes: input.notes || null,
       totpSecret: input.totpSecret || null
     }
+    const encrypted = await this.cryptoWorker.encryptItemPayload(JSON.stringify(payload))
 
     const meta: vaultRepository.VaultItemMeta = {
       id,
@@ -76,23 +83,23 @@ export class VaultService {
     }
     const secret: vaultRepository.VaultItemSecret = {
       item_id: id,
-      encrypted_payload: encryptVaultPayload(JSON.stringify(payload), itemKey),
-      wrapped_item_key: encryptVaultPayload(itemKey.toString('base64'), dek),
-      enc_version: 1
+      encrypted_payload: encrypted.encryptedPayload,
+      wrapped_item_key: encrypted.wrappedItemKey,
+      enc_version: encrypted.encVersion
     }
 
     vaultRepository.insertVaultItem(meta, secret)
     return meta
   }
 
-  createSecureNote(input: CreateSecureNoteInput): vaultRepository.VaultItemMeta {
+  async createSecureNote(input: CreateSecureNoteInput): Promise<vaultRepository.VaultItemMeta> {
+    await this.session.ensureUnlocked()
     const now = Date.now()
     const id = nanoid()
-    const itemKey = randomBytes(32)
-    const dek = this.session.getDEKOrThrow()
     const payload = {
       content: input.content
     }
+    const encrypted = await this.cryptoWorker.encryptItemPayload(JSON.stringify(payload))
 
     const meta: vaultRepository.VaultItemMeta = {
       id,
@@ -107,26 +114,27 @@ export class VaultService {
     }
     const secret: vaultRepository.VaultItemSecret = {
       item_id: id,
-      encrypted_payload: encryptVaultPayload(JSON.stringify(payload), itemKey),
-      wrapped_item_key: encryptVaultPayload(itemKey.toString('base64'), dek),
-      enc_version: 1
+      encrypted_payload: encrypted.encryptedPayload,
+      wrapped_item_key: encrypted.wrappedItemKey,
+      enc_version: encrypted.encVersion
     }
 
     vaultRepository.insertVaultItem(meta, secret)
     return meta
   }
 
-  getItemDetail(id: string): VaultItemDetail | null {
-    const dek = this.session.getDEKOrThrow()
+  async getItemDetail(id: string): Promise<VaultItemDetail | null> {
+    await this.session.ensureUnlocked()
     const meta = vaultRepository.getVaultItemMetaById(id)
     if (!meta) return null
     const secret = vaultRepository.getVaultItemSecretById(id)
     if (!secret) return null
 
-    const itemKeyB64 = decryptVaultPayload(secret.wrapped_item_key, dek)
-    const itemKey = Buffer.from(itemKeyB64, 'base64')
-    const payloadRaw = decryptVaultPayload(secret.encrypted_payload, itemKey)
-    const payload = JSON.parse(payloadRaw) as Record<string, unknown>
+    const { plaintext } = await this.cryptoWorker.decryptItemPayload({
+      encryptedPayload: secret.encrypted_payload,
+      wrappedItemKey: secret.wrapped_item_key
+    })
+    const payload = JSON.parse(plaintext) as Record<string, unknown>
 
     vaultRepository.updateVaultItem(id, {
       last_used_at: Date.now(),
@@ -155,7 +163,7 @@ export class VaultService {
     }
   }
 
-  updateItem(input: {
+  async updateItem(input: {
     id: string
     title?: string
     website?: string | null
@@ -170,7 +178,8 @@ export class VaultService {
     secureNoteFields?: {
       content: string
     }
-  }): void {
+  }): Promise<void> {
+    await this.session.ensureUnlocked()
     const meta = vaultRepository.getVaultItemMetaById(input.id)
     if (!meta) {
       throw new Error('Vault item not found')
@@ -192,13 +201,10 @@ export class VaultService {
       | undefined
 
     if (input.loginFields || input.secureNoteFields) {
-      const dek = this.session.getDEKOrThrow()
       const existingSecret = vaultRepository.getVaultItemSecretById(input.id)
       if (!existingSecret) {
         throw new Error('Vault item secret not found')
       }
-      const itemKeyB64 = decryptVaultPayload(existingSecret.wrapped_item_key, dek)
-      const itemKey = Buffer.from(itemKeyB64, 'base64')
 
       const payload =
         meta.type === 'login'
@@ -212,8 +218,13 @@ export class VaultService {
               content: input.secureNoteFields?.content || ''
             }
 
+      const encrypted = await this.cryptoWorker.reencryptItemPayload({
+        wrappedItemKey: existingSecret.wrapped_item_key,
+        plaintext: JSON.stringify(payload)
+      })
+
       secretUpdates = {
-        encrypted_payload: encryptVaultPayload(JSON.stringify(payload), itemKey),
+        encrypted_payload: encrypted.encryptedPayload,
         enc_version: existingSecret.enc_version
       }
     }
@@ -221,19 +232,18 @@ export class VaultService {
     vaultRepository.updateVaultItem(input.id, updates, secretUpdates)
   }
 
-  deleteItem(id: string): void {
-    this.session.getDEKOrThrow()
+  async deleteItem(id: string): Promise<void> {
+    await this.session.ensureUnlocked()
     vaultRepository.deleteVaultItem(id)
   }
 
-  generatePassword(options?: PasswordGenerateOptions): string {
-    this.session.getDEKOrThrow()
+  async generatePassword(options?: PasswordGenerateOptions): Promise<string> {
+    await this.session.ensureUnlocked()
     return generatePassword(options)
   }
 
-  getTotpCode(itemId: string): { code: string; remainingSeconds: number } | null {
-    this.session.getDEKOrThrow()
-    const detail = this.getItemDetail(itemId)
+  async getTotpCode(itemId: string): Promise<{ code: string; remainingSeconds: number } | null> {
+    const detail = await this.getItemDetail(itemId)
     if (!detail || detail.type !== 'login') return null
     if (!detail.fields.totpSecret) return null
     return generateTotpCode(detail.fields.totpSecret)
