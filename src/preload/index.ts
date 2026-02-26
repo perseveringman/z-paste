@@ -149,6 +149,7 @@ const api = {
   vaultUnlock: (masterPassword: string) => ipcRenderer.invoke('vault:unlock', masterPassword),
   vaultUnlockWithRecoveryKey: (recoveryKey: string) =>
     ipcRenderer.invoke('vault:unlockWithRecoveryKey', recoveryKey),
+  vaultUnlockWithBiometric: () => ipcRenderer.invoke('vault:unlockWithBiometric'),
   vaultLock: () => ipcRenderer.invoke('vault:lock'),
   vaultGetSecurityState: () => ipcRenderer.invoke('vault:getSecurityState'),
   vaultListAuditEvents: (limit?: number) => ipcRenderer.invoke('vault:listAuditEvents', limit),

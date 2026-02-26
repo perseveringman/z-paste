@@ -37,7 +37,8 @@ export interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
-  lastUnlockMethod: 'master' | 'recovery' | null
+  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null
+  hasBiometricUnlock: boolean
 }
 
 interface VaultState {
@@ -55,6 +56,7 @@ interface VaultState {
   setupMasterPassword: (masterPassword: string) => Promise<void>
   unlock: (masterPassword: string) => Promise<void>
   unlockWithRecoveryKey: (recoveryKey: string) => Promise<void>
+  unlockWithBiometric: () => Promise<void>
   lock: () => Promise<void>
   loadItems: () => Promise<void>
   selectItem: (id: string) => Promise<void>
@@ -84,7 +86,8 @@ const defaultSecurityState: VaultSecurityState = {
   locked: true,
   hasVaultSetup: false,
   autoLockMinutes: 10,
-  lastUnlockMethod: null
+  lastUnlockMethod: null,
+  hasBiometricUnlock: false
 }
 
 export const useVaultStore = create<VaultState>((set, get) => ({
@@ -145,6 +148,19 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await get().loadItems()
     } catch (e) {
       set({ error: e instanceof Error ? e.message : 'Recovery unlock failed' })
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  unlockWithBiometric: async () => {
+    set({ loading: true, error: null })
+    try {
+      await window.api.vaultUnlockWithBiometric()
+      await get().refreshSecurity()
+      await get().loadItems()
+    } catch (e) {
+      set({ error: e instanceof Error ? e.message : 'Biometric unlock failed' })
     } finally {
       set({ loading: false })
     }

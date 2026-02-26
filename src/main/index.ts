@@ -234,12 +234,17 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('vault:unlock', async (_, masterPassword: string) => {
-    vaultSession.unlockWithMasterPassword(masterPassword)
+    await vaultSession.unlockWithMasterPassword(masterPassword)
     return { ok: true }
   })
 
   ipcMain.handle('vault:unlockWithRecoveryKey', async (_, recoveryKey: string) => {
-    vaultSession.unlockWithRecoveryKey(recoveryKey)
+    await vaultSession.unlockWithRecoveryKey(recoveryKey)
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:unlockWithBiometric', async () => {
+    await vaultSession.unlockWithBiometric()
     return { ok: true }
   })
 

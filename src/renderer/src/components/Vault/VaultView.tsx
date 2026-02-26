@@ -21,6 +21,7 @@ export default function VaultView(): React.JSX.Element {
     setupMasterPassword,
     unlock,
     unlockWithRecoveryKey,
+    unlockWithBiometric,
     lock,
     loadItems,
     selectItem,
@@ -172,6 +173,13 @@ export default function VaultView(): React.JSX.Element {
             </Button>
           </div>
         </div>
+        {security.hasBiometricUnlock && (
+          <div className="mt-4">
+            <Button variant="outline" onClick={() => unlockWithBiometric()} disabled={loading}>
+              Unlock with Touch ID / Keychain
+            </Button>
+          </div>
+        )}
         {error && (
           <p className="text-sm text-destructive mt-3 cursor-pointer" onClick={clearError}>
             {error}

@@ -71,7 +71,8 @@ interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
-  lastUnlockMethod: 'master' | 'recovery' | null
+  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null
+  hasBiometricUnlock: boolean
 }
 
 interface VaultAuditEvent {
@@ -189,6 +190,7 @@ interface ZPasteAPI {
   vaultSetupMasterPassword: (masterPassword: string) => Promise<{ recoveryKey: string }>
   vaultUnlock: (masterPassword: string) => Promise<{ ok: true }>
   vaultUnlockWithRecoveryKey: (recoveryKey: string) => Promise<{ ok: true }>
+  vaultUnlockWithBiometric: () => Promise<{ ok: true }>
   vaultLock: () => Promise<{ ok: true }>
   vaultGetSecurityState: () => Promise<VaultSecurityState>
   vaultListAuditEvents: (limit?: number) => Promise<VaultAuditEvent[]>
