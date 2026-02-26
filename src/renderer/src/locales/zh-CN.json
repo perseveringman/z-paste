@@ -8,6 +8,7 @@
 
   "panel.tabs.clipboard": "剪贴板",
   "panel.tabs.templates": "模板",
+  "panel.tabs.vault": "保险库",
   "panel.search.placeholder": "搜索...",
   "panel.help.tooltip": "帮助 / 新手引导",
   "panel.settings.tooltip": "设置 (⌘,)",

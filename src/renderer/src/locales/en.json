@@ -8,6 +8,7 @@
 
   "panel.tabs.clipboard": "Clipboard",
   "panel.tabs.templates": "Templates",
+  "panel.tabs.vault": "Vault",
   "panel.search.placeholder": "Search...",
   "panel.help.tooltip": "Help / Guide",
   "panel.settings.tooltip": "Settings (⌘,)",

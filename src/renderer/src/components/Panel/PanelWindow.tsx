@@ -10,6 +10,7 @@ import QuickEdit from './QuickEdit'
 import TemplateList from '../Templates/TemplateList'
 import SettingsPage from '../Settings/SettingsPage'
 import OnboardingPage from '../Onboarding/OnboardingPage'
+import VaultView from '../Vault/VaultView'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import { useQueueToast } from '../../hooks/useQueueToast'
 import { useSearch } from '../../hooks/useSearch'
@@ -20,7 +21,7 @@ import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X } from 'lucide-rea
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
-type PanelView = 'clipboard' | 'templates' | 'settings' | 'onboarding'
+type PanelView = 'clipboard' | 'templates' | 'vault' | 'settings' | 'onboarding'
 
 export default function PanelWindow(): React.JSX.Element {
   const { t } = useTranslation()
@@ -138,8 +139,13 @@ export default function PanelWindow(): React.JSX.Element {
             active={view === 'templates'}
             onClick={() => setView('templates')}
           />
+          <TabButton
+            label={t('panel.tabs.vault')}
+            active={view === 'vault'}
+            onClick={() => setView('vault')}
+          />
         </div>
-        <SearchBar />
+        {view !== 'vault' ? <SearchBar /> : <div className="flex-1" />}
         <Button
           variant="ghost"
           size="icon"
@@ -205,8 +211,10 @@ export default function PanelWindow(): React.JSX.Element {
             </div>
           </div>
         </div>
-      ) : (
+      ) : view === 'templates' ? (
         <TemplateList />
+      ) : (
+        <VaultView />
       )}
 
       {/* Queue status bar */}
