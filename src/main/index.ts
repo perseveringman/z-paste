@@ -11,6 +11,7 @@ import * as repository from './database/repository'
 import { iCloudSync } from './sync/icloud'
 import { getAppIcon } from './clipboard/app-icon'
 import { exec } from 'child_process'
+import * as vaultRepository from './database/vault-repository'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -199,6 +200,23 @@ app.whenReady().then(() => {
     if (syncService) {
       syncService.syncNow()
     }
+  })
+
+  // Vault IPC handlers (encrypted data only, no plaintext decryption in this layer)
+  ipcMain.handle('vault:list', async (_, options) => {
+    return vaultRepository.listVaultItems(options)
+  })
+
+  ipcMain.handle('vault:get', async (_, id: string) => {
+    const meta = vaultRepository.getVaultItemMetaById(id)
+    if (!meta) return null
+    const secret = vaultRepository.getVaultItemSecretById(id)
+    if (!secret) return null
+    return { meta, secret }
+  })
+
+  ipcMain.handle('vault:delete', async (_, id: string) => {
+    vaultRepository.deleteVaultItem(id)
   })
 
   // Source app IPC handlers
