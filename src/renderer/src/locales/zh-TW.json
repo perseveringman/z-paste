@@ -217,5 +217,65 @@
   "tray.recentItems": "最近剪貼簿",
 
   "panel.queue.active": "正在選擇佇列 ({{count}} 條)",
-  "panel.queue.abandon": "放棄佇列"
+  "panel.queue.abandon": "放棄佇列",
+
+  "vault.setup.title": "保險庫設定",
+  "vault.setup.description": "設定主密碼，將恢復金鑰儲存在安全位置。",
+  "vault.setup.masterPassword": "主密碼",
+  "vault.setup.confirmPassword": "確認密碼",
+  "vault.setup.settingUp": "設定中...",
+  "vault.setup.setMasterPassword": "設定主密碼",
+  "vault.setup.recoveryKeyLabel": "恢復金鑰 — 請儲存在安全的地方！",
+  "vault.setup.copyRecoveryKey": "複製恢復金鑰",
+
+  "vault.locked.title": "保險庫已鎖定",
+  "vault.locked.description": "使用主密碼或恢復金鑰解鎖。",
+  "vault.locked.masterPassword": "主密碼",
+  "vault.locked.unlock": "解鎖",
+  "vault.locked.recoveryKey": "恢復金鑰",
+  "vault.locked.unlockByRecoveryKey": "透過恢復金鑰解鎖",
+  "vault.locked.unlockWithBiometric": "使用 Touch ID / 鑰匙圈解鎖",
+
+  "vault.search.placeholder": "搜尋保險庫...",
+  "vault.lock": "鎖定",
+  "vault.empty": "暫無保險庫項目",
+  "vault.newLogin": "新增登入",
+  "vault.newSecureNote": "新增安全備忘錄",
+
+  "vault.field.title": "標題",
+  "vault.field.website": "網站",
+  "vault.field.username": "使用者名稱",
+  "vault.field.password": "密碼",
+  "vault.field.notes": "備註",
+  "vault.field.totpSecret": "TOTP 金鑰（base32，選填）",
+  "vault.field.secureNoteContent": "安全備忘錄內容",
+  "vault.field.content": "內容",
+
+  "vault.action.hide": "隱藏",
+  "vault.action.show": "顯示",
+  "vault.action.generate": "產生",
+  "vault.action.saving": "儲存中...",
+  "vault.action.save": "儲存",
+  "vault.action.edit": "編輯",
+  "vault.action.delete": "刪除",
+  "vault.action.cancel": "取消",
+  "vault.action.copy": "複製",
+  "vault.action.copyNote": "複製備忘錄",
+  "vault.action.getTotpCode": "取得並複製",
+  "vault.action.autoType": "自動輸入",
+  "vault.action.autoTypeEnter": "自動輸入 + Enter",
+
+  "vault.confirm.question": "確認刪除？",
+  "vault.confirm.yes": "是",
+  "vault.confirm.no": "否",
+
+  "vault.detail.selectItem": "選擇一個項目查看詳情",
+  "vault.detail.login": "登入",
+  "vault.detail.secureNote": "安全備忘錄",
+
+  "vault.autoType.sent": "自動輸入已發送。",
+  "vault.autoType.fallback": "自動輸入失敗，已複製密碼。",
+
+  "vault.item.loginFallback": "登入",
+  "vault.item.secureNote": "安全備忘錄"
 }
