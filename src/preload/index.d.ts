@@ -15,6 +15,7 @@ interface ClipboardItem {
   category_id: string | null
   created_at: number
   updated_at: number
+  use_count: number
   tag_slugs?: string | null
 }
 
@@ -41,6 +42,7 @@ interface ZPasteAPI {
     favoritesOnly?: boolean
     leftFilter?: LeftFilter
     sourceApp?: string
+    sortBy?: 'recent' | 'usage'
   }) => Promise<ClipboardItem[]>
   searchItems: (query: string) => Promise<ClipboardItem[]>
   deleteItem: (id: string) => Promise<void>

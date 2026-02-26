@@ -61,8 +61,8 @@ export function insertItem(item: ClipboardItem): void {
   const content = isKeySet() ? (encryptContent(item.content) || item.content) : item.content
   const stmt = db.prepare(`
     INSERT INTO clipboard_items (id, content, content_type, content_hash, preview, metadata,
-      is_favorite, is_pinned, source_app, tags, category_id, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      is_favorite, is_pinned, source_app, tags, title, category_id, created_at, updated_at, use_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   stmt.run(
     item.id,
@@ -75,9 +75,11 @@ export function insertItem(item: ClipboardItem): void {
     item.is_pinned,
     item.source_app,
     item.tags,
+    item.title ?? null,
     item.category_id,
     item.created_at,
-    item.updated_at
+    item.updated_at,
+    item.use_count ?? 0
   )
 }
 

@@ -72,9 +72,11 @@ export class ClipboardMonitor {
       is_pinned: 0,
       source_app: this.getFrontmostApp(),
       tags: null,
+      title: null,
       category_id: null,
       created_at: Date.now(),
-      updated_at: Date.now()
+      updated_at: Date.now(),
+      use_count: 0
     }
 
     repository.insertItem(item)
@@ -121,9 +123,11 @@ export class ClipboardMonitor {
       is_pinned: 0,
       source_app: this.getFrontmostApp(),
       tags: null,
+      title: null,
       category_id: null,
       created_at: Date.now(),
-      updated_at: Date.now()
+      updated_at: Date.now(),
+      use_count: 0
     }
 
     repository.insertItem(item)

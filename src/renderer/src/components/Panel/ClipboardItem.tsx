@@ -14,8 +14,6 @@ import {
   File,
   Pin,
   Star,
-  Clipboard,
-  Copy,
   Trash2,
   Tag,
   Pencil
