@@ -107,6 +107,53 @@ export default function VaultView(): React.JSX.Element {
     setDeleteConfirmId(null)
   }, [detail?.meta.id])
 
+  useEffect(() => {
+    // Only active on the main vault view (unlocked, setup complete, no pending recovery key)
+    if (security.locked || !security.hasVaultSetup || pendingRecoveryKey) return
+
+    const handle = (e: KeyboardEvent): void => {
+      const inInput =
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+
+      if (e.key === 'Escape') {
+        if (editingItem) {
+          e.preventDefault()
+          setEditingItem(false)
+          return
+        }
+        if (deleteConfirmId) {
+          e.preventDefault()
+          setDeleteConfirmId(null)
+          return
+        }
+        return
+      }
+
+      if (inInput) return
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault()
+        const currentIndex = items.findIndex((item) => item.id === detail?.meta.id)
+        if (items.length === 0) return
+        let nextIndex: number
+        if (currentIndex === -1) {
+          nextIndex = 0
+        } else if (e.key === 'ArrowDown') {
+          nextIndex = Math.min(currentIndex + 1, items.length - 1)
+        } else {
+          nextIndex = Math.max(currentIndex - 1, 0)
+        }
+        if (items[nextIndex] && items[nextIndex].id !== detail?.meta.id) {
+          selectItem(items[nextIndex].id)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handle)
+    return () => window.removeEventListener('keydown', handle)
+  }, [security.locked, security.hasVaultSetup, pendingRecoveryKey, items, detail, editingItem, deleteConfirmId, selectItem])
+
   const canSetup = masterPassword.length >= 8 && masterPassword === masterPasswordConfirm
 
   const selectedTitle = useMemo(() => {
