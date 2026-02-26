@@ -433,7 +433,7 @@ export default function VaultView(): React.JSX.Element {
                 )}
                 {security.hasBiometricUnlock && (
                   <>
-                    {security.hintQuestion && <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center"><span className="bg-background px-2 text-xs text-muted-foreground">or</span></div></div>}
+                    {security.hintQuestion && <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center"><span className="bg-background px-2 text-xs text-muted-foreground">{t('vault.reset.or')}</span></div></div>}
                     <Button
                       className="w-full"
                       variant="outline"

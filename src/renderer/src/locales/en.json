@@ -305,6 +305,7 @@
   "vault.reset.passwordMismatch": "Passwords do not match",
   "vault.reset.resetting": "Resetting...",
   "vault.reset.resetPassword": "Reset Password",
+  "vault.reset.or": "or",
 
   "vault.resetVault.prompt": "Delete all vault data?",
   "vault.resetVault.delete": "Delete",

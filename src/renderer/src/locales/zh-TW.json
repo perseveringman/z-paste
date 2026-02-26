@@ -305,6 +305,7 @@
   "vault.reset.passwordMismatch": "兩次密碼不一致",
   "vault.reset.resetting": "重設中...",
   "vault.reset.resetPassword": "重設密碼",
+  "vault.reset.or": "或",
 
   "vault.resetVault.prompt": "刪除所有保險庫資料？",
   "vault.resetVault.delete": "刪除",
