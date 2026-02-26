@@ -66,6 +66,21 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
   }, [detail?.meta.id])
 
   useEffect(() => {
+    let timer: ReturnType<typeof setInterval>
+    if (detail?.type === 'login' && detail.fields.totpSecret) {
+      const updateTotp = async () => {
+        const result = await getTotpCode(detail.meta.id)
+        if (result) {
+          setTotp({ code: result.code, remain: result.remainingSeconds })
+        }
+      }
+      updateTotp()
+      timer = setInterval(updateTotp, 1000)
+    }
+    return () => clearInterval(timer)
+  }, [detail?.meta.id, detail?.fields.totpSecret, getTotpCode])
+
+  useEffect(() => {
     if (createType) {
       setEditTitle('')
       setEditWebsite('')
