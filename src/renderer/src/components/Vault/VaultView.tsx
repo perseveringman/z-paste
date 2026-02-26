@@ -50,6 +50,17 @@ export default function VaultView(): React.JSX.Element {
   const [totpCode, setTotpCode] = useState<string | null>(null)
   const [totpRemain, setTotpRemain] = useState<number | null>(null)
   const [autoTypeNotice, setAutoTypeNotice] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showDetailPassword, setShowDetailPassword] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [editingItem, setEditingItem] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editWebsite, setEditWebsite] = useState('')
+  const [editUsername, setEditUsername] = useState('')
+  const [editPassword, setEditPassword] = useState('')
+  const [editNotes, setEditNotes] = useState('')
+  const [editTotpSecret, setEditTotpSecret] = useState('')
+  const [editNoteContent, setEditNoteContent] = useState('')
 
   useEffect(() => {
     refreshSecurity()
@@ -60,6 +71,12 @@ export default function VaultView(): React.JSX.Element {
       loadItems()
     }
   }, [security.locked, security.hasVaultSetup, query, loadItems])
+
+  useEffect(() => {
+    setShowDetailPassword(false)
+    setEditingItem(false)
+    setDeleteConfirmId(null)
+  }, [detail?.meta.id])
 
   const canSetup = masterPassword.length >= 8 && masterPassword === masterPasswordConfirm
 
@@ -113,6 +130,43 @@ export default function VaultView(): React.JSX.Element {
     setPassword(generated)
   }
 
+  const startEditing = (): void => {
+    if (!detail) return
+    setEditTitle(detail.meta.title)
+    setEditWebsite(detail.meta.website || '')
+    if (detail.type === 'login') {
+      setEditUsername(detail.fields.username)
+      setEditPassword(detail.fields.password)
+      setEditNotes(detail.fields.notes || '')
+      setEditTotpSecret(detail.fields.totpSecret || '')
+    } else {
+      setEditNoteContent(detail.fields.content)
+    }
+    setEditingItem(true)
+  }
+
+  const handleUpdate = async (): Promise<void> => {
+    if (!detail) return
+    const input: Record<string, unknown> = {
+      id: detail.meta.id,
+      title: editTitle
+    }
+    if (detail.type === 'login') {
+      input.website = editWebsite || null
+      input.loginFields = {
+        username: editUsername,
+        password: editPassword,
+        notes: editNotes || null,
+        totpSecret: editTotpSecret || null
+      }
+    } else {
+      input.secureNoteFields = { content: editNoteContent }
+    }
+    await window.api.vaultUpdateItem(input as Parameters<typeof window.api.vaultUpdateItem>[0])
+    setEditingItem(false)
+    await loadItems()
+  }
+
   if (!security.hasVaultSetup) {
     return (
       <div className="h-full p-6 overflow-auto">
@@ -143,8 +197,11 @@ export default function VaultView(): React.JSX.Element {
           )}
           {recoveryKey && (
             <div className="rounded-md border bg-muted/30 p-3">
-              <p className="text-xs text-muted-foreground mb-1">Recovery Key</p>
+              <p className="text-xs text-muted-foreground mb-1">Recovery Key — save this in a safe place!</p>
               <p className="font-mono text-sm break-all">{recoveryKey}</p>
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => copyText(recoveryKey)}>
+                Copy Recovery Key
+              </Button>
             </div>
           )}
         </div>
@@ -248,7 +305,10 @@ export default function VaultView(): React.JSX.Element {
                 <Input placeholder="Website" value={website} onChange={(e) => setWebsite(e.target.value)} />
                 <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
                 <div className="flex gap-2">
-                  <Input placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Button variant="ghost" size="sm" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? 'Hide' : 'Show'}
+                  </Button>
                   <Button variant="outline" onClick={handleGeneratePassword}>
                     Generate
                   </Button>
@@ -282,10 +342,57 @@ export default function VaultView(): React.JSX.Element {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold">{selectedTitle}</h3>
-                <Button variant="destructive" size="sm" onClick={() => deleteItem(detail.meta.id)}>
-                  Delete
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={startEditing}>
+                    Edit
+                  </Button>
+                  {deleteConfirmId === detail.meta.id ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-destructive">Confirm?</span>
+                      <Button variant="destructive" size="sm" onClick={() => { deleteItem(detail.meta.id); setDeleteConfirmId(null) }}>
+                        Yes
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setDeleteConfirmId(null)}>
+                        No
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="destructive" size="sm" onClick={() => setDeleteConfirmId(detail.meta.id)}>
+                      Delete
+                    </Button>
+                  )}
+                </div>
               </div>
+              {editingItem && (
+                <div className="space-y-2 rounded-md border p-3 bg-muted/20">
+                  <Input placeholder="Title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                  {detail.type === 'login' ? (
+                    <>
+                      <Input placeholder="Website" value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} />
+                      <Input placeholder="Username" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
+                      <Input type="password" placeholder="Password" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
+                      <Input placeholder="TOTP Secret" value={editTotpSecret} onChange={(e) => setEditTotpSecret(e.target.value)} />
+                      <textarea
+                        className="w-full min-h-20 rounded-md border bg-background px-3 py-2 text-sm"
+                        placeholder="Notes"
+                        value={editNotes}
+                        onChange={(e) => setEditNotes(e.target.value)}
+                      />
+                    </>
+                  ) : (
+                    <textarea
+                      className="w-full min-h-24 rounded-md border bg-background px-3 py-2 text-sm"
+                      placeholder="Content"
+                      value={editNoteContent}
+                      onChange={(e) => setEditNoteContent(e.target.value)}
+                    />
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleUpdate} disabled={loading}>Save</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingItem(false)}>Cancel</Button>
+                  </div>
+                </div>
+              )}
               {detail.type === 'login' ? (
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -326,7 +433,10 @@ export default function VaultView(): React.JSX.Element {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-24 text-muted-foreground">Password</span>
-                    <span className="font-mono">{detail.fields.password}</span>
+                    <span className="font-mono">{showDetailPassword ? detail.fields.password : '••••••••'}</span>
+                    <Button size="sm" variant="ghost" onClick={() => setShowDetailPassword(!showDetailPassword)}>
+                      {showDetailPassword ? 'Hide' : 'Show'}
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => copyText(detail.fields.password)}>Copy</Button>
                   </div>
                   {detail.fields.totpSecret && (

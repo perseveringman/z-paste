@@ -149,6 +149,23 @@ export class VaultSessionManager {
     }
 
     await this.cryptoWorker.setDEK(dek.toString('base64'))
+
+    // Verify DEK is valid by attempting to decrypt the master-wrapped DEK
+    try {
+      const { dekBase64 } = await this.cryptoWorker.exportDEK()
+      if (!dekBase64) throw new Error('empty DEK')
+    } catch {
+      await this.cryptoWorker.lock()
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'unlock_biometric',
+        result: 'failed',
+        reason_code: 'biometric_dek_invalid',
+        created_at: Date.now()
+      })
+      throw new Error('Biometric unlock failed: stored key is invalid')
+    }
+
     this.lastUnlockMethod = 'biometric'
     this.touch()
     vaultRepository.appendVaultAuditEvent({

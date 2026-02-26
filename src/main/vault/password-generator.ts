@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto'
+
 export interface PasswordGenerateOptions {
   length?: number
   useUppercase?: boolean
@@ -13,7 +15,14 @@ const NUMBERS = '23456789'
 const SYMBOLS = '!@#$%^&*()-_=+[]{};:,.?'
 
 function randomInt(max: number): number {
-  return Math.floor(Math.random() * max)
+  // Use rejection sampling to avoid modulo bias
+  const byteLength = Math.ceil(Math.log2(max) / 8) || 1
+  const maxValid = Math.floor(256 ** byteLength / max) * max
+  let value: number
+  do {
+    value = randomBytes(byteLength).readUIntBE(0, byteLength)
+  } while (value >= maxValid)
+  return value % max
 }
 
 function pick(chars: string): string {

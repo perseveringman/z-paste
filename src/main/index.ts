@@ -216,21 +216,8 @@ app.whenReady().then(() => {
     }
   })
 
-  // Vault IPC handlers (encrypted data only, no plaintext decryption in this layer)
-  ipcMain.handle('vault:list', async (_, options) => {
-    return vaultRepository.listVaultItems(options)
-  })
-
-  ipcMain.handle('vault:get', async (_, id: string) => {
-    const meta = vaultRepository.getVaultItemMetaById(id)
-    if (!meta) return null
-    const secret = vaultRepository.getVaultItemSecretById(id)
-    if (!secret) return null
-    return { meta, secret }
-  })
-
   ipcMain.handle('vault:delete', async (_, id: string) => {
-    vaultRepository.deleteVaultItem(id)
+    await vaultService.deleteItem(id)
   })
 
   ipcMain.handle('vault:setupMasterPassword', async (_, masterPassword: string) => {

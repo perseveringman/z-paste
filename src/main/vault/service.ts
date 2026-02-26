@@ -137,8 +137,7 @@ export class VaultService {
     const payload = JSON.parse(plaintext) as Record<string, unknown>
 
     vaultRepository.updateVaultItem(id, {
-      last_used_at: Date.now(),
-      updated_at: Date.now()
+      last_used_at: Date.now()
     })
 
     if (meta.type === 'login') {

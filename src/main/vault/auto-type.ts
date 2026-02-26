@@ -47,6 +47,10 @@ export class AutoTypeAgent {
       await sleep(stepDelay)
       await runAppleScript('tell application "System Events" to key code 36')
     }
+
+    // Clear sensitive data from clipboard after paste completes
+    await sleep(stepDelay * 2)
+    clipboard.clear()
   }
 }
 

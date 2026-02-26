@@ -119,6 +119,9 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     case 'lock': {
+      if (activeDEK) {
+        activeDEK.fill(0)
+      }
       activeDEK = null
       return { ok: true }
     }
