@@ -151,6 +151,7 @@ const api = {
     ipcRenderer.invoke('vault:unlockWithRecoveryKey', recoveryKey),
   vaultLock: () => ipcRenderer.invoke('vault:lock'),
   vaultGetSecurityState: () => ipcRenderer.invoke('vault:getSecurityState'),
+  vaultListAuditEvents: (limit?: number) => ipcRenderer.invoke('vault:listAuditEvents', limit),
   vaultGeneratePassword: (options?: {
     length?: number
     useUppercase?: boolean

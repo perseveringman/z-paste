@@ -119,6 +119,8 @@
   "settings.privacy.vaultStatusNotSetup": "Not setup",
   "settings.privacy.vaultStatusLocked": "Locked",
   "settings.privacy.vaultStatusUnlocked": "Unlocked",
+  "settings.privacy.recentEvents": "Recent Vault Events",
+  "settings.privacy.recentEvents.empty": "No security events yet",
   "settings.privacy.clearAll": "Clear All Data",
   "settings.privacy.clearAll.desc": "Delete all clipboard records (cannot be undone)",
   "settings.privacy.confirmClear": "Confirm Clear?",

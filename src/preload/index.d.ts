@@ -74,6 +74,14 @@ interface VaultSecurityState {
   lastUnlockMethod: 'master' | 'recovery' | null
 }
 
+interface VaultAuditEvent {
+  id: string
+  event_type: string
+  result: string
+  reason_code: string | null
+  created_at: number
+}
+
 interface ZPasteAPI {
   getItems: (options?: {
     limit?: number
@@ -183,6 +191,7 @@ interface ZPasteAPI {
   vaultUnlockWithRecoveryKey: (recoveryKey: string) => Promise<{ ok: true }>
   vaultLock: () => Promise<{ ok: true }>
   vaultGetSecurityState: () => Promise<VaultSecurityState>
+  vaultListAuditEvents: (limit?: number) => Promise<VaultAuditEvent[]>
   vaultGeneratePassword: (options?: {
     length?: number
     useUppercase?: boolean

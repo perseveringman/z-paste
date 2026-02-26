@@ -405,6 +405,15 @@ function PrivacySection(): React.JSX.Element {
     hasVaultSetup: boolean
     lastUnlockMethod: 'master' | 'recovery' | null
   } | null>(null)
+  const [auditEvents, setAuditEvents] = useState<
+    Array<{
+      id: string
+      event_type: string
+      result: string
+      reason_code: string | null
+      created_at: number
+    }>
+  >([])
 
   const handleClearAll = useCallback(async () => {
     if (!confirming) {
@@ -424,6 +433,14 @@ function PrivacySection(): React.JSX.Element {
       })
       .catch(() => {
         if (mounted) setVaultState(null)
+      })
+    window.api
+      .vaultListAuditEvents?.(5)
+      .then((events) => {
+        if (mounted) setAuditEvents(events)
+      })
+      .catch(() => {
+        if (mounted) setAuditEvents([])
       })
     return () => {
       mounted = false
@@ -448,6 +465,24 @@ function PrivacySection(): React.JSX.Element {
       <SettingsItem label={t('settings.privacy.vaultStatus')} description={t('settings.privacy.vaultStatus.desc')}>
         <span className="text-xs rounded-md border px-2 py-1 bg-muted">{vaultStatus}</span>
       </SettingsItem>
+      <Separator />
+      <div className="py-4">
+        <p className="text-sm font-medium mb-2">{t('settings.privacy.recentEvents')}</p>
+        {auditEvents.length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t('settings.privacy.recentEvents.empty')}</p>
+        ) : (
+          <div className="space-y-1">
+            {auditEvents.map((event) => (
+              <div key={event.id} className="text-xs text-muted-foreground flex items-center gap-2">
+                <span className="w-24">{new Date(event.created_at).toLocaleString()}</span>
+                <span>{event.event_type}</span>
+                <span>{event.result}</span>
+                {event.reason_code && <span>({event.reason_code})</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <Separator />
       <SettingsItem label={t('settings.privacy.clearAll')} description={t('settings.privacy.clearAll.desc')}>
         <Button

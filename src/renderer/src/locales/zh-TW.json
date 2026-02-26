@@ -119,6 +119,8 @@
   "settings.privacy.vaultStatusNotSetup": "未初始化",
   "settings.privacy.vaultStatusLocked": "已鎖定",
   "settings.privacy.vaultStatusUnlocked": "已解鎖",
+  "settings.privacy.recentEvents": "最近保險庫事件",
+  "settings.privacy.recentEvents.empty": "暫無安全事件",
   "settings.privacy.clearAll": "清空所有資料",
   "settings.privacy.clearAll.desc": "刪除所有剪貼簿記錄（不可恢復）",
   "settings.privacy.confirmClear": "確認清空？",

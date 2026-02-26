@@ -222,3 +222,10 @@ export function appendVaultAuditEvent(event: VaultAuditEvent): void {
     'INSERT INTO vault_audit_events (id, event_type, result, reason_code, created_at) VALUES (?, ?, ?, ?, ?)'
   ).run(event.id, event.event_type, event.result, event.reason_code, event.created_at)
 }
+
+export function listVaultAuditEvents(limit: number = 20): VaultAuditEvent[] {
+  const db = getDatabase()
+  return db
+    .prepare('SELECT * FROM vault_audit_events ORDER BY created_at DESC LIMIT ?')
+    .all(Math.max(1, limit)) as VaultAuditEvent[]
+}

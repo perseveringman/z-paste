@@ -15,6 +15,7 @@ import * as vaultRepository from './database/vault-repository'
 import { VaultSessionManager } from './vault/session'
 import { VaultService } from './vault/service'
 import { AutoTypeAgent } from './vault/auto-type'
+import { nanoid } from 'nanoid'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -251,6 +252,10 @@ app.whenReady().then(() => {
     return vaultSession.getSecurityState()
   })
 
+  ipcMain.handle('vault:listAuditEvents', async (_, limit?: number) => {
+    return vaultRepository.listVaultAuditEvents(limit)
+  })
+
   ipcMain.handle('vault:listItems', async (_, options) => {
     return vaultService.listItems(options)
   })
@@ -294,9 +299,23 @@ app.whenReady().then(() => {
         submit: input.submit,
         stepDelayMs: input.stepDelayMs
       })
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'auto_type',
+        result: 'success',
+        reason_code: null,
+        created_at: Date.now()
+      })
       return { ok: true, fallbackCopied: false }
     } catch {
       clipboard.writeText(detail.fields.password)
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'auto_type',
+        result: 'failed',
+        reason_code: 'fallback_copy_password',
+        created_at: Date.now()
+      })
       return { ok: true, fallbackCopied: true }
     }
   })
