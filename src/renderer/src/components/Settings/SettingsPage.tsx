@@ -400,6 +400,11 @@ function PrivacySection(): React.JSX.Element {
   const { t } = useTranslation()
   const { encryptionEnabled, setEncryptionEnabled } = useSettingsStore()
   const [confirming, setConfirming] = useState(false)
+  const [vaultState, setVaultState] = useState<{
+    locked: boolean
+    hasVaultSetup: boolean
+    lastUnlockMethod: 'master' | 'recovery' | null
+  } | null>(null)
 
   const handleClearAll = useCallback(async () => {
     if (!confirming) {
@@ -410,11 +415,38 @@ function PrivacySection(): React.JSX.Element {
     setConfirming(false)
   }, [confirming])
 
+  useEffect(() => {
+    let mounted = true
+    window.api
+      .vaultGetSecurityState?.()
+      .then((state) => {
+        if (mounted) setVaultState(state)
+      })
+      .catch(() => {
+        if (mounted) setVaultState(null)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const vaultStatus = !vaultState
+    ? t('settings.privacy.vaultStatusUnknown')
+    : !vaultState.hasVaultSetup
+      ? t('settings.privacy.vaultStatusNotSetup')
+      : vaultState.locked
+        ? t('settings.privacy.vaultStatusLocked')
+        : t('settings.privacy.vaultStatusUnlocked')
+
   return (
     <div>
       <SectionTitle title={t('settings.privacy.title')} />
       <SettingsItem label={t('settings.privacy.encryption')} description={t('settings.privacy.encryption.desc')}>
         <Switch checked={encryptionEnabled} onCheckedChange={setEncryptionEnabled} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.privacy.vaultStatus')} description={t('settings.privacy.vaultStatus.desc')}>
+        <span className="text-xs rounded-md border px-2 py-1 bg-muted">{vaultStatus}</span>
       </SettingsItem>
       <Separator />
       <SettingsItem label={t('settings.privacy.clearAll')} description={t('settings.privacy.clearAll.desc')}>
