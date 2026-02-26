@@ -240,7 +240,12 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('vault:unlockWithBiometric', async () => {
-    await vaultSession.unlockWithBiometric()
+    windowManager.suppressBlur()
+    try {
+      await vaultSession.unlockWithBiometric()
+    } finally {
+      windowManager.restoreBlur()
+    }
     return { ok: true }
   })
 

@@ -6,6 +6,7 @@ import { execSync } from 'child_process'
 export class WindowManager {
   private mainWindow: BrowserWindow | null = null
   private previousAppBundleId: string | null = null
+  private blurSuppressed = false
 
   create(): BrowserWindow {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
@@ -31,6 +32,7 @@ export class WindowManager {
     })
 
     this.mainWindow.on('blur', () => {
+      if (this.blurSuppressed) return
       this.hide()
     })
 
@@ -106,6 +108,14 @@ export class WindowManager {
 
   getPreviousAppBundleId(): string | null {
     return this.previousAppBundleId
+  }
+
+  suppressBlur(): void {
+    this.blurSuppressed = true
+  }
+
+  restoreBlur(): void {
+    this.blurSuppressed = false
   }
 
   getWindow(): BrowserWindow | null {
