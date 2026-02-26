@@ -227,6 +227,7 @@
   "vault.setup.setMasterPassword": "設定主密碼",
   "vault.setup.recoveryKeyLabel": "恢復金鑰 — 請儲存在安全的地方！",
   "vault.setup.copyRecoveryKey": "複製恢復金鑰",
+  "vault.setup.savedContinue": "已儲存，繼續",
 
   "vault.locked.title": "保險庫已鎖定",
   "vault.locked.description": "使用主密碼或恢復金鑰解鎖。",

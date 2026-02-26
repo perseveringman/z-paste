@@ -227,6 +227,7 @@
   "vault.setup.setMasterPassword": "Set Master Password",
   "vault.setup.recoveryKeyLabel": "Recovery Key — save this in a safe place!",
   "vault.setup.copyRecoveryKey": "Copy Recovery Key",
+  "vault.setup.savedContinue": "I've saved it, continue",
 
   "vault.locked.title": "Vault Locked",
   "vault.locked.description": "Unlock with master password or recovery key.",

@@ -33,9 +33,13 @@ export default function VaultView(): React.JSX.Element {
     clearError,
     generatePassword,
     getTotpCode,
-    autoType
+    autoType,
+    unlockWithHint,
+    resetPassword,
+    resetVault
   } = useVaultStore()
 
+  const [pendingRecoveryKey, setPendingRecoveryKey] = useState<string | null>(null)
   const [masterPassword, setMasterPassword] = useState('')
   const [masterPasswordConfirm, setMasterPasswordConfirm] = useState('')
   const [unlockPassword, setUnlockPassword] = useState('')
@@ -63,10 +67,33 @@ export default function VaultView(): React.JSX.Element {
   const [editNotes, setEditNotes] = useState('')
   const [editTotpSecret, setEditTotpSecret] = useState('')
   const [editNoteContent, setEditNoteContent] = useState('')
+  const [securityMode, setSecurityMode] = useState<'strict' | 'relaxed'>('strict')
+  const [hintQuestion, setHintQuestion] = useState('')
+  const [hintAnswer, setHintAnswer] = useState('')
+  const [showResetFlow, setShowResetFlow] = useState(false)
+  const [resetHintAnswer, setResetHintAnswer] = useState('')
+  const [resetNewPassword, setResetNewPassword] = useState('')
+  const [resetNewPasswordConfirm, setResetNewPasswordConfirm] = useState('')
+  const [resetStep, setResetStep] = useState<'verify' | 'newpw'>('verify')
+  const [resetVaultConfirm, setResetVaultConfirm] = useState(false)
+
+  const HINT_QUESTIONS = [
+    'What was the name of your first pet?',
+    'What city were you born in?',
+    'What was the name of your first school?',
+    'What is your favorite movie?',
+    'What is your childhood nickname?'
+  ]
 
   useEffect(() => {
     refreshSecurity()
   }, [refreshSecurity])
+
+  useEffect(() => {
+    if (recoveryKey) {
+      setPendingRecoveryKey(recoveryKey)
+    }
+  }, [recoveryKey])
 
   useEffect(() => {
     if (!security.locked && security.hasVaultSetup) {
@@ -169,6 +196,26 @@ export default function VaultView(): React.JSX.Element {
     await loadItems()
   }
 
+  if (pendingRecoveryKey) {
+    return (
+      <div className="h-full p-6 overflow-auto">
+        <h2 className="text-lg font-semibold mb-2">{t('vault.setup.title')}</h2>
+        <div className="space-y-4 max-w-md">
+          <div className="rounded-md border bg-muted/30 p-3">
+            <p className="text-xs text-muted-foreground mb-1">{t('vault.setup.recoveryKeyLabel')}</p>
+            <p className="font-mono text-sm break-all select-all">{pendingRecoveryKey}</p>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => copyText(pendingRecoveryKey)}>
+              {t('vault.setup.copyRecoveryKey')}
+            </Button>
+          </div>
+          <Button onClick={() => setPendingRecoveryKey(null)}>
+            {t('vault.setup.savedContinue')}
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   if (!security.hasVaultSetup) {
     return (
       <div className="h-full p-6 overflow-auto">
@@ -176,35 +223,67 @@ export default function VaultView(): React.JSX.Element {
         <p className="text-sm text-muted-foreground mb-4">
           {t('vault.setup.description')}
         </p>
-        <div className="space-y-3 max-w-md">
+        <div className="space-y-4 max-w-md">
+          <div className="space-y-2">
+            <FieldLabel>Security Mode</FieldLabel>
+            <div className="flex gap-2">
+              <Button size="sm" variant={securityMode === 'strict' ? 'default' : 'outline'} onClick={() => setSecurityMode('strict')}>
+                Strict
+              </Button>
+              <Button size="sm" variant={securityMode === 'relaxed' ? 'default' : 'outline'} onClick={() => setSecurityMode('relaxed')}>
+                Relaxed
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {securityMode === 'strict'
+                ? 'Recovery key only. If lost, data cannot be recovered.'
+                : 'Allows password reset via security question or Touch ID.'}
+            </p>
+          </div>
           <div className="space-y-1">
             <FieldLabel>{t('vault.setup.masterPassword')}</FieldLabel>
             <Input type="password" value={masterPassword} onChange={(e) => setMasterPassword(e.target.value)} />
           </div>
           <div className="space-y-1">
             <FieldLabel>{t('vault.setup.confirmPassword')}</FieldLabel>
-            <Input
-              type="password"
-              value={masterPasswordConfirm}
-              onChange={(e) => setMasterPasswordConfirm(e.target.value)}
-            />
+            <Input type="password" value={masterPasswordConfirm} onChange={(e) => setMasterPasswordConfirm(e.target.value)} />
           </div>
-          <Button disabled={!canSetup || loading} onClick={() => setupMasterPassword({ masterPassword, securityMode: 'strict' })}>
+          {securityMode === 'relaxed' && (
+            <div className="space-y-2 rounded-md border p-3 bg-muted/20">
+              <FieldLabel>Security Question</FieldLabel>
+              <div className="flex flex-wrap gap-1">
+                {HINT_QUESTIONS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => setHintQuestion(q)}
+                    className={`text-xs px-2 py-1 rounded-md border transition-colors ${
+                      hintQuestion === q ? 'bg-primary text-primary-foreground border-transparent' : 'hover:bg-muted/40 border-muted'
+                    }`}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+              <Input placeholder="Or type a custom question..." value={hintQuestion} onChange={(e) => setHintQuestion(e.target.value)} />
+              <FieldLabel>Answer</FieldLabel>
+              <Input placeholder="Your answer (case-insensitive)" value={hintAnswer} onChange={(e) => setHintAnswer(e.target.value)} />
+            </div>
+          )}
+          <Button
+            disabled={!canSetup || loading || (securityMode === 'relaxed' && (!hintQuestion.trim() || !hintAnswer.trim()))}
+            onClick={() => setupMasterPassword({
+              masterPassword,
+              securityMode,
+              hintQuestion: securityMode === 'relaxed' ? hintQuestion : undefined,
+              hintAnswer: securityMode === 'relaxed' ? hintAnswer : undefined
+            })}
+          >
             {loading ? t('vault.setup.settingUp') : t('vault.setup.setMasterPassword')}
           </Button>
           {error && (
             <p className="text-sm text-destructive cursor-pointer" onClick={clearError}>
               {error}
             </p>
-          )}
-          {recoveryKey && (
-            <div className="rounded-md border bg-muted/30 p-3">
-              <p className="text-xs text-muted-foreground mb-1">{t('vault.setup.recoveryKeyLabel')}</p>
-              <p className="font-mono text-sm break-all">{recoveryKey}</p>
-              <Button variant="outline" size="sm" className="mt-2" onClick={() => copyText(recoveryKey)}>
-                {t('vault.setup.copyRecoveryKey')}
-              </Button>
-            </div>
           )}
         </div>
       </div>
@@ -216,29 +295,105 @@ export default function VaultView(): React.JSX.Element {
       <div className="h-full p-6 overflow-auto">
         <h2 className="text-lg font-semibold mb-2">{t('vault.locked.title')}</h2>
         <p className="text-sm text-muted-foreground mb-4">{t('vault.locked.description')}</p>
-        <div className="grid grid-cols-2 gap-4 max-w-2xl">
-          <div className="space-y-2">
-            <FieldLabel>{t('vault.locked.masterPassword')}</FieldLabel>
-            <Input type="password" value={unlockPassword} onChange={(e) => setUnlockPassword(e.target.value)} />
-            <Button onClick={() => unlock(unlockPassword)} disabled={!unlockPassword || loading}>
-              {t('vault.locked.unlock')}
+
+        {!showResetFlow ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 max-w-2xl">
+              <div className="space-y-2">
+                <FieldLabel>{t('vault.locked.masterPassword')}</FieldLabel>
+                <Input type="password" value={unlockPassword} onChange={(e) => setUnlockPassword(e.target.value)} />
+                <Button onClick={() => unlock(unlockPassword)} disabled={!unlockPassword || loading}>
+                  {t('vault.locked.unlock')}
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <FieldLabel>{t('vault.locked.recoveryKey')}</FieldLabel>
+                <Input value={unlockRecoveryKey} onChange={(e) => setUnlockRecoveryKey(e.target.value)} />
+                <Button onClick={() => unlockWithRecoveryKey(unlockRecoveryKey)} disabled={!unlockRecoveryKey || loading}>
+                  {t('vault.locked.unlockByRecoveryKey')}
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-4">
+              {security.hasBiometricUnlock && (
+                <Button variant="outline" onClick={() => unlockWithBiometric()} disabled={loading}>
+                  {t('vault.locked.unlockWithBiometric')}
+                </Button>
+              )}
+              {security.securityMode === 'relaxed' && (
+                <Button
+                  variant="link"
+                  className="text-sm"
+                  onClick={() => { setShowResetFlow(true); setResetStep('verify'); setResetHintAnswer(''); setResetNewPassword(''); setResetNewPasswordConfirm('') }}
+                >
+                  Forgot Password?
+                </Button>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="max-w-md space-y-4">
+            <Button variant="ghost" size="sm" onClick={() => setShowResetFlow(false)}>
+              ← Back to unlock
             </Button>
-          </div>
-          <div className="space-y-2">
-            <FieldLabel>{t('vault.locked.recoveryKey')}</FieldLabel>
-            <Input value={unlockRecoveryKey} onChange={(e) => setUnlockRecoveryKey(e.target.value)} />
-            <Button onClick={() => unlockWithRecoveryKey(unlockRecoveryKey)} disabled={!unlockRecoveryKey || loading}>
-              {t('vault.locked.unlockByRecoveryKey')}
-            </Button>
-          </div>
-        </div>
-        {security.hasBiometricUnlock && (
-          <div className="mt-4">
-            <Button variant="outline" onClick={() => unlockWithBiometric()} disabled={loading}>
-              {t('vault.locked.unlockWithBiometric')}
-            </Button>
+            {resetStep === 'verify' ? (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">Verify Your Identity</h3>
+                {security.hintQuestion && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">{security.hintQuestion}</p>
+                    <Input placeholder="Your answer" value={resetHintAnswer} onChange={(e) => setResetHintAnswer(e.target.value)} />
+                    <Button
+                      onClick={async () => { try { await unlockWithHint(resetHintAnswer); setResetStep('newpw') } catch { /* error in store */ } }}
+                      disabled={!resetHintAnswer.trim() || loading}
+                    >
+                      {loading ? 'Verifying...' : 'Verify'}
+                    </Button>
+                  </div>
+                )}
+                {security.hasBiometricUnlock && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Or verify with Touch ID</p>
+                    <Button variant="outline" onClick={async () => { try { await unlockWithBiometric(); setResetStep('newpw') } catch { /* error in store */ } }} disabled={loading}>
+                      Use Touch ID
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">Set New Master Password</h3>
+                <div className="space-y-1">
+                  <FieldLabel>New Password</FieldLabel>
+                  <Input type="password" value={resetNewPassword} onChange={(e) => setResetNewPassword(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <FieldLabel>Confirm New Password</FieldLabel>
+                  <Input type="password" value={resetNewPasswordConfirm} onChange={(e) => setResetNewPasswordConfirm(e.target.value)} />
+                </div>
+                <Button
+                  onClick={async () => {
+                    await resetPassword({ newMasterPassword: resetNewPassword, hintQuestion: security.hintQuestion || undefined, hintAnswer: resetHintAnswer || undefined })
+                    setShowResetFlow(false); setResetStep('verify')
+                  }}
+                  disabled={resetNewPassword.length < 8 || resetNewPassword !== resetNewPasswordConfirm || loading}
+                >
+                  {loading ? 'Resetting...' : 'Reset Password'}
+                </Button>
+                {recoveryKey && (
+                  <div className="rounded-md border bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground mb-1">New Recovery Key — save this!</p>
+                    <p className="font-mono text-sm break-all">{recoveryKey}</p>
+                    <Button variant="outline" size="sm" className="mt-2" onClick={() => copyText(recoveryKey)}>
+                      Copy Recovery Key
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
+
         {error && (
           <p className="text-sm text-destructive mt-3 cursor-pointer" onClick={clearError}>
             {error}
@@ -261,6 +416,21 @@ export default function VaultView(): React.JSX.Element {
             <Button variant="outline" onClick={() => lock()}>
               {t('vault.lock')}
             </Button>
+            {resetVaultConfirm ? (
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-destructive whitespace-nowrap">Delete all?</span>
+                <Button variant="destructive" size="sm" onClick={async () => { await resetVault(); setResetVaultConfirm(false) }}>
+                  Yes
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setResetVaultConfirm(false)}>
+                  No
+                </Button>
+              </div>
+            ) : (
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setResetVaultConfirm(true)}>
+                Reset
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex-1 overflow-auto p-2 space-y-1">
