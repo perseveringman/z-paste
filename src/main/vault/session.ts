@@ -32,7 +32,7 @@ export class VaultSessionManager {
     }
 
     const now = Date.now()
-    const keys = setupVaultKeys(masterPassword)
+    const keys = await setupVaultKeys(masterPassword)
     vaultRepository.upsertVaultCryptoMeta({
       id: META_ID,
       kdf_type: keys.kdfType,
@@ -68,10 +68,11 @@ export class VaultSessionManager {
 
     try {
       const kdfParams = JSON.parse(meta.kdf_params) as VaultKdfParams
-      this.dek = unwrapDEKWithMasterPassword(
+      this.dek = await unwrapDEKWithMasterPassword(
         meta.dek_wrapped_by_master,
         masterPassword,
         meta.salt,
+        (meta.kdf_type as 'argon2id' | 'pbkdf2') || 'pbkdf2',
         kdfParams
       )
       this.lastUnlockMethod = 'master'
@@ -104,10 +105,11 @@ export class VaultSessionManager {
 
     try {
       const kdfParams = JSON.parse(meta.kdf_params) as VaultKdfParams
-      this.dek = unwrapDEKWithRecoveryKey(
+      this.dek = await unwrapDEKWithRecoveryKey(
         meta.dek_wrapped_by_recovery,
         recoveryKey,
         meta.salt,
+        (meta.kdf_type as 'argon2id' | 'pbkdf2') || 'pbkdf2',
         kdfParams
       )
       this.lastUnlockMethod = 'recovery'
