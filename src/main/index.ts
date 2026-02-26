@@ -12,6 +12,7 @@ import { iCloudSync } from './sync/icloud'
 import { getAppIcon } from './clipboard/app-icon'
 import { exec } from 'child_process'
 import * as vaultRepository from './database/vault-repository'
+import { VaultSessionManager } from './vault/session'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -19,6 +20,7 @@ let shortcutManager: ShortcutManager
 let trayManager: TrayManager
 let clipboardMonitor: ClipboardMonitor
 let syncService: iCloudSync | null = null
+let vaultSession: VaultSessionManager
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
@@ -39,6 +41,7 @@ app.whenReady().then(() => {
   shortcutManager.setWidgetManager(widgetManager)
   trayManager = new TrayManager(windowManager)
   clipboardMonitor = new ClipboardMonitor()
+  vaultSession = new VaultSessionManager()
 
   shortcutManager.register()
   trayManager.create()
@@ -217,6 +220,29 @@ app.whenReady().then(() => {
 
   ipcMain.handle('vault:delete', async (_, id: string) => {
     vaultRepository.deleteVaultItem(id)
+  })
+
+  ipcMain.handle('vault:setupMasterPassword', async (_, masterPassword: string) => {
+    return vaultSession.setupMasterPassword(masterPassword)
+  })
+
+  ipcMain.handle('vault:unlock', async (_, masterPassword: string) => {
+    vaultSession.unlockWithMasterPassword(masterPassword)
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:unlockWithRecoveryKey', async (_, recoveryKey: string) => {
+    vaultSession.unlockWithRecoveryKey(recoveryKey)
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:lock', async () => {
+    vaultSession.lock()
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:getSecurityState', async () => {
+    return vaultSession.getSecurityState()
   })
 
   // Source app IPC handlers
