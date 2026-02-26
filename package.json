@@ -14,12 +14,14 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
+    "test:vault": "npm run build && node --test tests/vault/**/*.test.cjs",
     "postinstall": "electron-builder install-app-deps",
     "build:mac": "electron-vite build && electron-builder --mac"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@node-rs/argon2": "^2.0.2",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -30,6 +32,7 @@
     "framer-motion": "^12.34.1",
     "fuse.js": "^7.0.0",
     "i18next": "^25.8.11",
+    "keytar": "^7.9.0",
     "lucide-react": "^0.574.0",
     "nanoid": "^5.0.9",
     "react-i18next": "^16.5.4",

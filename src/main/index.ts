@@ -11,6 +11,12 @@ import * as repository from './database/repository'
 import { iCloudSync } from './sync/icloud'
 import { getAppIcon } from './clipboard/app-icon'
 import { exec } from 'child_process'
+import * as vaultRepository from './database/vault-repository'
+import { VaultSessionManager } from './vault/session'
+import { VaultService } from './vault/service'
+import { AutoTypeAgent } from './vault/auto-type'
+import { nanoid } from 'nanoid'
+import { VaultCryptoWorkerClient } from './vault/worker-client'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -18,6 +24,10 @@ let shortcutManager: ShortcutManager
 let trayManager: TrayManager
 let clipboardMonitor: ClipboardMonitor
 let syncService: iCloudSync | null = null
+let vaultSession: VaultSessionManager
+let vaultService: VaultService
+let autoTypeAgent: AutoTypeAgent
+let vaultCryptoWorker: VaultCryptoWorkerClient | null = null
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
@@ -38,6 +48,11 @@ app.whenReady().then(() => {
   shortcutManager.setWidgetManager(widgetManager)
   trayManager = new TrayManager(windowManager)
   clipboardMonitor = new ClipboardMonitor()
+  const worker = new VaultCryptoWorkerClient()
+  vaultCryptoWorker = worker
+  vaultSession = new VaultSessionManager(worker)
+  vaultService = new VaultService(vaultSession, worker)
+  autoTypeAgent = new AutoTypeAgent()
 
   shortcutManager.register()
   trayManager.create()
@@ -198,6 +213,119 @@ app.whenReady().then(() => {
   ipcMain.handle('sync:now', async () => {
     if (syncService) {
       syncService.syncNow()
+    }
+  })
+
+  // Vault IPC handlers (encrypted data only, no plaintext decryption in this layer)
+  ipcMain.handle('vault:list', async (_, options) => {
+    return vaultRepository.listVaultItems(options)
+  })
+
+  ipcMain.handle('vault:get', async (_, id: string) => {
+    const meta = vaultRepository.getVaultItemMetaById(id)
+    if (!meta) return null
+    const secret = vaultRepository.getVaultItemSecretById(id)
+    if (!secret) return null
+    return { meta, secret }
+  })
+
+  ipcMain.handle('vault:delete', async (_, id: string) => {
+    vaultRepository.deleteVaultItem(id)
+  })
+
+  ipcMain.handle('vault:setupMasterPassword', async (_, masterPassword: string) => {
+    return vaultSession.setupMasterPassword(masterPassword)
+  })
+
+  ipcMain.handle('vault:unlock', async (_, masterPassword: string) => {
+    await vaultSession.unlockWithMasterPassword(masterPassword)
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:unlockWithRecoveryKey', async (_, recoveryKey: string) => {
+    await vaultSession.unlockWithRecoveryKey(recoveryKey)
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:unlockWithBiometric', async () => {
+    await vaultSession.unlockWithBiometric()
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:lock', async () => {
+    await vaultSession.lock()
+    return { ok: true }
+  })
+
+  ipcMain.handle('vault:getSecurityState', async () => {
+    return vaultSession.getSecurityState()
+  })
+
+  ipcMain.handle('vault:listAuditEvents', async (_, limit?: number) => {
+    return vaultRepository.listVaultAuditEvents(limit)
+  })
+
+  ipcMain.handle('vault:listItems', async (_, options) => {
+    return await vaultService.listItems(options)
+  })
+
+  ipcMain.handle('vault:createLogin', async (_, input) => {
+    return await vaultService.createLogin(input)
+  })
+
+  ipcMain.handle('vault:createSecureNote', async (_, input) => {
+    return await vaultService.createSecureNote(input)
+  })
+
+  ipcMain.handle('vault:updateItem', async (_, input) => {
+    await vaultService.updateItem(input)
+  })
+
+  ipcMain.handle('vault:getItemDetail', async (_, id: string) => {
+    return await vaultService.getItemDetail(id)
+  })
+
+  ipcMain.handle('vault:generatePassword', async (_, options) => {
+    return await vaultService.generatePassword(options)
+  })
+
+  ipcMain.handle('vault:getTotpCode', async (_, id: string) => {
+    return await vaultService.getTotpCode(id)
+  })
+
+  ipcMain.handle('vault:autoType', async (_, input: { id: string; submit?: boolean; stepDelayMs?: number }) => {
+    const detail = await vaultService.getItemDetail(input.id)
+    if (!detail || detail.type !== 'login') {
+      throw new Error('Vault login item not found')
+    }
+
+    const previousApp = windowManager.getPreviousAppBundleId()
+    windowManager.hide()
+    try {
+      await autoTypeAgent.run(previousApp, {
+        username: detail.fields.username,
+        password: detail.fields.password,
+        submit: input.submit,
+        stepDelayMs: input.stepDelayMs
+      })
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'auto_type',
+        result: 'success',
+        reason_code: null,
+        created_at: Date.now()
+      })
+      return { ok: true, fallbackCopied: false }
+    } catch {
+      clipboard.writeText(detail.fields.password)
+      vaultRepository.appendVaultAuditEvent({
+        id: nanoid(),
+        event_type: 'auto_type',
+        result: 'failed',
+        reason_code: 'fallback_copy_password',
+        created_at: Date.now()
+      })
+      return { ok: true, fallbackCopied: true }
     }
   })
 
@@ -373,6 +501,9 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   shortcutManager.unregister()
   clipboardMonitor.stop()
+  if (vaultCryptoWorker) {
+    void vaultCryptoWorker.shutdown()
+  }
   if (syncService) syncService.stop()
   const db = getDatabase()
   if (db) db.close()

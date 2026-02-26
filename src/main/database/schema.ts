@@ -65,6 +65,52 @@ export function createTables(): void {
 
     CREATE INDEX IF NOT EXISTS idx_item_tags_item ON clipboard_item_tags(item_id);
     CREATE INDEX IF NOT EXISTS idx_item_tags_tag  ON clipboard_item_tags(tag_id);
+
+    CREATE TABLE IF NOT EXISTS vault_items (
+      id            TEXT PRIMARY KEY,
+      type          TEXT NOT NULL,
+      title         TEXT NOT NULL,
+      website       TEXT,
+      favorite      INTEGER DEFAULT 0,
+      tags          TEXT,
+      created_at    INTEGER NOT NULL,
+      updated_at    INTEGER NOT NULL,
+      last_used_at  INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_vault_items_type ON vault_items(type);
+    CREATE INDEX IF NOT EXISTS idx_vault_items_updated ON vault_items(updated_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_vault_items_last_used ON vault_items(last_used_at DESC);
+
+    CREATE TABLE IF NOT EXISTS vault_item_secrets (
+      item_id            TEXT PRIMARY KEY,
+      encrypted_payload  TEXT NOT NULL,
+      wrapped_item_key   TEXT NOT NULL,
+      enc_version        INTEGER NOT NULL DEFAULT 1,
+      FOREIGN KEY (item_id) REFERENCES vault_items(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS vault_crypto_meta (
+      id                        TEXT PRIMARY KEY,
+      kdf_type                  TEXT NOT NULL,
+      kdf_params                TEXT NOT NULL,
+      salt                      TEXT NOT NULL,
+      dek_wrapped_by_master     TEXT NOT NULL,
+      dek_wrapped_by_recovery   TEXT NOT NULL,
+      created_at                INTEGER NOT NULL,
+      updated_at                INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS vault_audit_events (
+      id           TEXT PRIMARY KEY,
+      event_type   TEXT NOT NULL,
+      result       TEXT NOT NULL,
+      reason_code  TEXT,
+      created_at   INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_vault_audit_event_type ON vault_audit_events(event_type);
+    CREATE INDEX IF NOT EXISTS idx_vault_audit_created ON vault_audit_events(created_at DESC);
   `)
 
   // Add title column if missing
