@@ -87,6 +87,8 @@ export default function PanelWindow(): React.JSX.Element {
         setView((v) => (v === 'settings' ? 'clipboard' : 'settings'))
         return
       }
+      // Clipboard-only shortcuts — suppress when vault is active
+      if (view === 'vault') return
       if (matchShortcut(e, toggleFilterShortcut)) {
         e.preventDefault()
         toggleFilters()
@@ -109,7 +111,7 @@ export default function PanelWindow(): React.JSX.Element {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem, tagPickerItemId, togglePreview, toggleFilters, toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut])
+  }, [selectedItem, tagPickerItemId, view, togglePreview, toggleFilters, toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut])
 
   const containerClass =
     'w-full h-full rounded-xl overflow-hidden bg-background/95 backdrop-blur-xl border shadow-2xl flex flex-col'
