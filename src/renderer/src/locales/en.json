@@ -305,6 +305,8 @@
 
   "vault.item.loginFallback": "Login",
   "vault.item.secureNote": "Secure Note",
+  "vault.item.favorite": "Add to favorites",
+  "vault.item.unfavorite": "Remove from favorites",
 
   "vault.locked.forgotPassword": "Forgot password?",
 

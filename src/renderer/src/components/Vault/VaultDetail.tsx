@@ -3,16 +3,19 @@ import { useTranslation } from 'react-i18next'
 import { useVaultStore } from '../../stores/vaultStore'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { 
-  Copy, 
-  Eye, 
-  EyeOff, 
-  ExternalLink, 
-  Edit2, 
-  Trash2, 
-  Check, 
-  Clock, 
-  ShieldCheck
+import {
+  Copy,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  Edit2,
+  Trash2,
+  Check,
+  Clock,
+  ShieldCheck,
+  Key,
+  FileText,
+  Star
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -33,11 +36,13 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
     getTotpCode,
     autoType,
     createLogin,
-    createSecureNote
+    createSecureNote,
+    toggleFavorite
   } = useVaultStore()
 
   const [editing, setEditing] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showEditPassword, setShowEditPassword] = useState(false)
   const [totp, setTotp] = useState<{ code: string; remain: number } | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [autoTypeNotice, setAutoTypeNotice] = useState<string | null>(null)
@@ -161,6 +166,7 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
       useSymbols: true
     })
     setEditPassword(generated)
+    setShowEditPassword(true)
   }
 
   const handleTotp = async (): Promise<void> => {
@@ -210,7 +216,16 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
           >
             {/* Edit/Create Header */}
             <div className="h-14 px-6 border-b flex items-center justify-between shrink-0">
-              <h3 className="font-semibold">{createType ? t('vault.newItem') : t('vault.action.edit')}</h3>
+              {createType ? (
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                    {createType === 'login' ? <Key className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
+                  </div>
+                  <h3 className="font-semibold">{createType === 'login' ? t('vault.newLogin') : t('vault.newSecureNote')}</h3>
+                </div>
+              ) : (
+                <h3 className="font-semibold">{t('vault.action.edit')}</h3>
+              )}
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onClick={() => editing ? setEditing(false) : onCancelCreate?.()}>{t('vault.action.cancel')}</Button>
                 <Button size="sm" onClick={createType ? handleCreate : handleUpdate} disabled={loading || !editTitle.trim()}>{t('vault.action.save')}</Button>
@@ -218,40 +233,50 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
             </div>
 
             {/* Edit/Create Form */}
-            <div className="flex-1 overflow-auto p-6 space-y-6">
-              <div className="space-y-4 max-w-2xl mx-auto">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-muted-foreground">{t('vault.field.title')}</label>
-                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} autoFocus />
-                </div>
-
+            <div className="flex-1 min-h-0 px-4 pt-3 pb-4 overflow-auto flex flex-col">
+              <div className={(createType === 'login' || (detail?.type === 'login' && editing)) ? 'space-y-3' : 'flex flex-col flex-1 space-y-3 min-h-0'}>
                 {(createType === 'login' || (detail?.type === 'login' && editing)) ? (
                   <>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">{t('vault.field.website')}</label>
-                      <Input value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} placeholder="https://..." />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-muted-foreground">{t('vault.field.username')}</label>
-                        <Input value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.title')}</label>
+                        <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} autoFocus className="h-8 text-sm" />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-muted-foreground">{t('vault.field.password')}</label>
-                        <div className="flex gap-2">
-                          <Input type="password" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
-                          <Button variant="outline" size="sm" onClick={handleGeneratePassword}>{t('vault.action.generate')}</Button>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.website')}</label>
+                        <Input value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} placeholder="https://..." className="h-8 text-sm" />
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="space-y-1 w-[35%] shrink-0">
+                        <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.username')}</label>
+                        <Input value={editUsername} onChange={(e) => setEditUsername(e.target.value)} className="h-8 text-sm" />
+                      </div>
+                      <div className="space-y-1 flex-1">
+                        <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.password')}</label>
+                        <div className="flex gap-1.5">
+                          <div className="relative flex-1">
+                            <Input type={showEditPassword ? 'text' : 'password'} value={editPassword} onChange={(e) => setEditPassword(e.target.value)} className="h-8 text-sm pr-8" />
+                            <button
+                              type="button"
+                              onClick={() => setShowEditPassword((v) => !v)}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {showEditPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={handleGeneratePassword} className="h-8 px-2 text-xs shrink-0">{t('vault.action.generate')}</Button>
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">{t('vault.field.totpSecret')}</label>
-                      <Input value={editTotpSecret} onChange={(e) => setEditTotpSecret(e.target.value)} placeholder="Secret key (Base32)" />
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.totpSecret')}</label>
+                      <Input value={editTotpSecret} onChange={(e) => setEditTotpSecret(e.target.value)} placeholder="Secret key (Base32)" className="h-8 text-sm" />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">{t('vault.field.notes')}</label>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.notes')}</label>
                       <textarea
-                        className="w-full min-h-32 rounded-lg border bg-background px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+                        className="w-full min-h-20 rounded-lg border bg-background px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
                         placeholder={t('vault.field.notes')}
@@ -259,14 +284,20 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
                     </div>
                   </>
                 ) : (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">{t('vault.field.content')}</label>
-                    <textarea
-                      className="w-full min-h-[400px] rounded-lg border bg-background px-3 py-2 text-sm font-mono focus:ring-1 focus:ring-primary outline-none transition-all"
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.title')}</label>
+                      <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} autoFocus className="h-8 text-sm" />
+                    </div>
+                    <div className="space-y-1 flex flex-col flex-1 min-h-0">
+                      <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.content')}</label>
+                      <textarea
+                        className="flex-1 min-h-0 rounded-lg border bg-background px-3 py-2 text-sm font-mono focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -303,6 +334,17 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
+                    <button
+                      onClick={() => toggleFavorite(detail.meta.id)}
+                      className={`p-1 rounded transition-colors ${
+                        detail.meta.favorite
+                          ? 'text-yellow-500 hover:text-yellow-600'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title={detail.meta.favorite ? t('vault.item.unfavorite') : t('vault.item.favorite')}
+                    >
+                      <Star className={`w-4 h-4 ${detail.meta.favorite ? 'fill-yellow-500' : ''}`} />
+                    </button>
                     <Button variant="outline" size="sm" onClick={startEditing} className="h-9 px-3">
                       <Edit2 className="w-3.5 h-3.5 mr-2" />
                       {t('vault.action.edit')}

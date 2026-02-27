@@ -305,6 +305,8 @@
 
   "vault.item.loginFallback": "登录",
   "vault.item.secureNote": "安全备注",
+  "vault.item.favorite": "添加到收藏",
+  "vault.item.unfavorite": "取消收藏",
 
   "vault.locked.forgotPassword": "忘记密码？",
 
