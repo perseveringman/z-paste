@@ -52,6 +52,7 @@ app.whenReady().then(() => {
   vaultCryptoWorker = worker
   vaultSession = new VaultSessionManager(worker)
   vaultService = new VaultService(vaultSession, worker)
+  windowManager.setVaultSession(vaultSession)
   autoTypeAgent = new AutoTypeAgent()
 
   shortcutManager.register()

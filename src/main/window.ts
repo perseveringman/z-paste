@@ -7,6 +7,7 @@ export class WindowManager {
   private mainWindow: BrowserWindow | null = null
   private previousAppBundleId: string | null = null
   private blurSuppressed = false
+  private vaultSession: { lockOnHide: () => Promise<void> } | null = null
 
   create(): BrowserWindow {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
@@ -103,6 +104,9 @@ export class WindowManager {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       this.mainWindow.hide()
       this.mainWindow.webContents.send('panel:hidden')
+      if (this.vaultSession) {
+        void this.vaultSession.lockOnHide()
+      }
     }
   }
 
@@ -116,6 +120,10 @@ export class WindowManager {
 
   restoreBlur(): void {
     this.blurSuppressed = false
+  }
+
+  setVaultSession(session: { lockOnHide: () => Promise<void> }): void {
+    this.vaultSession = session
   }
 
   getWindow(): BrowserWindow | null {
