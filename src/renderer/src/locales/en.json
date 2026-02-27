@@ -326,5 +326,10 @@
   "vault.resetVault.prompt": "Delete all vault data?",
   "vault.resetVault.delete": "Delete",
   "vault.resetVault.cancel": "Cancel",
-  "vault.resetVault.button": "Reset Vault…"
+  "vault.resetVault.button": "Reset Vault…",
+
+  "vault.filter.all": "All",
+  "vault.filter.login": "Login",
+  "vault.filter.note": "Note",
+  "vault.filter.favoritesOnly": "Favorites only"
 }

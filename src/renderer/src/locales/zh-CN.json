@@ -326,5 +326,10 @@
   "vault.resetVault.prompt": "删除所有保险库数据？",
   "vault.resetVault.delete": "删除",
   "vault.resetVault.cancel": "取消",
-  "vault.resetVault.button": "重置保险库…"
+  "vault.resetVault.button": "重置保险库…",
+
+  "vault.filter.all": "全部",
+  "vault.filter.login": "登录",
+  "vault.filter.note": "笔记",
+  "vault.filter.favoritesOnly": "仅收藏"
 }

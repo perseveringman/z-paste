@@ -1,42 +1,50 @@
 import { useTranslation } from 'react-i18next'
 import { useVaultStore } from '../../stores/vaultStore'
-import { Key, FileText, Plus } from 'lucide-react'
+import { Key, FileText, Star } from 'lucide-react'
 import { Button } from '../ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "../ui/select"
 import { useState } from 'react'
 
-interface VaultSidebarProps {
-  onCreate: (type: 'login' | 'secure_note') => void
-}
-
-export default function VaultSidebar({ onCreate }: VaultSidebarProps): React.JSX.Element {
+export default function VaultSidebar(): React.JSX.Element {
   const { t } = useTranslation()
-  const { items, detail, selectItem } = useVaultStore()
+  const { items, detail, selectItem, filterType, setFilterType, showFavoritesOnly, setShowFavoritesOnly } = useVaultStore()
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const resetVault = useVaultStore((state) => state.resetVault)
 
+  const displayItems = showFavoritesOnly ? items.filter((i) => i.favorite === 1) : items
+
   return (
     <div className="w-[34%] border-r min-h-0 flex flex-col bg-muted/5">
-      <div className="p-3 border-b">
-        <Select onValueChange={(value: 'login' | 'secure_note') => onCreate(value)}>
-          <SelectTrigger className="w-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-sm">
-            <Plus className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">{t('vault.newItem')}</span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="login">{t('vault.newLogin')}</SelectItem>
-            <SelectItem value="secure_note">{t('vault.newSecureNote')}</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Filter bar */}
+      <div className="flex items-center gap-1 px-2 pt-2 pb-1">
+        <div className="flex items-center gap-0.5 flex-1 bg-muted/50 rounded-md p-0.5">
+          {(['all', 'login', 'secure_note'] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={`flex-1 text-[10px] px-1.5 py-1 rounded transition-all font-medium ${
+                filterType === type
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {type === 'all' ? t('vault.filter.all') : type === 'login' ? t('vault.filter.login') : t('vault.filter.note')}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          className={`p-1.5 rounded-md transition-colors ${
+            showFavoritesOnly
+              ? 'text-yellow-500 bg-yellow-500/10'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+          title={t('vault.filter.favoritesOnly')}
+        >
+          <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-yellow-500' : ''}`} />
+        </button>
       </div>
-
       <div className="flex-1 overflow-auto p-2 space-y-1">
-        {items.map((item) => (
+        {displayItems.map((item) => (
           <button
             key={item.id}
             onClick={() => selectItem(item.id)}
@@ -61,7 +69,7 @@ export default function VaultSidebar({ onCreate }: VaultSidebarProps): React.JSX
             </div>
           </button>
         ))}
-        {items.length === 0 && (
+        {displayItems.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
               <Key className="w-5 h-5 text-muted-foreground" />
