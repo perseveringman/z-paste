@@ -41,6 +41,7 @@ export interface VaultSecurityState {
   hasBiometricUnlock: boolean
   securityMode: 'strict' | 'relaxed'
   hintQuestion: string | null
+  lockOnBlur: boolean
 }
 
 interface VaultState {
@@ -71,6 +72,8 @@ interface VaultState {
     hintAnswer?: string
   }) => Promise<void>
   lock: () => Promise<void>
+  setLockOnBlur: (enabled: boolean) => Promise<void>
+  setAutoLockMinutes: (minutes: number) => Promise<void>
   loadItems: () => Promise<void>
   selectItem: (id: string) => Promise<void>
   createLogin: (input: {
@@ -103,7 +106,8 @@ const defaultSecurityState: VaultSecurityState = {
   lastUnlockMethod: null,
   hasBiometricUnlock: false,
   securityMode: 'strict',
-  hintQuestion: null
+  hintQuestion: null,
+  lockOnBlur: true
 }
 
 export const useVaultStore = create<VaultState>((set, get) => ({
@@ -212,6 +216,16 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     await window.api.vaultLock()
     await get().refreshSecurity()
     set({ items: [], selectedId: null, detail: null })
+  },
+
+  setLockOnBlur: async (enabled) => {
+    await window.api.vaultSetLockOnBlur(enabled)
+    await get().refreshSecurity()
+  },
+
+  setAutoLockMinutes: async (minutes) => {
+    await window.api.vaultSetAutoLockMinutes(minutes)
+    await get().refreshSecurity()
   },
 
   loadItems: async () => {
