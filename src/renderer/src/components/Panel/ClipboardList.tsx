@@ -19,7 +19,6 @@ function getItemHeight(contentType: string): number {
 export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props): React.JSX.Element {
   const items = useSearch()
   const { t } = useTranslation()
-  const { selectedIndex } = useClipboardStore()
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
   const [containerHeight, setContainerHeight] = useState(400)
@@ -34,6 +33,18 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
     }
     arr.push(acc) // sentinel: total height
     return arr
+  }, [items])
+
+  // Keep a ref to offsets so the subscribe callback always has the latest value
+  const offsetsRef = useRef(offsets)
+  useEffect(() => {
+    offsetsRef.current = offsets
+  }, [offsets])
+
+  // Keep a ref to items for the same reason
+  const itemsRef = useRef(items)
+  useEffect(() => {
+    itemsRef.current = items
   }, [items])
 
   const totalHeight = offsets[offsets.length - 1] ?? 0
@@ -51,19 +62,29 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
     return () => observer.disconnect()
   }, [])
 
+  // Subscribe to selectedIndex changes without re-rendering ClipboardList
   useEffect(() => {
-    if (!containerRef.current || selectedIndex < 0) return
-    const itemTop = offsets[selectedIndex] ?? 0
-    const itemBottom = itemTop + getItemHeight(items[selectedIndex]?.content_type ?? '')
-    const viewTop = scrollTop
-    const viewBottom = scrollTop + containerHeight
+    let prevIndex = useClipboardStore.getState().selectedIndex
+    return useClipboardStore.subscribe((state) => {
+      const selectedIndex = state.selectedIndex
+      if (selectedIndex === prevIndex) return
+      prevIndex = selectedIndex
+      const el = containerRef.current
+      if (!el || selectedIndex < 0) return
+      const offs = offsetsRef.current
+      const its = itemsRef.current
+      const itemTop = offs[selectedIndex] ?? 0
+      const itemBottom = itemTop + getItemHeight(its[selectedIndex]?.content_type ?? '')
+      const viewTop = el.scrollTop
+      const viewBottom = viewTop + el.clientHeight
 
-    if (itemTop < viewTop) {
-      containerRef.current.scrollTop = itemTop
-    } else if (itemBottom > viewBottom) {
-      containerRef.current.scrollTop = itemBottom - containerHeight
-    }
-  }, [selectedIndex, scrollTop, containerHeight, offsets, items])
+      if (itemTop < viewTop) {
+        el.scrollTop = itemTop
+      } else if (itemBottom > viewBottom) {
+        el.scrollTop = itemBottom - el.clientHeight
+      }
+    })
+  }, [])
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop)
@@ -111,7 +132,6 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
         <ClipboardItemRow
           item={item}
           index={i}
-          isSelected={i === selectedIndex}
           onDoubleClick={onDoubleClick}
           onOpenTagPicker={onOpenTagPicker}
         />

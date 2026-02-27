@@ -1,23 +1,6 @@
-import { useMemo } from 'react'
-import Fuse from 'fuse.js'
-import { ClipboardItem, useClipboardStore } from '../stores/clipboardStore'
-
-const fuseOptions = {
-  keys: ['content', 'preview'],
-  threshold: 0.3,
-  ignoreLocation: true,
-  minMatchCharLength: 1
-}
+import { useClipboardStore } from '../stores/clipboardStore'
+import type { ClipboardItem } from '../stores/clipboardStore'
 
 export function useSearch(): ClipboardItem[] {
-  const { items, searchQuery } = useClipboardStore()
-
-  const fuse = useMemo(() => new Fuse(items, fuseOptions), [items])
-
-  const filteredItems = useMemo(() => {
-    if (!searchQuery.trim()) return items
-    return fuse.search(searchQuery).map((result) => result.item)
-  }, [fuse, items, searchQuery])
-
-  return filteredItems
+  return useClipboardStore((state) => state.items)
 }

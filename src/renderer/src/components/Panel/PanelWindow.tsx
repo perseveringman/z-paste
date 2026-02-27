@@ -18,7 +18,7 @@ import { useClipboardStore } from '../../stores/clipboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { matchShortcut } from '../../utils/shortcut'
-import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X, Lock, Unlock } from 'lucide-react'
+import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X, Lock, Unlock, FilePlus, Key, FileText } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
@@ -37,6 +37,9 @@ export default function PanelWindow(): React.JSX.Element {
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [tagPickerItemId, setTagPickerItemId] = useState<string | null>(null)
   const tagPickerAnchorRef = useRef<HTMLDivElement>(null)
+  const [vaultCreateType, setVaultCreateType] = useState<'login' | 'secure_note' | null>(null)
+  const [showCreateMenu, setShowCreateMenu] = useState(false)
+  const createMenuRef = useRef<HTMLDivElement>(null)
 
   // 右侧预览 debounce：hover 稳定 150ms 后才显示
   const [previewItem, setPreviewItem] = useState<(typeof selectedItem) | null>(null)
@@ -74,6 +77,18 @@ export default function PanelWindow(): React.JSX.Element {
   const openTagPicker = useCallback((itemId: string) => {
     setTagPickerItemId(itemId)
   }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent): void => {
+      if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) {
+        setShowCreateMenu(false)
+      }
+    }
+    if (showCreateMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showCreateMenu])
 
   useEffect(() => {
     const unsub = window.api.onPanelSetView((view) => {
@@ -156,40 +171,73 @@ export default function PanelWindow(): React.JSX.Element {
           />
         </div>
         <SearchBar view={view} />
-        {view === 'vault' && !security.locked && (
+        <div className="flex items-center gap-1 ml-2">
+          {view === 'vault' && !security.locked && (
+            <div className="relative" ref={createMenuRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowCreateMenu((v) => !v)}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                title={t('vault.newItem')}
+              >
+                <FilePlus className="w-4 h-4" />
+              </Button>
+              {showCreateMenu && (
+                <div className="absolute right-0 top-full mt-1 w-40 bg-popover border rounded-lg shadow-lg py-1 z-50">
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors"
+                    onClick={() => { setVaultCreateType('login'); setShowCreateMenu(false) }}
+                  >
+                    <Key className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('vault.newLogin')}
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors"
+                    onClick={() => { setVaultCreateType('secure_note'); setShowCreateMenu(false) }}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                    {t('vault.newSecureNote')}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {view === 'vault' && !security.locked && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => lockVault()}
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              title={t('vault.lock')}
+            >
+              <Unlock className="w-4 h-4" />
+            </Button>
+          )}
+          {view === 'vault' && security.locked && (
+            <div className="h-8 w-8 flex items-center justify-center text-muted-foreground">
+              <Lock className="w-4 h-4" />
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => lockVault()}
-            className="ml-2 h-9 w-9 text-muted-foreground hover:text-destructive"
-            title={t('vault.lock')}
+            onClick={() => setView('onboarding')}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            title={t('panel.help.tooltip')}
           >
-            <Unlock className="w-4 h-4" />
+            <HelpCircle className="w-4 h-4" />
           </Button>
-        )}
-        {view === 'vault' && security.locked && (
-          <div className="ml-2 h-9 w-9 flex items-center justify-center text-muted-foreground">
-            <Lock className="w-4 h-4" />
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setView('onboarding')}
-          className="ml-2 h-9 w-9 text-muted-foreground hover:text-foreground"
-          title={t('panel.help.tooltip')}
-        >
-          <HelpCircle className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setView('settings')}
-          className="h-9 w-9 text-muted-foreground hover:text-foreground"
-          title={t('panel.settings.tooltip')}
-        >
-          <Settings className="w-4 h-4" />
-        </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setView('settings')}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            title={t('panel.settings.tooltip')}
+          >
+            <Settings className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {view === 'clipboard' ? (
@@ -241,7 +289,7 @@ export default function PanelWindow(): React.JSX.Element {
         <TemplateList />
       ) : (
         <div className="flex-1 min-h-0">
-          <VaultView />
+          <VaultView createType={vaultCreateType} onCreateTypeChange={setVaultCreateType} />
         </div>
       )}
 

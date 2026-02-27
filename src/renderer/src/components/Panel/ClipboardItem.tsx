@@ -22,7 +22,6 @@ import {
 interface Props {
   item: ClipboardItem
   index: number
-  isSelected: boolean
   onDoubleClick?: (itemId: string) => void
   onOpenTagPicker?: (itemId: string) => void
 }
@@ -67,21 +66,30 @@ function formatTime(timestamp: number): string {
 function ClipboardItemRow({
   item,
   index,
-  isSelected,
   onDoubleClick,
   onOpenTagPicker
 }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const { setSelectedIndex, pasteItem, deleteItem, toggleFavorite, togglePin, toggleSelectItem, isItemInQueue, getQueuePosition, selectedItems, updateTitle } = useClipboardStore()
+  const isSelected = useClipboardStore((s) => s.selectedIndex === index)
+  const setSelectedIndex = useClipboardStore((s) => s.setSelectedIndex)
+  const pasteItem = useClipboardStore((s) => s.pasteItem)
+  const deleteItem = useClipboardStore((s) => s.deleteItem)
+  const toggleFavorite = useClipboardStore((s) => s.toggleFavorite)
+  const togglePin = useClipboardStore((s) => s.togglePin)
+  const toggleSelectItem = useClipboardStore((s) => s.toggleSelectItem)
+  const updateTitle = useClipboardStore((s) => s.updateTitle)
+  const inQueue = useClipboardStore((s) => s.sequenceQueue.some((q) => q.id === item.id))
+  const queuePos = useClipboardStore((s) => {
+    if (!inQueue) return 0
+    return s.sequenceQueue.findIndex((q) => q.id === item.id) + 1
+  })
+  const isMultiSelected = useClipboardStore((s) => s.selectedItems.has(item.id))
   const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editingTitle, setEditingTitle] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const inQueue = isItemInQueue(item.id)
-  const queuePos = inQueue ? getQueuePosition(item.id) : 0
-  const isMultiSelected = selectedItems.has(item.id)
 
   const sourceApp = useMemo(() => {
     if (!item.source_app) return null

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { useVaultStore } from '../../stores/vaultStore'
@@ -14,9 +14,8 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
-  
+
   const clipboardSearch = useClipboardStore((state) => state.search)
-  const setClipboardQuery = useClipboardStore((state) => state.setSearchQuery)
   const clipboardQuery = useClipboardStore((state) => state.searchQuery)
   const isVisible = useClipboardStore((state) => state.isVisible)
 
@@ -24,10 +23,18 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
   const setVaultQuery = useVaultStore((state) => state.setQuery)
   const vaultQuery = useVaultStore((state) => state.query)
 
-  const query = view === 'vault' ? vaultQuery : clipboardQuery
+  // Local state drives the input display immediately; debounce triggers actual search
+  const [localQuery, setLocalQuery] = useState(view === 'vault' ? vaultQuery : clipboardQuery)
+
+  // Sync local state when panel becomes visible (store resets searchQuery to '')
+  useEffect(() => {
+    if (isVisible) {
+      setLocalQuery('')
+    }
+  }, [isVisible])
 
   useEffect(() => {
-    if (isVisible && inputRef.current) {
+    if (inputRef.current) {
       inputRef.current.blur()
     }
   }, [isVisible])
@@ -40,32 +47,32 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
 
   const handleChange = useCallback(
     (value: string) => {
+      setLocalQuery(value)
+      if (debounceRef.current) clearTimeout(debounceRef.current)
       if (view === 'vault') {
         setVaultQuery(value)
-        if (debounceRef.current) clearTimeout(debounceRef.current)
         debounceRef.current = setTimeout(() => {
           vaultSearch()
         }, 300)
       } else {
-        setClipboardQuery(value)
-        if (debounceRef.current) clearTimeout(debounceRef.current)
         debounceRef.current = setTimeout(() => {
           clipboardSearch(value)
         }, 300)
       }
     },
-    [view, clipboardSearch, setClipboardQuery, vaultSearch, setVaultQuery]
+    [view, clipboardSearch, vaultSearch, setVaultQuery]
   )
 
   const handleClear = useCallback(() => {
+    setLocalQuery('')
+    if (debounceRef.current) clearTimeout(debounceRef.current)
     if (view === 'vault') {
       setVaultQuery('')
       vaultSearch()
     } else {
-      setClipboardQuery('')
       clipboardSearch('')
     }
-  }, [view, clipboardSearch, setClipboardQuery, vaultSearch, setVaultQuery])
+  }, [view, clipboardSearch, vaultSearch, setVaultQuery])
 
   return (
     <div className="flex-1 relative group">
@@ -75,12 +82,12 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
       <Input
         ref={inputRef}
         type="text"
-        value={query}
+        value={localQuery}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={view === 'vault' ? t('vault.search.placeholder') : t('panel.search.placeholder')}
         className="h-9 pl-9 pr-8 bg-muted/50 border-transparent focus-visible:bg-background focus-visible:border-input shadow-none"
       />
-      {query && (
+      {localQuery && (
         <Button
           variant="ghost"
           size="icon"
