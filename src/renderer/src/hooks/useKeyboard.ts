@@ -62,9 +62,8 @@ export function useKeyboard(view: PanelView): void {
           }
           break
         default:
-          // Number keys 1-9 for quick select
-          if (e.key >= '1' && e.key <= '9' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-            if (isInput) return
+          // Cmd+Number 1-9 for quick select
+          if (e.key >= '1' && e.key <= '9' && e.metaKey && !e.ctrlKey && !e.altKey) {
             const index = parseInt(e.key) - 1
             if (index < items.length) {
               e.preventDefault()
@@ -85,7 +84,7 @@ export function useKeyboard(view: PanelView): void {
           if (
             !isInput &&
             !e.metaKey && !e.ctrlKey && !e.altKey &&
-            e.key.length === 1 && /[a-zA-Z]/.test(e.key)
+            e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)
           ) {
             const searchInput = document.querySelector<HTMLInputElement>('input[type="text"]')
             if (searchInput) {

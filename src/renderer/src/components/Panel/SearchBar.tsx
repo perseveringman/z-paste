@@ -34,10 +34,13 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
   }, [isVisible])
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.blur()
-    }
-  }, [isVisible])
+    if (!isVisible || view !== 'clipboard') return
+    // Delay to ensure the Electron window has fully gained focus before focusing the input
+    const t = setTimeout(() => {
+      inputRef.current?.focus()
+    }, 0)
+    return () => clearTimeout(t)
+  }, [isVisible, view])
 
   useEffect(() => {
     return () => {

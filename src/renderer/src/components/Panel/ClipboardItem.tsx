@@ -182,7 +182,7 @@ function ClipboardItemRow({
             <div className="w-8 flex items-center justify-center shrink-0 mr-2">
               {index < 9 ? (
                 <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {index + 1}
+                  ⌘{index + 1}
                 </span>
               ) : (
                 <TypeIcon type={item.content_type} />
