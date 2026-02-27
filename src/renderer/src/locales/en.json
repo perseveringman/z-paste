@@ -247,6 +247,7 @@
   "vault.locked.unlockWithBiometric": "Unlock with Touch ID / Keychain",
 
   "vault.search.placeholder": "Search vault...",
+  "vault.newItem": "+ New Item",
   "vault.lock": "Lock",
   "vault.empty": "No vault items",
   "vault.newLogin": "New Login",
@@ -275,12 +276,15 @@
   "vault.action.getTotpCode": "Get & Copy Code",
   "vault.action.autoType": "Auto Type",
   "vault.action.autoTypeEnter": "Auto Type + Enter",
+  "vault.action.autoTypeNoEnter": "Auto-type Only",
+  "vault.action.copied": "Copied!",
 
   "vault.confirm.question": "Confirm?",
   "vault.confirm.yes": "Yes",
   "vault.confirm.no": "No",
 
   "vault.detail.selectItem": "Select an item to view details",
+  "vault.detail.selectItemDesc": "Select an item from the sidebar to view or edit its contents securely.",
   "vault.detail.login": "Login",
   "vault.detail.secureNote": "Secure Note",
 

@@ -247,6 +247,7 @@
   "vault.locked.unlockWithBiometric": "使用 Touch ID / 钥匙串解锁",
 
   "vault.search.placeholder": "搜索保险库...",
+  "vault.newItem": "+ 新建条目",
   "vault.lock": "锁定",
   "vault.empty": "暂无保险库条目",
   "vault.newLogin": "新建登录",
@@ -275,12 +276,15 @@
   "vault.action.getTotpCode": "获取并复制",
   "vault.action.autoType": "自动输入",
   "vault.action.autoTypeEnter": "自动输入 + 回车",
+  "vault.action.autoTypeNoEnter": "仅自动输入",
+  "vault.action.copied": "已复制!",
 
   "vault.confirm.question": "确认删除？",
   "vault.confirm.yes": "是",
   "vault.confirm.no": "否",
 
   "vault.detail.selectItem": "选择一个条目查看详情",
+  "vault.detail.selectItemDesc": "从侧边栏选择一个条目，安全地查看或编辑其内容。",
   "vault.detail.login": "登录",
   "vault.detail.secureNote": "安全备注",
 

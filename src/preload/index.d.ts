@@ -71,8 +71,10 @@ interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
-  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null
+  lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null
   hasBiometricUnlock: boolean
+  securityMode: 'strict' | 'relaxed'
+  hintQuestion: string | null
 }
 
 interface VaultAuditEvent {
@@ -188,10 +190,22 @@ interface ZPasteAPI {
   }) => Promise<void>
   vaultGetItemDetail: (id: string) => Promise<VaultItemDetail | null>
   vaultDeleteItem: (id: string) => Promise<void>
-  vaultSetupMasterPassword: (masterPassword: string) => Promise<{ recoveryKey: string }>
+  vaultSetupMasterPassword: (input: {
+    masterPassword: string
+    securityMode: 'strict' | 'relaxed'
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => Promise<{ recoveryKey: string }>
   vaultUnlock: (masterPassword: string) => Promise<{ ok: true }>
   vaultUnlockWithRecoveryKey: (recoveryKey: string) => Promise<{ ok: true }>
   vaultUnlockWithBiometric: () => Promise<{ ok: true }>
+  vaultUnlockWithHint: (hintAnswer: string) => Promise<{ ok: true }>
+  vaultResetPassword: (input: {
+    newMasterPassword: string
+    hintQuestion?: string
+    hintAnswer?: string
+  }) => Promise<{ recoveryKey: string }>
+  vaultResetVault: () => Promise<void>
   vaultLock: () => Promise<{ ok: true }>
   vaultGetSecurityState: () => Promise<VaultSecurityState>
   vaultListAuditEvents: (limit?: number) => Promise<VaultAuditEvent[]>

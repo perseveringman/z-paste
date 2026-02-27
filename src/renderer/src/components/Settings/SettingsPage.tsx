@@ -404,7 +404,7 @@ function PrivacySection(): React.JSX.Element {
     locked: boolean
     hasVaultSetup: boolean
     hasBiometricUnlock: boolean
-    lastUnlockMethod: 'master' | 'recovery' | 'biometric' | null
+    lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null
   } | null>(null)
   const [auditEvents, setAuditEvents] = useState<
     Array<{
