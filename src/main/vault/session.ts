@@ -11,6 +11,7 @@ export interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
+  lockOnBlur: boolean
   lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null
   hasBiometricUnlock: boolean
   securityMode: 'strict' | 'relaxed'
@@ -22,6 +23,7 @@ export class VaultSessionManager {
 
   private autoLockMinutes = DEFAULT_AUTO_LOCK_MINUTES
   private autoLockTimer: ReturnType<typeof setTimeout> | null = null
+  private lockOnBlur = true
   private lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null = null
 
   async setupMasterPassword(input: {
@@ -304,6 +306,7 @@ export class VaultSessionManager {
       locked: !(await this.isUnlocked()),
       hasVaultSetup: !!meta,
       autoLockMinutes: this.autoLockMinutes,
+      lockOnBlur: this.lockOnBlur,
       lastUnlockMethod: this.lastUnlockMethod,
       hasBiometricUnlock: await hasBiometricDEK(),
       securityMode: (meta?.security_mode as 'strict' | 'relaxed') || 'strict',
@@ -326,6 +329,20 @@ export class VaultSessionManager {
         if (unlocked) this.touch()
       })
       .catch(() => undefined)
+  }
+
+  setLockOnBlur(enabled: boolean): void {
+    this.lockOnBlur = enabled
+  }
+
+  async lockOnHide(): Promise<void> {
+    const meta = vaultRepository.getVaultCryptoMeta(META_ID)
+    if (!meta) return
+    if (!(await this.isUnlocked())) return
+    const isStrict = meta.security_mode === 'strict'
+    if (isStrict || this.lockOnBlur) {
+      await this.lock()
+    }
   }
 
   private touch(): void {
