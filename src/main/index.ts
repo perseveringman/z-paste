@@ -255,6 +255,14 @@ app.whenReady().then(() => {
     return { ok: true }
   })
 
+  ipcMain.handle('vault:setLockOnBlur', async (_, enabled: boolean) => {
+    vaultSession.setLockOnBlur(enabled)
+  })
+
+  ipcMain.handle('vault:setAutoLockMinutes', async (_, minutes: number) => {
+    vaultSession.setAutoLockMinutes(minutes)
+  })
+
   ipcMain.handle('vault:resetVault', async () => {
     await vaultSession.resetVault()
     return { ok: true }

@@ -178,7 +178,11 @@ const api = {
     hintAnswer?: string
   }) => ipcRenderer.invoke('vault:resetPassword', input),
   vaultUnlockWithHint: (hintAnswer: string) =>
-    ipcRenderer.invoke('vault:unlockWithHint', hintAnswer)
+    ipcRenderer.invoke('vault:unlockWithHint', hintAnswer),
+  vaultSetLockOnBlur: (enabled: boolean) =>
+    ipcRenderer.invoke('vault:setLockOnBlur', enabled),
+  vaultSetAutoLockMinutes: (minutes: number) =>
+    ipcRenderer.invoke('vault:setAutoLockMinutes', minutes),
 }
 
 if (process.contextIsolated) {

@@ -71,6 +71,7 @@ interface VaultSecurityState {
   locked: boolean
   hasVaultSetup: boolean
   autoLockMinutes: number
+  lockOnBlur: boolean
   lastUnlockMethod: 'master' | 'recovery' | 'biometric' | 'hint' | null
   hasBiometricUnlock: boolean
   securityMode: 'strict' | 'relaxed'
@@ -221,6 +222,8 @@ interface ZPasteAPI {
     ok: true
     fallbackCopied: boolean
   }>
+  vaultSetLockOnBlur: (enabled: boolean) => Promise<void>
+  vaultSetAutoLockMinutes: (minutes: number) => Promise<void>
 }
 
 declare global {
