@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore, ThemeMode, LanguageMode } from '../../stores/settingsStore'
+import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { Switch } from '../ui/switch'
 import {
@@ -399,6 +400,7 @@ function SyncSection(): React.JSX.Element {
 function PrivacySection(): React.JSX.Element {
   const { t } = useTranslation()
   const { encryptionEnabled, setEncryptionEnabled } = useSettingsStore()
+  const { security, setLockOnBlur, setAutoLockMinutes } = useVaultStore()
   const [confirming, setConfirming] = useState(false)
   const [vaultState, setVaultState] = useState<{
     locked: boolean
@@ -502,6 +504,53 @@ function PrivacySection(): React.JSX.Element {
           )}
         </Button>
       </SettingsItem>
+
+      <Separator />
+
+      {/* Vault Security */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium">{t('settings.vault.title')}</h3>
+
+        {/* Lock on blur */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-sm">{t('settings.vault.lockOnBlur')}</p>
+            <p className="text-xs text-muted-foreground">
+              {security.securityMode === 'strict'
+                ? t('settings.vault.lockOnBlurStrictNote')
+                : t('settings.vault.lockOnBlurDesc')}
+            </p>
+          </div>
+          <Switch
+            checked={security.securityMode === 'strict' ? true : security.lockOnBlur}
+            disabled={security.securityMode === 'strict'}
+            onCheckedChange={(v) => setLockOnBlur(v)}
+          />
+        </div>
+
+        {/* Auto-lock timeout */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-sm">{t('settings.vault.autoLockTimeout')}</p>
+            <p className="text-xs text-muted-foreground">{t('settings.vault.autoLockTimeoutDesc')}</p>
+          </div>
+          <Select
+            value={String(security.autoLockMinutes)}
+            onValueChange={(v) => setAutoLockMinutes(Number(v))}
+          >
+            <SelectTrigger className="w-32 h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">{t('settings.vault.timeout1')}</SelectItem>
+              <SelectItem value="5">{t('settings.vault.timeout5')}</SelectItem>
+              <SelectItem value="10">{t('settings.vault.timeout10')}</SelectItem>
+              <SelectItem value="30">{t('settings.vault.timeout30')}</SelectItem>
+              <SelectItem value="99999">{t('settings.vault.timeoutNever')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
   )
 }

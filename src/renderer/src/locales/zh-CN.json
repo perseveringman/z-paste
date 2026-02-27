@@ -126,6 +126,18 @@
   "settings.privacy.confirmClear": "确认清空？",
   "settings.privacy.clearButton": "清空",
 
+  "settings.vault.title": "保险库安全",
+  "settings.vault.lockOnBlur": "切换应用时锁定",
+  "settings.vault.lockOnBlurDesc": "切换到其他应用时自动锁定保险库",
+  "settings.vault.lockOnBlurStrictNote": "严格模式下始终锁定",
+  "settings.vault.autoLockTimeout": "自动锁定超时",
+  "settings.vault.autoLockTimeoutDesc": "在指定时间内无操作后自动锁定",
+  "settings.vault.timeout1": "1 分钟",
+  "settings.vault.timeout5": "5 分钟",
+  "settings.vault.timeout10": "10 分钟",
+  "settings.vault.timeout30": "30 分钟",
+  "settings.vault.timeoutNever": "永不",
+
   "settings.theme.title": "主题",
   "settings.theme.auto": "自动",
   "settings.theme.dark": "暗色",

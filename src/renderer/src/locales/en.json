@@ -126,6 +126,18 @@
   "settings.privacy.confirmClear": "Confirm Clear?",
   "settings.privacy.clearButton": "Clear",
 
+  "settings.vault.title": "Vault Security",
+  "settings.vault.lockOnBlur": "Lock when switching away",
+  "settings.vault.lockOnBlurDesc": "Automatically lock the vault when you switch to another app",
+  "settings.vault.lockOnBlurStrictNote": "Always locked in strict mode",
+  "settings.vault.autoLockTimeout": "Auto-lock timeout",
+  "settings.vault.autoLockTimeoutDesc": "Lock after this period of inactivity",
+  "settings.vault.timeout1": "1 minute",
+  "settings.vault.timeout5": "5 minutes",
+  "settings.vault.timeout10": "10 minutes",
+  "settings.vault.timeout30": "30 minutes",
+  "settings.vault.timeoutNever": "Never",
+
   "settings.theme.title": "Theme",
   "settings.theme.auto": "Auto",
   "settings.theme.dark": "Dark",

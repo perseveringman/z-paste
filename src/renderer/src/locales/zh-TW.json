@@ -126,6 +126,18 @@
   "settings.privacy.confirmClear": "確認清空？",
   "settings.privacy.clearButton": "清空",
 
+  "settings.vault.title": "保險庫安全",
+  "settings.vault.lockOnBlur": "切換應用程式時鎖定",
+  "settings.vault.lockOnBlurDesc": "切換到其他應用程式時自動鎖定保險庫",
+  "settings.vault.lockOnBlurStrictNote": "嚴格模式下始終鎖定",
+  "settings.vault.autoLockTimeout": "自動鎖定逾時",
+  "settings.vault.autoLockTimeoutDesc": "在指定時間內無操作後自動鎖定",
+  "settings.vault.timeout1": "1 分鐘",
+  "settings.vault.timeout5": "5 分鐘",
+  "settings.vault.timeout10": "10 分鐘",
+  "settings.vault.timeout30": "30 分鐘",
+  "settings.vault.timeoutNever": "永不",
+
   "settings.theme.title": "主題",
   "settings.theme.auto": "自動",
   "settings.theme.dark": "深色",
