@@ -53,8 +53,13 @@ interface VaultState {
   error: string | null
   recoveryKey: string | null
   query: string
+  filterType: 'all' | 'login' | 'secure_note'
+  showFavoritesOnly: boolean
 
   setQuery: (query: string) => void
+  setFilterType: (type: 'all' | 'login' | 'secure_note') => Promise<void>
+  setShowFavoritesOnly: (v: boolean) => void
+  toggleFavorite: (id: string) => Promise<void>
   refreshSecurity: () => Promise<void>
   setupMasterPassword: (input: {
     masterPassword: string
@@ -119,8 +124,25 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   error: null,
   recoveryKey: null,
   query: '',
+  filterType: 'all' as 'all' | 'login' | 'secure_note',
+  showFavoritesOnly: false,
 
   setQuery: (query) => set({ query }),
+
+  setFilterType: async (type) => {
+    set({ filterType: type })
+    await get().loadItems()
+  },
+
+  setShowFavoritesOnly: (v) => set({ showFavoritesOnly: v }),
+
+  toggleFavorite: async (id) => {
+    const { detail, loadItems, selectItem } = get()
+    const currentFavorite = detail?.meta.id === id ? detail.meta.favorite : 0
+    await window.api.vaultUpdateItem({ id, favorite: !currentFavorite })
+    await loadItems()
+    await selectItem(id)
+  },
 
   clearError: () => set({ error: null }),
 
@@ -229,7 +251,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   },
 
   loadItems: async () => {
-    const { security, query } = get()
+    const { security, query, filterType } = get()
     if (!security.hasVaultSetup || security.locked) {
       set({ items: [], selectedId: null, detail: null })
       return
@@ -237,6 +259,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
 
     const items = await window.api.vaultListItems({
       query: query || undefined,
+      type: filterType !== 'all' ? filterType : undefined,
       limit: 100
     })
     set({ items })
