@@ -48,8 +48,8 @@ function setupAutoUpdater(): void {
       cancelId: 1,
     }).then(({ response }) => {
       if (response === 0) {
-        autoUpdater.downloadUpdate().catch(() => {
-          // 下载失败静默处理，不打扰用户
+        autoUpdater.downloadUpdate().catch((err) => {
+          console.error('[updater] download failed:', err.message)
         })
       }
     })
@@ -71,15 +71,16 @@ function setupAutoUpdater(): void {
     })
   })
 
-  autoUpdater.on('error', () => {
-    // 静默失败，不弹错误弹窗
+  autoUpdater.on('error', (err) => {
+    console.error('[updater] error:', err.message)
   })
 
   // 启动时检查，之后每小时一次
   autoUpdater.checkForUpdates().catch(() => {})
-  setInterval(() => {
+  const updateIntervalId = setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {})
   }, 60 * 60 * 1000)
+  app.on('will-quit', () => clearInterval(updateIntervalId))
 }
 
 app.whenReady().then(() => {
