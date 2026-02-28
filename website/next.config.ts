@@ -4,6 +4,6 @@ const withNextra = nextra({})
 
 export default withNextra({
   output: 'export',
-  basePath: '/z-paste',
+  basePath: '/Stash',
   images: { unoptimized: true },
 })
