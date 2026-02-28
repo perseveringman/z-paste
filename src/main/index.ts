@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, clipboard } from 'electron'
+import { app, BrowserWindow, ipcMain, clipboard, dialog } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
@@ -17,6 +17,7 @@ import { VaultService } from './vault/service'
 import { AutoTypeAgent } from './vault/auto-type'
 import { nanoid } from 'nanoid'
 import { VaultCryptoWorkerClient } from './vault/worker-client'
+import { autoUpdater } from 'electron-updater'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -28,6 +29,58 @@ let vaultSession: VaultSessionManager
 let vaultService: VaultService
 let autoTypeAgent: AutoTypeAgent
 let vaultCryptoWorker: VaultCryptoWorkerClient | null = null
+
+function setupAutoUpdater(): void {
+  // 开发模式下跳过
+  if (!app.isPackaged) return
+
+  autoUpdater.autoDownload = false
+  autoUpdater.autoInstallOnAppQuit = true
+
+  autoUpdater.on('update-available', (info) => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: '发现新版本',
+      message: `Z-Paste ${info.version} 已发布`,
+      detail: '是否立即下载更新？下载完成后重启即可安装。',
+      buttons: ['立即更新', '稍后提醒'],
+      defaultId: 0,
+      cancelId: 1,
+    }).then(({ response }) => {
+      if (response === 0) {
+        autoUpdater.downloadUpdate().catch(() => {
+          // 下载失败静默处理，不打扰用户
+        })
+      }
+    })
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox({
+      type: 'info',
+      title: '更新已准备好',
+      message: '新版本已下载完成',
+      detail: '重启 Z-Paste 以完成安装。',
+      buttons: ['现在重启', '稍后'],
+      defaultId: 0,
+      cancelId: 1,
+    }).then(({ response }) => {
+      if (response === 0) {
+        autoUpdater.quitAndInstall()
+      }
+    })
+  })
+
+  autoUpdater.on('error', () => {
+    // 静默失败，不弹错误弹窗
+  })
+
+  // 启动时检查，之后每小时一次
+  autoUpdater.checkForUpdates().catch(() => {})
+  setInterval(() => {
+    autoUpdater.checkForUpdates().catch(() => {})
+  }, 60 * 60 * 1000)
+}
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
@@ -58,6 +111,7 @@ app.whenReady().then(() => {
   shortcutManager.register()
   trayManager.create()
   clipboardMonitor.start()
+  setupAutoUpdater()
 
   // Auto cleanup every 10 minutes
   setInterval(() => {
