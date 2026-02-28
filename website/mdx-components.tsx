@@ -1,5 +1,8 @@
 import { useMDXComponents as getDocsMDXComponents } from 'nextra-theme-docs'
+import type { MDXComponents } from 'nextra/mdx-components'
 
-export function useMDXComponents(components: Record<string, React.ComponentType>) {
+export function useMDXComponents(
+  components: MDXComponents
+): ReturnType<typeof getDocsMDXComponents> {
   return getDocsMDXComponents(components)
 }
