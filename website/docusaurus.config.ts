@@ -3,15 +3,15 @@ import type { Config } from '@docusaurus/types'
 import type * as Preset from '@docusaurus/preset-classic'
 
 const config: Config = {
-  title: 'Z-Paste',
+  title: 'Stash',
   tagline: 'macOS 剪切板管理 + 密码保险箱',
   favicon: 'img/favicon.ico',
 
   url: 'https://perseveringman.github.io',
-  baseUrl: '/z-paste/',
+  baseUrl: '/Stash/',
 
   organizationName: 'perseveringman',
-  projectName: 'z-paste',
+  projectName: 'Stash',
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
@@ -44,9 +44,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Z-Paste',
+      title: 'Stash',
       logo: {
-        alt: 'Z-Paste Logo',
+        alt: 'Stash Logo',
         src: 'img/logo.png',
       },
       items: [
@@ -87,7 +87,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Z-Paste. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Stash. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
