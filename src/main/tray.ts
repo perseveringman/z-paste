@@ -104,7 +104,7 @@ export class TrayManager {
     icon.setTemplateImage(true)
 
     this.tray = new Tray(icon)
-    this.tray.setToolTip('Z-Paste')
+    this.tray.setToolTip('Stash')
 
     this.buildMenu()
 

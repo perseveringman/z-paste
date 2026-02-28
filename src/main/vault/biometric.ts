@@ -6,7 +6,7 @@ const ACCOUNT = 'biometric_dek'
 
 // Touch ID prompt reason shown in the macOS system dialog.
 // This string is displayed by macOS directly and is intentionally in English.
-const TOUCH_ID_REASON = 'unlock Z-Paste Vault'
+const TOUCH_ID_REASON = 'unlock Stash Vault'
 
 export async function saveBiometricDEK(dek: Buffer): Promise<void> {
   await keytar.setPassword(SERVICE, ACCOUNT, dek.toString('base64'))

@@ -1,5 +1,5 @@
 appId: com.zpaste.app
-productName: Z-Paste
+productName: Stash
 directories:
   buildResources: build
 files:
@@ -36,4 +36,4 @@ dmg:
 publish:
   provider: github
   owner: perseveringman
-  repo: z-paste
+  repo: stash

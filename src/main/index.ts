@@ -41,7 +41,7 @@ function setupAutoUpdater(): void {
     dialog.showMessageBox({
       type: 'info',
       title: '发现新版本',
-      message: `Z-Paste ${info.version} 已发布`,
+      message: `Stash ${info.version} 已发布`,
       detail: '是否立即下载更新？下载完成后重启即可安装。',
       buttons: ['立即更新', '稍后提醒'],
       defaultId: 0,
@@ -60,7 +60,7 @@ function setupAutoUpdater(): void {
       type: 'info',
       title: '更新已准备好',
       message: '新版本已下载完成',
-      detail: '重启 Z-Paste 以完成安装。',
+      detail: '重启 Stash 以完成安装。',
       buttons: ['现在重启', '稍后'],
       defaultId: 0,
       cancelId: 1,

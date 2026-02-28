@@ -1,8 +1,8 @@
-# Z-Paste 实施计划
+# Stash 实施计划
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** 完成 Phase 3（iCloud 同步 + 打磨），将 Z-Paste 推进到完整产品。
+**Goal:** 完成 Phase 3（iCloud 同步 + 打磨），将 Stash 推进到完整产品。
 
 **Architecture:** 在 Phase 1 + 2 已完成的基础上，添加 iCloud 同步层、加密存储、设置页、引导页、主题切换、性能优化和动画。
 

@@ -848,7 +848,7 @@ function AboutSection(): React.JSX.Element {
           Z
         </div>
         <div>
-          <h3 className="text-lg font-semibold">Z-Paste</h3>
+          <h3 className="text-lg font-semibold">Stash</h3>
           <p className="text-sm text-muted-foreground">{t('settings.about.version', { version: '1.0.0' })}</p>
         </div>
         <p className="text-sm text-muted-foreground max-w-xs">
@@ -856,7 +856,7 @@ function AboutSection(): React.JSX.Element {
         </p>
         <Button variant="link" asChild>
           <a
-            href="https://github.com/perseveringman/z-paste"
+            href="https://github.com/perseveringman/Stash"
             target="_blank"
             rel="noopener noreferrer"
           >

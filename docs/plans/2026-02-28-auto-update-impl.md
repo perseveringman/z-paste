@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** 为 Z-Paste 添加基于 GitHub Releases 的自动发布 CI/CD 流水线和应用内热更新功能。
+**Goal:** 为 Stash 添加基于 GitHub Releases 的自动发布 CI/CD 流水线和应用内热更新功能。
 
 **Architecture:** 使用 `electron-updater` 检查/下载/安装更新，GitHub Actions 在推送 `v*` tag 时自动构建并发布到 GitHub Releases，`electron-builder` 生成的 `latest-mac.yml` 作为版本描述文件。
 
@@ -103,7 +103,7 @@ function setupAutoUpdater(): void {
     dialog.showMessageBox({
       type: 'info',
       title: '发现新版本',
-      message: `Z-Paste ${info.version} 已发布`,
+      message: `Stash ${info.version} 已发布`,
       detail: '是否立即下载更新？下载完成后重启即可安装。',
       buttons: ['立即更新', '稍后提醒'],
       defaultId: 0,
@@ -122,7 +122,7 @@ function setupAutoUpdater(): void {
       type: 'info',
       title: '更新已准备好',
       message: '新版本已下载完成',
-      detail: '重启 Z-Paste 以完成安装。',
+      detail: '重启 Stash 以完成安装。',
       buttons: ['现在重启', '稍后'],
       defaultId: 0,
       cancelId: 1,
@@ -255,7 +255,7 @@ npm run build:mac
 ```
 
 Expected:
-- `dist/` 目录下生成 `z-paste-X.Y.Z-arm64.dmg`、`z-paste-X.Y.Z-x64.dmg`
+- `dist/` 目录下生成 `stash-X.Y.Z-arm64.dmg`、`stash-X.Y.Z-x64.dmg`
 - `dist/latest-mac.yml` 文件存在
 
 **Step 3: 检查 latest-mac.yml 内容**

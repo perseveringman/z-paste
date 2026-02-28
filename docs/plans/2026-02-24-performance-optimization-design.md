@@ -1,8 +1,8 @@
-# Z-Paste Performance Optimization Design
+# Stash Performance Optimization Design
 
 ## Background
 
-Z-Paste is an Electron-based clipboard manager for macOS. Users report noticeable paste delay (1s+) when selecting items from the panel. A comprehensive code audit identified 10 performance issues across 4 categories.
+Stash is an Electron-based clipboard manager for macOS. Users report noticeable paste delay (1s+) when selecting items from the panel. A comprehensive code audit identified 10 performance issues across 4 categories.
 
 ## Approach
 

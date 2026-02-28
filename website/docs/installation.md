@@ -15,7 +15,7 @@ sidebar_position: 1
 
 ### 从 GitHub Releases 下载
 
-1. 访问 [GitHub Releases](https://github.com/perseveringman/z-paste/releases/latest) 页面
+1. 访问 [GitHub Releases](https://github.com/perseveringman/Stash/releases/latest) 页面
 2. 根据您的处理器架构下载对应版本：
    - **Apple Silicon（M 系列芯片）**：下载 `z-paste-x.x.x-arm64.dmg`
    - **Intel 处理器**：下载 `z-paste-x.x.x-x64.dmg`

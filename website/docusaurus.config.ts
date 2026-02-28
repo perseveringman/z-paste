@@ -57,12 +57,12 @@ const config: Config = {
           label: '使用文档',
         },
         {
-          href: 'https://github.com/perseveringman/z-paste',
+          href: 'https://github.com/perseveringman/Stash',
           label: 'GitHub',
           position: 'right',
         },
         {
-          href: 'https://github.com/perseveringman/z-paste/releases/latest',
+          href: 'https://github.com/perseveringman/Stash/releases/latest',
           label: '下载',
           position: 'right',
         },
@@ -82,8 +82,8 @@ const config: Config = {
         {
           title: '更多',
           items: [
-            { label: 'GitHub', href: 'https://github.com/perseveringman/z-paste' },
-            { label: '反馈问题', href: 'https://github.com/perseveringman/z-paste/issues' },
+            { label: 'GitHub', href: 'https://github.com/perseveringman/Stash' },
+            { label: '反馈问题', href: 'https://github.com/perseveringman/Stash/issues' },
           ],
         },
       ],

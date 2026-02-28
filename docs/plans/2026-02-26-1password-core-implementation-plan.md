@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** 在现有 Z-Paste 中交付安全优先的 Vault MVP（Login + Secure Note、主密码+Touch ID、恢复码、密码生成、TOTP、自动输入回退）。
+**Goal:** 在现有 Stash 中交付安全优先的 Vault MVP（Login + Secure Note、主密码+Touch ID、恢复码、密码生成、TOTP、自动输入回退）。
 
 **Architecture:** 新增独立 Vault 领域层（`main/vault`）与数据库表，主进程只做编排和 IPC，渲染层通过新 `Vault` 视图调用 API。MVP 先完成安全底座和高频操作，再补自动输入与审计。
 

@@ -1,10 +1,10 @@
-# Z-Paste 自动发布与热更新设计文档
+# Stash 自动发布与热更新设计文档
 
 日期：2026-02-28
 
 ## 背景
 
-Z-Paste 是一个 macOS 专属的 Electron 剪贴板管理应用，当前版本 1.0.1，使用 electron-builder 构建，尚无 CI/CD 流水线和自动更新机制。本文档描述基于 GitHub Releases 的自动发布和热更新方案。
+Stash 是一个 macOS 专属的 Electron 剪贴板管理应用，当前版本 1.0.1，使用 electron-builder 构建，尚无 CI/CD 流水线和自动更新机制。本文档描述基于 GitHub Releases 的自动发布和热更新方案。
 
 ## 目标
 
@@ -32,8 +32,8 @@ GitHub Actions (macOS runner)
    npm ci + npm run build:mac
         │
    electron-builder 生成：
-   ├── Z-Paste-X.Y.Z-arm64.dmg
-   ├── Z-Paste-X.Y.Z-x64.dmg
+   ├── Stash-X.Y.Z-arm64.dmg
+   ├── Stash-X.Y.Z-x64.dmg
    └── latest-mac.yml
         │
    gh release create + upload

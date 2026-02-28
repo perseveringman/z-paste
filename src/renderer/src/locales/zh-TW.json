@@ -66,7 +66,7 @@
   "settings.general.language.en": "English",
   "settings.general.language.zhTW": "繁體中文",
   "settings.general.launchAtLogin": "開機自啟",
-  "settings.general.launchAtLogin.desc": "登入 macOS 時自動啟動 Z-Paste",
+  "settings.general.launchAtLogin.desc": "登入 macOS 時自動啟動 Stash",
   "settings.general.historyRetention": "歷史保留時間",
   "settings.general.historyRetention.desc": "超過時間的非收集箱/非置頂記錄將自動清理",
   "settings.general.retention.1day": "1 天",
@@ -158,7 +158,7 @@
   "settings.about.version": "版本 {{version}}",
   "settings.about.description": "Mac 剪貼簿管理器 — 讓複製貼上更高效",
 
-  "onboarding.step1.title": "歡迎使用 Z-Paste",
+  "onboarding.step1.title": "歡迎使用 Stash",
   "onboarding.step1.description": "強大的 Mac 剪貼簿管理器，讓你的複製貼上更高效",
   "onboarding.step1.feature1.title": "智慧歷史",
   "onboarding.step1.feature1.desc": "自動記錄剪貼簿，智慧分類文字、程式碼、連結、顏色",
@@ -170,7 +170,7 @@
   "onboarding.step1.feature4.desc": "程式碼高亮、JSON 格式化、顏色預覽",
 
   "onboarding.step2.title": "快捷鍵",
-  "onboarding.step2.description": "用一個快捷鍵喚起 Z-Paste",
+  "onboarding.step2.description": "用一個快捷鍵喚起 Stash",
   "onboarding.step2.shortcutHint": "按下 ⇧⌘V 即可隨時喚起剪貼簿面板",
   "onboarding.step2.autoPaste": "選擇條目後自動貼上到目前應用",
   "onboarding.step2.moreShortcuts": "更多快捷鍵",
@@ -187,7 +187,7 @@
   "onboarding.step3.sync.desc": "在多台 Mac 之間透過 iCloud Drive 同步剪貼簿資料。可隨時在設定中變更。",
 
   "onboarding.step4.title": "準備就緒！",
-  "onboarding.step4.description": "開始使用 Z-Paste 提升你的效率",
+  "onboarding.step4.description": "開始使用 Stash 提升你的效率",
   "onboarding.step4.ready": "一切準備就緒！",
   "onboarding.step4.hint": "複製任何內容後，按 ⇧⌘V 即可開始使用",
 

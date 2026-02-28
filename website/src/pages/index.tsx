@@ -17,7 +17,7 @@ function Hero() {
         <div className={styles.heroActions}>
           <Link
             className="button button--primary button--lg"
-            to="https://github.com/perseveringman/z-paste/releases/latest"
+            to="https://github.com/perseveringman/Stash/releases/latest"
           >
             免费下载
           </Link>

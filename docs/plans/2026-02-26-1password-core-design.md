@@ -1,8 +1,8 @@
-# Z-Paste 1Password Core Design (MVP)
+# Stash 1Password Core Design (MVP)
 
 日期：2026-02-26  
 状态：已评审（Brainstorming 结果沉淀）  
-目标：在现有 Z-Paste 项目中实现类似 1Password 的“最核心、最高频”功能，优先安全边界。
+目标：在现有 Stash 项目中实现类似 1Password 的“最核心、最高频”功能，优先安全边界。
 
 ## 1. 范围与决策
 
