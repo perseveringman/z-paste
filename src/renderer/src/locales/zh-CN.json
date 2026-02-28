@@ -156,7 +156,8 @@
 
   "settings.about.title": "关于",
   "settings.about.version": "版本 {{version}}",
-  "settings.about.description": "Mac 剪贴板管理器 — 让复制粘贴更高效",
+  "settings.about.description": "Mac 剪贴板 + 密码管理器 — 让复制粘贴更高效",
+  "settings.about.docs": "文档站",
 
   "onboarding.step1.title": "欢迎使用 Stash",
   "onboarding.step1.description": "强大的 Mac 剪贴板管理器，让你的复制粘贴更高效",

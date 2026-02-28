@@ -156,7 +156,8 @@
 
   "settings.about.title": "About",
   "settings.about.version": "Version {{version}}",
-  "settings.about.description": "Mac Clipboard Manager — Make Copy-Paste More Efficient",
+  "settings.about.description": "Mac Clipboard + Password Manager — Make Copy-Paste More Efficient",
+  "settings.about.docs": "Docs",
 
   "onboarding.step1.title": "Welcome to Stash",
   "onboarding.step1.description": "A powerful Mac clipboard manager to boost your copy-paste workflow",

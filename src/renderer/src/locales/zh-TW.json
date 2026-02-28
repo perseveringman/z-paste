@@ -156,7 +156,8 @@
 
   "settings.about.title": "關於",
   "settings.about.version": "版本 {{version}}",
-  "settings.about.description": "Mac 剪貼簿管理器 — 讓複製貼上更高效",
+  "settings.about.description": "Mac 剪貼簿 + 密碼管理器 — 讓複製貼上更高效",
+  "settings.about.docs": "文檔站",
 
   "onboarding.step1.title": "歡迎使用 Stash",
   "onboarding.step1.description": "強大的 Mac 剪貼簿管理器，讓你的複製貼上更高效",

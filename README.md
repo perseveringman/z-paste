@@ -2,15 +2,15 @@
 
 # Stash
 
-**macOS 剪切板管理器 + 密码保险箱**
+**macOS 剪贴板 + 密码管理器**
 
-免费、本地存储、隐私优先——你复制过的一切，随时找回。
+免费、本地存储、隐私优先——你的剪贴板历史与密码，安全掌握。
 
 [![Version](https://img.shields.io/github/v/release/perseveringman/Stash?label=版本)](https://github.com/perseveringman/Stash/releases/latest)
 [![Platform](https://img.shields.io/badge/平台-macOS%2012%2B-blue)](https://github.com/perseveringman/Stash/releases/latest)
 [![License](https://img.shields.io/github/license/perseveringman/Stash)](LICENSE)
 
-[📖 使用文档](https://perseveringman.github.io/z-paste/) · [⬇️ 立即下载](https://github.com/perseveringman/Stash/releases/latest) · [🐛 反馈问题](https://github.com/perseveringman/Stash/issues)
+[📖 使用文档](https://perseveringman.github.io/Stash/) · [⬇️ 立即下载](https://github.com/perseveringman/Stash/releases/latest) · [🐛 反馈问题](https://github.com/perseveringman/Stash/issues)
 
 </div>
 
@@ -47,7 +47,7 @@
 2. 首次启动时，按提示授予「辅助功能」和「输入监控」权限
 3. 按 **`Shift+Cmd+V`** 唤起剪切板面板，开始使用
 
-📖 更详细的说明请查看 [使用文档](https://perseveringman.github.io/z-paste/)
+📖 更详细的说明请查看 [使用文档](https://perseveringman.github.io/Stash/)
 
 ## 系统要求
 

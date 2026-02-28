@@ -845,7 +845,7 @@ function AboutSection(): React.JSX.Element {
       <SectionTitle title={t('settings.about.title')} />
       <div className="flex flex-col items-center py-8 text-center space-y-4">
         <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-          Z
+          S
         </div>
         <div>
           <h3 className="text-lg font-semibold">Stash</h3>
@@ -854,15 +854,26 @@ function AboutSection(): React.JSX.Element {
         <p className="text-sm text-muted-foreground max-w-xs">
           {t('settings.about.description')}
         </p>
-        <Button variant="link" asChild>
-          <a
-            href="https://github.com/perseveringman/Stash"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub →
-          </a>
-        </Button>
+        <div className="flex gap-4">
+          <Button variant="link" asChild>
+            <a
+              href="https://github.com/perseveringman/Stash"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub →
+            </a>
+          </Button>
+          <Button variant="link" asChild>
+            <a
+              href="https://perseveringman.github.io/Stash/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('settings.about.docs')} →
+            </a>
+          </Button>
+        </div>
       </div>
     </div>
   )
