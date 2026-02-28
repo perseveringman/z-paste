@@ -12,7 +12,7 @@ interface VaultViewProps {
 }
 
 export default function VaultView({ createType, onCreateTypeChange }: VaultViewProps): React.JSX.Element {
-  const { security, refreshSecurity, recoveryKey, detail } = useVaultStore()
+  const { security, securityInitialized, refreshSecurity, recoveryKey, detail } = useVaultStore()
 
   useEffect(() => {
     refreshSecurity()
@@ -30,6 +30,10 @@ export default function VaultView({ createType, onCreateTypeChange }: VaultViewP
       onCreateTypeChange(null)
     }
   }, [detail?.meta.id])
+
+  if (!securityInitialized) {
+    return <div className="h-full" />
+  }
 
   if (recoveryKey) {
     return <VaultSetup />

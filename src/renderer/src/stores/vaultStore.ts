@@ -49,6 +49,7 @@ interface VaultState {
   selectedId: string | null
   detail: VaultItemDetail | null
   security: VaultSecurityState
+  securityInitialized: boolean
   loading: boolean
   error: string | null
   recoveryKey: string | null
@@ -120,6 +121,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   selectedId: null,
   detail: null,
   security: defaultSecurityState,
+  securityInitialized: false,
   loading: false,
   error: null,
   recoveryKey: null,
@@ -149,9 +151,9 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   refreshSecurity: async () => {
     try {
       const security = await window.api.vaultGetSecurityState()
-      set({ security })
+      set({ security, securityInitialized: true })
     } catch {
-      set({ security: defaultSecurityState })
+      set({ security: defaultSecurityState, securityInitialized: true })
     }
   },
 

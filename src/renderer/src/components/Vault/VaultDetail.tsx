@@ -371,7 +371,7 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
                   <div className="flex items-center gap-3 mt-6">
                     <Button variant="default" size="sm" onClick={() => handleAutoType(true)} className="h-9 shadow-sm">
                       <ShieldCheck className="w-3.5 h-3.5 mr-2" />
-                      {t('vault.action.autoType')}
+                      {t('vault.action.autoTypeEnter')}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleAutoType(false)} className="h-9">
                       {t('vault.action.autoTypeNoEnter') || 'Auto-type Only'}

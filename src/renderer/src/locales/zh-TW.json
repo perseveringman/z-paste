@@ -287,6 +287,8 @@
   "vault.action.getTotpCode": "取得並複製",
   "vault.action.autoType": "自動輸入",
   "vault.action.autoTypeEnter": "自動輸入 + Enter",
+  "vault.action.autoTypeNoEnter": "僅自動輸入",
+  "vault.action.copied": "已複製！",
 
   "vault.confirm.question": "確認刪除？",
   "vault.confirm.yes": "是",

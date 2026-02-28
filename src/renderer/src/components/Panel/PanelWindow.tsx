@@ -159,11 +159,11 @@ export default function PanelWindow(): React.JSX.Element {
             active={view === 'clipboard'}
             onClick={() => setView('clipboard')}
           />
-          <TabButton
+          {/* <TabButton
             label={t('panel.tabs.templates')}
             active={view === 'templates'}
             onClick={() => setView('templates')}
-          />
+          /> */}
           <TabButton
             label={t('panel.tabs.vault')}
             active={view === 'vault'}
