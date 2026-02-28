@@ -23,7 +23,7 @@ function Hero() {
           </Link>
           <Link
             className="button button--secondary button--lg"
-            to="/z-paste/docs/installation"
+            to="/docs/installation"
           >
             查看文档
           </Link>
