@@ -6,6 +6,14 @@ sidebar_position: 6
 
 # 更新日志
 
+## v1.1.0
+
+### 改进
+- 重写 README，面向普通用户的产品介绍风格
+- 新增官方文档站：[perseveringman.github.io/z-paste](https://perseveringman.github.io/z-paste/)
+
+---
+
 ## v1.0.1
 
 ### 修复
