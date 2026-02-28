@@ -4,6 +4,7 @@
   "description": "Z-Paste 剪贴板管理工具 - Mac 剪贴板管理器",
   "main": "./out/main/index.js",
   "author": "Z-Paste",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://github.com/perseveringman/z-paste",
   "scripts": {
     "format": "prettier --write .",
