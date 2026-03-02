@@ -15,8 +15,7 @@ mac:
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application data storage
     - LSUIElement: true
-  notarize:
-    teamId: "9L67H7PVDT"
+  notarize: true
   icon: resources/icon.icns
   category: public.app-category.utilities
   target:
