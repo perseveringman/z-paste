@@ -35,6 +35,7 @@ interface ClipboardState {
   filtersCollapsed: boolean
   sortBy: 'recent' | 'usage'
   sourceAppFilter: string | null
+  starredCount: number
 
   // Sequence paste queue
   sequenceQueue: ClipboardItem[]
@@ -53,6 +54,7 @@ interface ClipboardState {
   getQueuePosition: (id: string) => number
 
   loadItems: () => Promise<void>
+  loadStarredCount: () => Promise<void>
   addItem: (item: ClipboardItem) => void
   setSelectedIndex: (index: number) => void
   setSearchQuery: (query: string) => void
@@ -83,6 +85,7 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   filtersCollapsed: false,
   sourceAppFilter: null,
   sortBy: 'recent',
+  starredCount: 0,
 
   // Sequence paste queue
   sequenceQueue: [],
@@ -170,6 +173,12 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
       sortBy: state.sortBy
     })
     set({ items, selectedIndex: 0 })
+    get().loadStarredCount()
+  },
+
+  loadStarredCount: async () => {
+    const count = await window.api.getStarredCount()
+    set({ starredCount: count })
   },
 
   addItem: (item) => {

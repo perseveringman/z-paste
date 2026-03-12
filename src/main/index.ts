@@ -182,6 +182,10 @@ app.whenReady().then(() => {
     return repository.clearAll()
   })
 
+  ipcMain.handle('clipboard:getStarredCount', async () => {
+    return repository.getStarredCount()
+  })
+
   // Template IPC handlers
   ipcMain.handle('templates:getAll', async () => {
     return repository.getTemplates()

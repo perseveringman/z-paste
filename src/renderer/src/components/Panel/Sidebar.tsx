@@ -5,9 +5,7 @@ import { Star, Layers } from 'lucide-react'
 
 export default function Sidebar(): React.JSX.Element {
   const { t } = useTranslation()
-  const { leftFilter, setLeftFilter, items } = useClipboardStore()
-
-  const starredCount = items.filter((i) => i.is_favorite).length
+  const { leftFilter, setLeftFilter, starredCount } = useClipboardStore()
 
   const isActive = (f: LeftFilter): boolean => {
     if (f.type !== leftFilter.type) return false

@@ -88,28 +88,28 @@ export default function FilterTabs(): React.JSX.Element {
       {/* Source app row */}
       {sourceApps.length > 0 && (
         <div className="flex items-center gap-1.5 px-3 py-1.5 border-t border-border/50 overflow-x-auto no-scrollbar">
-          <Badge
-            variant={sourceAppFilter === null ? 'default' : 'secondary'}
+          <button
             className={cn(
-              'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px]',
-              sourceAppFilter !== null &&
-                'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+              'shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer',
+              sourceAppFilter === null
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
             onClick={() => setSourceAppFilter(null)}
           >
             {t('panel.filter.all')}
-          </Badge>
+          </button>
           {sourceApps.map((app) => {
             const isActive = sourceAppFilter === app.bundleId
             const icon = appIcons.get(app.bundleId)
             return (
-              <Badge
+              <button
                 key={app.bundleId}
-                variant={isActive ? 'default' : 'secondary'}
                 className={cn(
-                  'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px] flex items-center gap-1 px-1.5',
-                  !isActive &&
-                    'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+                  'shrink-0 inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer',
+                  isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                 )}
                 onClick={() => setSourceAppFilter(isActive ? null : app.bundleId)}
               >
@@ -118,13 +118,13 @@ export default function FilterTabs(): React.JSX.Element {
                     src={`data:image/png;base64,${icon}`}
                     alt={app.name}
                     title={app.name}
-                    className="w-5 h-5 rounded-sm object-contain"
+                    className="w-4 h-4 rounded-sm object-contain shrink-0"
                   />
                 ) : (
                   <span className="max-w-[80px] truncate">{app.name}</span>
                 )}
-                <span className="text-[10px] opacity-60">{app.count}</span>
-              </Badge>
+                <span className="text-[10px] opacity-70">{app.count}</span>
+              </button>
             )
           })}
         </div>

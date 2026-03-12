@@ -8,7 +8,7 @@ import { Star } from 'lucide-react'
 
 export default function TagBar(): React.JSX.Element {
   const { t } = useTranslation()
-  const { leftFilter, setLeftFilter, items } = useClipboardStore()
+  const { leftFilter, setLeftFilter, starredCount } = useClipboardStore()
   const { tags, loadTags } = useTagStore()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -16,7 +16,7 @@ export default function TagBar(): React.JSX.Element {
 
   useEffect(() => {
     loadTags()
-  }, [loadTags, items])
+  }, [loadTags, leftFilter])
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current
@@ -47,7 +47,6 @@ export default function TagBar(): React.JSX.Element {
   const isAll = leftFilter.type === 'all'
   const isStarred = leftFilter.type === 'starred'
   const activeTag = leftFilter.type === 'tag' ? leftFilter.slug : null
-  const starredCount = items.filter((i) => i.is_favorite).length
 
   return (
     <div className="relative flex items-center border-b bg-muted/10">

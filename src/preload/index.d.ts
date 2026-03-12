@@ -103,6 +103,7 @@ interface ZPasteAPI {
   pasteItem: (id: string) => Promise<void>
   updateItemTitle: (id: string, title: string | null) => Promise<void>
   clearAll: () => Promise<void>
+  getStarredCount: () => Promise<number>
   getCategories: () => Promise<Array<{ id: string; name: string; color: string | null; sort_order: number; created_at: number }>>
   createCategory: (id: string, name: string, color: string | null) => Promise<void>
   deleteCategory: (id: string) => Promise<void>

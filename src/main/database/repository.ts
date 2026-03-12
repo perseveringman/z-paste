@@ -178,6 +178,12 @@ export function deleteItem(id: string): void {
   db.prepare('DELETE FROM clipboard_items WHERE id = ?').run(id)
 }
 
+export function getStarredCount(): number {
+  const db = getDatabase()
+  const row = db.prepare('SELECT COUNT(*) as c FROM clipboard_items WHERE is_favorite = 1').get() as { c: number }
+  return row.c
+}
+
 export function toggleFavorite(id: string): void {
   const db = getDatabase()
   const hasTag = (db.prepare(

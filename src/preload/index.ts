@@ -31,6 +31,7 @@ const api = {
   pasteItem: (id: string) => ipcRenderer.invoke('clipboard:pasteItem', id),
   updateItemTitle: (id: string, title: string | null) => ipcRenderer.invoke('clipboard:updateTitle', id, title),
   clearAll: () => ipcRenderer.invoke('clipboard:clearAll'),
+  getStarredCount: () => ipcRenderer.invoke('clipboard:getStarredCount') as Promise<number>,
   getCategories: () => ipcRenderer.invoke('categories:getAll'),
   createCategory: (id: string, name: string, color: string | null) =>
     ipcRenderer.invoke('categories:create', id, name, color),
