@@ -78,24 +78,29 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
   }, [view, clipboardSearch, vaultSearch, setVaultQuery])
 
   return (
-    <div className="flex-1 relative group">
-      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+    <div className="group relative min-w-0 flex-1">
+      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
         <Search className="w-4 h-4" />
       </div>
       <Input
         ref={inputRef}
         type="text"
+        name={view === 'vault' ? 'vault-search' : 'clipboard-search'}
         value={localQuery}
         onChange={(e) => handleChange(e.target.value)}
+        aria-label={view === 'vault' ? t('vault.search.placeholder') : t('panel.search.placeholder')}
+        autoComplete="off"
+        spellCheck={false}
         placeholder={view === 'vault' ? t('vault.search.placeholder') : t('panel.search.placeholder')}
-        className="h-9 pl-9 pr-8 bg-muted/50 border-transparent focus-visible:bg-background focus-visible:border-input shadow-none"
+        className="h-9 rounded-[1rem] border-border/70 bg-background/72 pl-9 pr-9 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] focus-visible:border-primary/45 focus-visible:bg-background"
       />
       {localQuery && (
         <Button
           variant="ghost"
           size="icon"
           onClick={handleClear}
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+          aria-label={t('common.clear')}
+          className="absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
         >
           <X className="w-3 h-3" />
         </Button>

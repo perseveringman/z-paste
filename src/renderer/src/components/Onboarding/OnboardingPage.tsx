@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { Button } from '../ui/button'
+import { Switch } from '../ui/switch'
 
 interface Step {
   title: string
@@ -39,33 +41,33 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       description: t('onboarding.step2.description'),
       icon: '⌨️',
       content: (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-5">
           <div className="flex items-center gap-2">
             <KeyCap label="⇧" />
-            <span className="text-gray-400">+</span>
+            <span className="text-muted-foreground">+</span>
             <KeyCap label="⌘" />
-            <span className="text-gray-400">+</span>
+            <span className="text-muted-foreground">+</span>
             <KeyCap label="V" />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          <p className="text-center text-xs leading-6 text-muted-foreground">
             {t('onboarding.step2.shortcutHint')}
             <br />
             {t('onboarding.step2.autoPaste')}
           </p>
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 mt-2 w-full">
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">{t('onboarding.step2.moreShortcuts')}</p>
-            <div className="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
+          <div className="mt-1 w-full rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{t('onboarding.step2.moreShortcuts')}</p>
+            <div className="space-y-2 text-xs text-foreground/80">
               <div className="flex justify-between">
                 <span>{t('onboarding.step2.numbers')}</span>
-                <span className="text-gray-400">{t('onboarding.step2.numbersDesc')}</span>
+                <span className="text-muted-foreground">{t('onboarding.step2.numbersDesc')}</span>
               </div>
               <div className="flex justify-between">
                 <span>⌘ ,</span>
-                <span className="text-gray-400">{t('onboarding.step2.openSettings')}</span>
+                <span className="text-muted-foreground">{t('onboarding.step2.openSettings')}</span>
               </div>
               <div className="flex justify-between">
                 <span>Esc</span>
-                <span className="text-gray-400">{t('onboarding.step2.closePanel')}</span>
+                <span className="text-muted-foreground">{t('onboarding.step2.closePanel')}</span>
               </div>
             </div>
           </div>
@@ -78,29 +80,22 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       icon: '🔒',
       content: (
         <div className="space-y-4">
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-            <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 font-medium">{t('onboarding.step3.storage.title')}</p>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+            <p className="mb-2 text-xs font-semibold text-foreground">{t('onboarding.step3.storage.title')}</p>
+            <p className="text-[11px] leading-6 text-muted-foreground">
               {t('onboarding.step3.storage.desc')}
             </p>
           </div>
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">{t('onboarding.step3.sync.title')}</p>
-              <button
-                onClick={() => setSyncChoice(!syncChoice)}
-                className={`relative w-10 h-6 rounded-full transition-colors ${
-                  syncChoice ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                    syncChoice ? 'translate-x-4' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold text-foreground">{t('onboarding.step3.sync.title')}</p>
+              <Switch
+                checked={syncChoice}
+                onCheckedChange={setSyncChoice}
+                aria-label={t('onboarding.step3.sync.title')}
+              />
             </div>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+            <p className="text-[11px] leading-6 text-muted-foreground">
               {t('onboarding.step3.sync.desc')}
             </p>
           </div>
@@ -112,11 +107,11 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       description: t('onboarding.step4.description'),
       icon: '✨',
       content: (
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+        <div className="flex flex-col items-center gap-5">
+          <div className="flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-primary/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.82),_rgba(255,255,255,0)_55%),linear-gradient(135deg,rgba(200,120,56,0.95),rgba(93,143,117,0.9))] text-3xl font-bold text-white shadow-[0_20px_45px_rgba(98,67,44,0.18)]">
             Z
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
+          <p className="text-center text-xs leading-6 text-muted-foreground">
             {t('onboarding.step4.ready')}
             <br />
             {t('onboarding.step4.hint')}
@@ -150,31 +145,70 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
   const step = steps[currentStep]
 
   return (
-    <div className="w-full h-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl overflow-hidden border border-black/10 dark:border-white/10">
-      <div className="flex-1 flex flex-col items-center justify-center px-8 py-6">
-        <span className="text-4xl mb-3">{step.icon}</span>
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">
-          {step.title}
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 text-center">
-          {step.description}
-        </p>
-        <div className="w-full max-w-sm">{step.content}</div>
+    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,252,248,0.96),rgba(250,244,236,0.92))] backdrop-blur-xl dark:bg-[linear-gradient(180deg,rgba(41,34,29,0.96),rgba(30,25,22,0.92))]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(208,140,82,0.18),_transparent_58%)]" />
+      <div className="relative flex flex-1 flex-col justify-center px-10 py-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Stash</p>
+            <p data-display="true" className="mt-2 text-2xl font-semibold text-balance text-foreground">
+              {t('onboarding.step1.description')}
+            </p>
+          </div>
+          <div className="rounded-full border border-border/60 bg-background/65 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {currentStep + 1} / {steps.length}
+          </div>
+        </div>
+
+        <div className="grid flex-1 gap-8 md:grid-cols-[120px_minmax(0,1fr)]">
+          <div className="flex flex-col justify-between rounded-[1.5rem] border border-border/60 bg-background/60 p-5 shadow-sm">
+            <div>
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary/75 text-4xl shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                {step.icon}
+              </div>
+              <div className="space-y-2">
+                {steps.map((candidate, index) => (
+                  <div
+                    key={candidate.title}
+                    className={`rounded-2xl px-3 py-2 text-xs transition-colors ${
+                      index === currentStep
+                        ? 'bg-primary/12 text-foreground'
+                        : index < currentStep
+                          ? 'bg-secondary/70 text-foreground/80'
+                          : 'text-muted-foreground'
+                    }`}
+                  >
+                    {candidate.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="text-[11px] leading-6 text-muted-foreground">{t('onboarding.step4.hint')}</p>
+          </div>
+
+          <div className="flex flex-col justify-center rounded-[1.75rem] border border-border/65 bg-background/78 px-8 py-8 shadow-[0_20px_55px_rgba(101,68,43,0.12)]">
+            <h2 data-display="true" className="mb-2 text-3xl font-semibold text-balance text-foreground">
+              {step.title}
+            </h2>
+            <p className="mb-8 max-w-md text-sm leading-7 text-muted-foreground">
+              {step.description}
+            </p>
+            <div className="w-full max-w-md">{step.content}</div>
+          </div>
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-black/5 dark:border-white/5">
-        {/* Progress dots */}
-        <div className="flex items-center gap-1.5">
+      <div className="relative flex items-center justify-between border-t border-border/60 px-8 py-5">
+        <div className="flex items-center gap-2">
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${
+              className={`h-2 w-2 rounded-full transition-colors ${
                 i === currentStep
-                  ? 'bg-blue-500'
+                  ? 'bg-primary'
                   : i < currentStep
-                    ? 'bg-blue-300'
-                    : 'bg-gray-300 dark:bg-gray-600'
+                    ? 'bg-primary/40'
+                    : 'bg-border'
               }`}
             />
           ))}
@@ -182,19 +216,22 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
 
         <div className="flex items-center gap-3">
           {!isLastStep && (
-            <button
+            <Button
               onClick={handleSkip}
-              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground hover:text-foreground"
             >
               {t('onboarding.skip')}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             onClick={handleNext}
-            className="text-xs bg-blue-500 text-white px-4 py-1.5 rounded-md hover:bg-blue-600 transition-colors"
+            size="sm"
+            className="px-4 text-xs"
           >
             {isLastStep ? t('onboarding.start') : t('onboarding.next')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -211,11 +248,11 @@ function Feature({
   desc: string
 }): React.JSX.Element {
   return (
-    <div className="flex items-start gap-3">
-      <span className="text-base mt-0.5">{icon}</span>
+    <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/55 bg-background/65 px-4 py-3 shadow-sm">
+      <span className="mt-0.5 text-base">{icon}</span>
       <div>
-        <p className="text-xs font-medium text-gray-700 dark:text-gray-200">{title}</p>
-        <p className="text-[11px] text-gray-500 dark:text-gray-400">{desc}</p>
+        <p className="text-xs font-semibold text-foreground">{title}</p>
+        <p className="text-[11px] leading-5 text-muted-foreground">{desc}</p>
       </div>
     </div>
   )
@@ -223,7 +260,7 @@ function Feature({
 
 function KeyCap({ label }: { label: string }): React.JSX.Element {
   return (
-    <span className="inline-flex items-center justify-center w-10 h-10 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 text-sm font-mono shadow-sm">
+    <span className="inline-flex h-11 w-11 items-center justify-center rounded-[1rem] border border-border/60 bg-background/75 text-sm font-semibold text-foreground shadow-sm">
       {label}
     </span>
   )

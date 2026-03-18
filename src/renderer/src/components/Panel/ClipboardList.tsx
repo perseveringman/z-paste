@@ -9,8 +9,8 @@ interface Props {
   onOpenTagPicker?: (itemId: string) => void
 }
 
-const DEFAULT_HEIGHT = 60
-const IMAGE_HEIGHT = 68
+const DEFAULT_HEIGHT = 68
+const IMAGE_HEIGHT = 82
 
 function getItemHeight(contentType: string): number {
   return contentType === 'image' ? IMAGE_HEIGHT : DEFAULT_HEIGHT
@@ -92,11 +92,11 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
 
   if (items.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
-        <div className="text-center">
-          <p className="text-2xl mb-2">📋</p>
-          <p>{t('panel.empty.title')}</p>
-          <p className="text-xs mt-1 text-gray-600">{t('panel.empty.subtitle')}</p>
+      <div className="flex flex-1 items-center justify-center px-5 py-8 text-sm text-muted-foreground">
+        <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-background/70 px-6 py-8 text-center shadow-sm">
+          <p className="mb-3 text-3xl">📋</p>
+          <p className="text-base font-semibold text-foreground">{t('panel.empty.title')}</p>
+          <p className="mt-2 text-xs leading-6 text-muted-foreground">{t('panel.empty.subtitle')}</p>
         </div>
       </div>
     )
@@ -142,7 +142,7 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-y-auto"
+      className="flex-1 overflow-y-auto px-1.5 py-1.5"
       onScroll={handleScroll}
     >
       <div style={{ position: 'relative', height: totalHeight, width: '100%' }}>

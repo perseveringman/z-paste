@@ -49,42 +49,39 @@ export default function TagBar(): React.JSX.Element {
   const activeTag = leftFilter.type === 'tag' ? leftFilter.slug : null
 
   return (
-    <div className="relative flex items-center border-b bg-muted/10">
-      {/* Left fade + arrow */}
+    <div className="surface-subtle relative flex items-center border-b border-border/60 px-1">
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 z-10 h-full px-1 flex items-center bg-gradient-to-r from-background/95 to-transparent"
+          aria-label="Scroll tags left"
+          className="absolute left-0 z-10 flex h-full items-center px-1 text-muted-foreground transition-colors hover:text-foreground"
         >
-          <svg className="w-3 h-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
       )}
 
-      {/* Scrollable tag strip */}
       <div
         ref={scrollRef}
-        className="flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto no-scrollbar"
+        className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-1.5 py-1.5"
       >
-        {/* 全部 */}
         <Badge
           variant={isAll ? 'default' : 'secondary'}
           className={cn(
-            'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap shrink-0 text-[11px]',
+            'shrink-0 cursor-pointer whitespace-nowrap border px-2.5 py-1 text-[11px]',
             !isAll &&
-              'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+              'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
           )}
           onClick={() => setLeftFilter({ type: 'all' })}
         >
           {t('common.all')}
         </Badge>
 
-        {/* 已收藏 */}
         <Badge
           variant={isStarred ? 'default' : 'secondary'}
           className={cn(
-            'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap shrink-0 text-[11px] gap-0.5',
+            'shrink-0 cursor-pointer whitespace-nowrap border px-2.5 py-1 text-[11px] gap-1',
             !isStarred &&
-              'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+              'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
           )}
           onClick={() => {
             if (isStarred) {
@@ -94,19 +91,17 @@ export default function TagBar(): React.JSX.Element {
             }
           }}
         >
-          <Star className="w-3 h-3" />
+          <Star className="h-3 w-3" aria-hidden="true" />
           {t('panel.tagBar.starred')}
           {starredCount > 0 && (
-            <span className="ml-0.5 text-[9px] opacity-60">{starredCount}</span>
+            <span className="ml-0.5 text-[9px] tabular-nums opacity-60">{starredCount}</span>
           )}
         </Badge>
 
-        {/* 分隔线 */}
         {tags.length > 0 && (
-          <div className="h-3 w-px bg-border shrink-0" />
+          <div className="h-4 w-px shrink-0 bg-border/70" />
         )}
 
-        {/* 标签 */}
         {tags.map((tag) => {
           const isActive = activeTag === tag.slug
           return (
@@ -114,9 +109,9 @@ export default function TagBar(): React.JSX.Element {
               key={tag.slug}
               variant={isActive ? 'default' : 'secondary'}
               className={cn(
-                'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap shrink-0 text-[11px]',
+                'shrink-0 cursor-pointer whitespace-nowrap border px-2.5 py-1 text-[11px]',
                 !isActive &&
-                  'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+                  'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
               )}
               onClick={() => {
                 if (isActive) {
@@ -128,20 +123,20 @@ export default function TagBar(): React.JSX.Element {
             >
               {tag.name}
               {tag.count > 0 && (
-                <span className="ml-1 text-[9px] opacity-60">{tag.count}</span>
+                <span className="ml-1 text-[9px] tabular-nums opacity-60">{tag.count}</span>
               )}
             </Badge>
           )
         })}
       </div>
 
-      {/* Right fade + arrow */}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 z-10 h-full px-1 flex items-center bg-gradient-to-l from-background/95 to-transparent"
+          aria-label="Scroll tags right"
+          className="absolute right-0 z-10 flex h-full items-center px-1 text-muted-foreground transition-colors hover:text-foreground"
         >
-          <svg className="w-3 h-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
       )}
     </div>

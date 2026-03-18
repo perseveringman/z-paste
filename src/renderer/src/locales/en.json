@@ -2,6 +2,7 @@
   "common.confirm": "Confirm",
   "common.cancel": "Cancel",
   "common.close": "Close",
+  "common.clear": "Clear",
   "common.save": "Save",
   "common.delete": "Delete",
   "common.all": "All",
@@ -9,7 +10,7 @@
   "panel.tabs.clipboard": "Clipboard",
   "panel.tabs.templates": "Templates",
   "panel.tabs.vault": "Vault",
-  "panel.search.placeholder": "Search...",
+  "panel.search.placeholder": "Search…",
   "panel.help.tooltip": "Help / Guide",
   "panel.settings.tooltip": "Settings (⌘,)",
   "panel.empty.title": "No clipboard records",
@@ -40,7 +41,7 @@
   "panel.context.editTitle": "Edit Title",
   "panel.context.delete": "Delete",
 
-  "panel.title.placeholder": "Enter title...",
+  "panel.title.placeholder": "Enter title…",
   "panel.image.fallback": "Image",
 
   "time.justNow": "now",

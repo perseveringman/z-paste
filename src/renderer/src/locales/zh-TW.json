@@ -2,6 +2,7 @@
   "common.confirm": "確認",
   "common.cancel": "取消",
   "common.close": "關閉",
+  "common.clear": "清除",
   "common.save": "儲存",
   "common.delete": "刪除",
   "common.all": "全部",
@@ -9,7 +10,7 @@
   "panel.tabs.clipboard": "剪貼簿",
   "panel.tabs.templates": "範本",
   "panel.tabs.vault": "保險庫",
-  "panel.search.placeholder": "搜尋...",
+  "panel.search.placeholder": "搜尋…",
   "panel.help.tooltip": "幫助 / 新手引導",
   "panel.settings.tooltip": "設定 (⌘,)",
   "panel.empty.title": "暫無剪貼簿記錄",
@@ -40,7 +41,7 @@
   "panel.context.editTitle": "編輯標題",
   "panel.context.delete": "刪除",
 
-  "panel.title.placeholder": "輸入標題...",
+  "panel.title.placeholder": "輸入標題…",
   "panel.image.fallback": "圖片",
 
   "time.justNow": "剛剛",

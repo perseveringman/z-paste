@@ -1,36 +1,83 @@
-import { BrowserWindow, screen } from 'electron'
+import { app, BrowserWindow, screen } from 'electron'
 import { join } from 'path'
+import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { is } from '@electron-toolkit/utils'
 import { execSync } from 'child_process'
+
+interface WindowBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+function getBoundsPath(): string {
+  return join(app.getPath('userData'), 'window-bounds.json')
+}
+
+function loadBounds(): WindowBounds | null {
+  try {
+    return JSON.parse(readFileSync(getBoundsPath(), 'utf-8'))
+  } catch {
+    return null
+  }
+}
+
+function saveBounds(bounds: WindowBounds): void {
+  try {
+    mkdirSync(app.getPath('userData'), { recursive: true })
+    writeFileSync(getBoundsPath(), JSON.stringify(bounds))
+  } catch {
+    // ignore write errors
+  }
+}
 
 export class WindowManager {
   private mainWindow: BrowserWindow | null = null
   private previousAppBundleId: string | null = null
   private blurSuppressed = false
   private vaultSession: { lockOnHide: () => Promise<void> } | null = null
+  private saveTimer: ReturnType<typeof setTimeout> | null = null
 
   create(): BrowserWindow {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       return this.mainWindow
     }
 
+    const saved = loadBounds()
+
     this.mainWindow = new BrowserWindow({
-      width: 680,
-      height: 480,
+      width: saved?.width ?? 680,
+      height: saved?.height ?? 480,
       show: false,
       frame: false,
       transparent: true,
-      resizable: false,
+      backgroundColor: '#00000000',
+      resizable: true,
+      minWidth: 400,
+      minHeight: 300,
       alwaysOnTop: true,
       skipTaskbar: true,
       vibrancy: 'under-window',
       visualEffectState: 'active',
-      roundedCorners: true,
+      roundedCorners: false,
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false
       }
     })
+
+    const debounceSave = (): void => {
+      if (this.saveTimer) clearTimeout(this.saveTimer)
+      this.saveTimer = setTimeout(() => {
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+          saveBounds(this.mainWindow.getBounds())
+        }
+      }, 300)
+    }
+
+    this.mainWindow.on('resize', debounceSave)
+    this.mainWindow.on('moved', debounceSave)
 
     this.mainWindow.on('blur', () => {
       if (this.blurSuppressed) return
@@ -74,15 +121,21 @@ export class WindowManager {
     }
 
     const win = this.mainWindow!
-    const cursorPoint = screen.getCursorScreenPoint()
-    const display = screen.getDisplayNearestPoint(cursorPoint)
-    const { x, y, width, height } = display.workArea
-    const winBounds = win.getBounds()
+    const saved = loadBounds()
 
-    const centerX = Math.round(x + (width - winBounds.width) / 2)
-    const centerY = Math.round(y + (height - winBounds.height) / 2)
-
-    win.setPosition(centerX, centerY)
+    if (saved) {
+      const visible = screen.getAllDisplays().some((d) => {
+        const { x, y, width, height } = d.workArea
+        return saved.x < x + width && saved.x + saved.width > x && saved.y < y + height && saved.y + saved.height > y
+      })
+      if (visible) {
+        win.setBounds(saved)
+      } else {
+        this.centerOnScreen(win)
+      }
+    } else {
+      this.centerOnScreen(win)
+    }
     win.show()
     win.focus()
     win.webContents.send('panel:shown')
@@ -108,6 +161,17 @@ export class WindowManager {
         void this.vaultSession.lockOnHide()
       }
     }
+  }
+
+  private centerOnScreen(win: BrowserWindow): void {
+    const cursorPoint = screen.getCursorScreenPoint()
+    const display = screen.getDisplayNearestPoint(cursorPoint)
+    const { x, y, width, height } = display.workArea
+    const winBounds = win.getBounds()
+    win.setPosition(
+      Math.round(x + (width - winBounds.width) / 2),
+      Math.round(y + (height - winBounds.height) / 2)
+    )
   }
 
   getPreviousAppBundleId(): string | null {

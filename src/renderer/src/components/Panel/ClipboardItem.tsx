@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
 import { useAppIcon } from '../../hooks/useAppIcon'
+import { cn } from '../../lib/utils'
 import {
   FileText,
   Code,
@@ -151,6 +152,15 @@ function ClipboardItemRow({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [contextMenu])
 
+  const rootClassName = cn(
+    'group relative mx-1 my-0.5 flex cursor-pointer items-center rounded-[1.1rem] border px-3 py-2.5 transition-[background-color,border-color,box-shadow,transform] duration-200',
+    isMultiSelected
+      ? 'border-primary/35 bg-primary/10 text-foreground shadow-sm'
+      : isSelected
+        ? 'border-border/70 bg-background/90 text-foreground shadow-[0_12px_28px_rgba(91,60,36,0.08)]'
+        : 'border-transparent bg-transparent text-foreground hover:border-border/50 hover:bg-background/62'
+  )
+
   return (
     <>
       <div
@@ -161,36 +171,29 @@ function ClipboardItemRow({
         }}
         onContextMenu={handleContextMenu}
         onMouseEnter={() => setSelectedIndex(index)}
-        className={`group relative flex items-center px-3 py-2 mx-2 my-1 rounded-lg cursor-pointer transition-colors duration-75 border ${
-          isMultiSelected
-            ? 'bg-primary/10 border-primary/40 text-foreground'
-            : isSelected
-              ? 'bg-accent text-accent-foreground shadow-sm border-transparent'
-              : 'hover:bg-muted/50 text-foreground border-transparent'
-        }`}
+        className={rootClassName}
       >
-        {/* Selection Indicator */}
         {isSelected && (
-          <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
+          <div className="absolute inset-y-2.5 left-1 w-1 rounded-full bg-primary/90" />
         )}
 
         {item.content_type === 'image' ? (
           <ImageRow item={item} index={index} isSelected={isSelected} />
         ) : (
           <>
-            {/* Index / Icon */}
-            <div className="w-8 flex items-center justify-center shrink-0 mr-2">
+            <div className="mr-2.5 flex w-9 shrink-0 items-center justify-center">
               {index < 9 ? (
-                <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                <span className={cn('text-[11px] font-semibold tabular-nums', isSelected ? 'text-primary' : 'text-muted-foreground')}>
                   ⌘{index + 1}
                 </span>
               ) : (
-                <TypeIcon type={item.content_type} />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/80 text-muted-foreground">
+                  <TypeIcon type={item.content_type} className="h-4 w-4" />
+                </span>
               )}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
+            <div className="flex h-full min-w-0 flex-1 flex-col justify-center">
               {isEditingTitle ? (
                 <input
                   ref={titleInputRef}
@@ -203,12 +206,13 @@ function ClipboardItemRow({
                     e.stopPropagation()
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="text-xs font-medium bg-transparent border-b border-primary outline-none text-foreground w-full mb-0.5"
+                  aria-label={t('panel.context.editTitle')}
+                  className="mb-1 w-full border-b border-primary bg-transparent pb-1 text-xs font-semibold text-foreground outline-none"
                   placeholder={t('panel.title.placeholder')}
                 />
               ) : item.title ? (
                 <p
-                  className="text-xs font-medium text-primary truncate cursor-pointer mb-0.5"
+                  className="mb-1 cursor-pointer truncate text-xs font-semibold text-primary"
                   onDoubleClick={(e) => {
                     e.stopPropagation()
                     startEditTitle()
@@ -217,35 +221,35 @@ function ClipboardItemRow({
                   {item.title}
                 </p>
               ) : null}
-              <p className={`text-sm truncate transition-colors ${isSelected ? 'font-medium' : ''}`}>
+              <p className={cn('truncate text-[13px] leading-5 transition-colors', isSelected ? 'font-semibold' : 'font-medium')}>
                 {item.preview || item.content}
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="rounded-full bg-secondary/75 px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px] text-muted-foreground">
                   {item.content_type}
                 </span>
-                <span className="text-[10px] text-muted-foreground/50">•</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-muted-foreground/50">•</span>
+                <span>
                   {formatTime(item.created_at)}
                 </span>
                 {item.use_count > 0 && (
                   <>
-                    <span className="text-[10px] text-muted-foreground/50">•</span>
-                    <span className="text-[10px] text-muted-foreground">{item.use_count}次</span>
+                    <span className="text-muted-foreground/50">•</span>
+                    <span className="tabular-nums">{item.use_count}次</span>
                   </>
                 )}
                 {sourceApp && (
                   <>
-                    <span className="text-[10px] text-muted-foreground/50">•</span>
+                    <span className="text-muted-foreground/50">•</span>
                     {appIcon ? (
                       <img
                         src={`data:image/png;base64,${appIcon}`}
                         alt={sourceApp.name}
                         title={sourceApp.name}
-                        className="w-3.5 h-3.5 rounded-sm"
+                        className="h-3.5 w-3.5 rounded-sm"
                       />
                     ) : (
-                      <span className="text-[10px] text-muted-foreground max-w-[80px] truncate">{sourceApp.name}</span>
+                      <span className="max-w-[96px] truncate">{sourceApp.name}</span>
                     )}
                   </>
                 )}
@@ -254,16 +258,15 @@ function ClipboardItemRow({
           </>
         )}
 
-        {/* Action Area (Right Side) */}
-        <div className="relative flex items-center justify-end min-w-[64px] ml-2">
-          {/* Hover Actions */}
-          <div className="absolute inset-0 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-inherit">
+        <div className="relative ml-2 flex min-w-[64px] items-center justify-end">
+          <div className="absolute inset-0 flex items-center justify-end gap-1 bg-inherit opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 onOpenTagPicker?.(item.id)
               }}
-              className="p-1 rounded hover:bg-background/80 text-muted-foreground"
+              aria-label={t('panel.context.tag')}
+              className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-secondary/85 hover:text-foreground"
               title={t('panel.context.tag')}
             >
               <Tag className="w-3.5 h-3.5" />
@@ -273,7 +276,8 @@ function ClipboardItemRow({
                 e.stopPropagation()
                 togglePin(item.id)
               }}
-              className={`p-1 rounded hover:bg-background/80 ${
+              aria-label={item.is_pinned ? t('panel.context.unpin') : t('panel.context.pin')}
+              className={`rounded-full p-1 transition-colors hover:bg-secondary/85 ${
                 item.is_pinned ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
@@ -284,7 +288,8 @@ function ClipboardItemRow({
                 e.stopPropagation()
                 toggleFavorite(item.id)
               }}
-              className={`p-1 rounded hover:bg-background/80 ${
+              aria-label={item.is_favorite ? t('panel.context.unfavorite') : t('panel.context.favorite')}
+              className={`rounded-full p-1 transition-colors hover:bg-secondary/85 ${
                 item.is_favorite ? 'text-yellow-500' : 'text-muted-foreground'
               }`}
             >
@@ -292,10 +297,9 @@ function ClipboardItemRow({
             </button>
           </div>
 
-          {/* Static Status (Hidden on Hover) */}
-          <div className="flex items-center gap-1 group-hover:opacity-0 transition-opacity">
+          <div className="flex items-center gap-1 transition-opacity duration-200 group-hover:opacity-0">
             {inQueue && (
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              <span className="inline-flex h-4.5 w-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {queuePos}
               </span>
             )}
@@ -309,7 +313,7 @@ function ClipboardItemRow({
       {contextMenu && (
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 zoom-in-95"
+          className="fixed z-50 min-w-[8rem] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
           style={{ left: contextMenu.x, top: contextMenu.y }}
         >
           <ContextMenuItem
@@ -352,30 +356,32 @@ function ImageRow({
     : `data:image/png;base64,${item.content}`
 
   return (
-    <div className="flex items-center gap-2 w-full min-w-0">
-      <div className="w-8 flex items-center justify-center shrink-0">
+    <div className="flex w-full min-w-0 items-center gap-2.5">
+      <div className="flex w-9 shrink-0 items-center justify-center">
         {index < 9 ? (
-          <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={cn('text-[11px] font-semibold tabular-nums', isSelected ? 'text-primary' : 'text-muted-foreground')}>
             ⌘{index + 1}
           </span>
         ) : (
-          <ImageIcon className="w-4 h-4 text-muted-foreground" />
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/80 text-muted-foreground">
+            <ImageIcon className="h-4 w-4" />
+          </span>
         )}
       </div>
       <img
         src={src}
         alt=""
-        className="h-9 w-14 object-cover rounded border border-black/10 dark:border-white/10 shrink-0"
+        className="h-12 w-[4.5rem] shrink-0 rounded-[0.9rem] border border-border/60 object-cover"
         loading="lazy"
       />
       <div className="flex-1 min-w-0">
-        <p className={`text-sm truncate ${isSelected ? 'font-medium' : ''}`}>
+        <p className={cn('truncate text-[13px] leading-5', isSelected ? 'font-semibold' : 'font-medium')}>
           {item.preview || i18n.t('panel.image.fallback')}
         </p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">image</span>
-          <span className="text-[10px] text-muted-foreground/50">•</span>
-          <span className="text-[10px] text-muted-foreground">{formatTime(item.created_at)}</span>
+        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <span className="rounded-full bg-secondary/75 px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px]">image</span>
+          <span className="text-muted-foreground/50">•</span>
+          <span>{formatTime(item.created_at)}</span>
         </div>
       </div>
     </div>
@@ -396,7 +402,7 @@ function ContextMenuItem({
   return (
     <button
       onClick={onClick}
-      className={`relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${
+      className={`relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-2 text-sm outline-none transition-colors hover:bg-secondary hover:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${
         danger ? 'text-destructive focus:text-destructive' : ''
       }`}
     >

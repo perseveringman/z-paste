@@ -58,30 +58,27 @@ export default function FilterTabs(): React.JSX.Element {
     }).then(setTypeCounts)
   }, [items, leftFilter, sourceAppFilter])
 
-  const totalCount = Object.values(typeCounts).reduce((sum, c) => sum + c, 0)
-
   return (
-    <div className="border-b bg-muted/20">
-      {/* Content type row */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto no-scrollbar">
+    <div className="border-b border-border/60 bg-background/18">
+      <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-2.5 py-1.5">
         {tabs.map(({ label, value }) => {
           const isActive = filterType === value
-          const count = value === null ? totalCount : (typeCounts[value] || 0)
+          const count = value !== null ? (typeCounts[value] || 0) : 0
           return (
             <Badge
               key={label}
               variant={isActive ? 'default' : 'secondary'}
               className={cn(
-                'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px]',
+                'cursor-pointer whitespace-nowrap border px-2.5 py-1 text-[11px]',
                 !isActive &&
-                  'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+                  'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
               )}
               onClick={() => setFilterType(value)}
             >
               {label}
               {count > 0 && (
                 <span className={cn(
-                  'ml-1 text-[10px]',
+                  'ml-1 text-[10px] tabular-nums',
                   isActive ? 'opacity-80' : 'opacity-50'
                 )}>
                   {count}
@@ -90,30 +87,29 @@ export default function FilterTabs(): React.JSX.Element {
             </Badge>
           )
         })}
-        <div className="w-px h-4 bg-border mx-1" />
+        <div className="mx-0.5 h-4 w-px bg-border/70" />
         <Badge
           variant={sortBy === 'usage' ? 'default' : 'secondary'}
           className={cn(
-            'cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap text-[11px] flex items-center gap-1',
+            'flex cursor-pointer items-center gap-1 whitespace-nowrap border px-2.5 py-1 text-[11px]',
             sortBy !== 'usage' &&
-              'bg-transparent hover:bg-muted text-muted-foreground border border-transparent hover:border-border'
+              'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
           )}
           onClick={() => setSortBy(sortBy === 'usage' ? 'recent' : 'usage')}
         >
-          <ArrowDownWideNarrow className="w-3 h-3" />
+          <ArrowDownWideNarrow className="h-3 w-3" aria-hidden="true" />
           {t('panel.filter.byUsage')}
         </Badge>
       </div>
 
-      {/* Source app row */}
       {sourceApps.length > 0 && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 border-t border-border/50 overflow-x-auto no-scrollbar">
+        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto border-t border-border/50 px-2.5 py-1.5">
           <button
             className={cn(
-              'shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer',
+              'inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors',
               sourceAppFilter === null
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                : 'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
             )}
             onClick={() => setSourceAppFilter(null)}
           >
@@ -126,10 +122,10 @@ export default function FilterTabs(): React.JSX.Element {
               <button
                 key={app.bundleId}
                 className={cn(
-                  'shrink-0 inline-flex items-center gap-1.5 rounded-full pl-1.5 pr-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer',
+                  'inline-flex shrink-0 items-center gap-1.5 rounded-full border pl-1.5 pr-2.5 py-1 text-[11px] font-semibold transition-colors',
                   isActive
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    : 'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
                 )}
                 onClick={() => setSourceAppFilter(isActive ? null : app.bundleId)}
               >
@@ -141,9 +137,9 @@ export default function FilterTabs(): React.JSX.Element {
                     className="w-4 h-4 rounded-sm object-contain shrink-0"
                   />
                 ) : (
-                  <span className="max-w-[80px] truncate">{app.name}</span>
+                  <span className="max-w-[90px] truncate">{app.name}</span>
                 )}
-                <span className="text-[10px] opacity-70">{app.count}</span>
+                <span className="text-[10px] tabular-nums opacity-70">{app.count}</span>
               </button>
             )
           })}

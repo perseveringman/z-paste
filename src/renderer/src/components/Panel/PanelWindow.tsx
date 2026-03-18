@@ -131,7 +131,7 @@ export default function PanelWindow(): React.JSX.Element {
   }, [selectedItem, tagPickerItemId, view, togglePreview, toggleFilters, toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut])
 
   const containerClass =
-    'w-full h-full rounded-xl overflow-hidden bg-background/95 backdrop-blur-xl border shadow-2xl flex flex-col'
+    'surface-panel hairline flex h-full w-full flex-col overflow-hidden rounded-[1.15rem] border border-border/70 backdrop-blur-xl'
 
   if (view === 'settings') {
     return (
@@ -151,49 +151,63 @@ export default function PanelWindow(): React.JSX.Element {
 
   return (
     <div className={containerClass}>
-      {/* Top bar */}
-      <div className="flex items-center h-14 px-4 border-b bg-muted/30">
-        <div className="flex items-center gap-1 p-1 bg-muted rounded-lg mr-4">
+      <div
+        className="surface-subtle flex h-14 items-center gap-2.5 border-b border-border/60 px-3"
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      >
+        <div className="min-w-0 shrink-0 pr-1.5">
+          <div className="hidden sm:block">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              Stash Desk
+            </p>
+            <p className="text-[13px] font-semibold text-foreground/95">Clipboard atelier</p>
+          </div>
+          <p className="block sm:hidden text-[16px] font-bold text-foreground/95">S</p>
+        </div>
+
+        <div
+          className="flex shrink-0 items-center gap-1 rounded-full bg-background/78 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        >
           <TabButton
             label={t('panel.tabs.clipboard')}
             active={view === 'clipboard'}
             onClick={() => setView('clipboard')}
           />
-          {/* <TabButton
-            label={t('panel.tabs.templates')}
-            active={view === 'templates'}
-            onClick={() => setView('templates')}
-          /> */}
           <TabButton
             label={t('panel.tabs.vault')}
             active={view === 'vault'}
             onClick={() => setView('vault')}
           />
         </div>
-        <SearchBar view={view} />
-        <div className="flex items-center gap-1 ml-2">
+
+        <div className="min-w-0 flex-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+          <SearchBar view={view} />
+        </div>
+        <div className="ml-0.5 flex shrink-0 items-center gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {view === 'vault' && !security.locked && (
             <div className="relative" ref={createMenuRef}>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowCreateMenu((v) => !v)}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                aria-label={t('vault.newItem')}
+                className="h-8 w-8 rounded-full bg-background/55 text-muted-foreground hover:bg-background hover:text-foreground"
                 title={t('vault.newItem')}
               >
                 <FilePlus className="w-4 h-4" />
               </Button>
               {showCreateMenu && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-popover border rounded-lg shadow-lg py-1 z-50">
+                <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 shadow-xl backdrop-blur-xl">
                   <button
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-secondary/80"
                     onClick={() => { setVaultCreateType('login'); setShowCreateMenu(false) }}
                   >
                     <Key className="w-3.5 h-3.5 text-muted-foreground" />
                     {t('vault.newLogin')}
                   </button>
                   <button
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-secondary/80"
                     onClick={() => { setVaultCreateType('secure_note'); setShowCreateMenu(false) }}
                   >
                     <FileText className="w-3.5 h-3.5 text-muted-foreground" />
@@ -208,14 +222,15 @@ export default function PanelWindow(): React.JSX.Element {
               variant="ghost"
               size="icon"
               onClick={() => lockVault()}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              aria-label={t('vault.lock')}
+              className="h-8 w-8 rounded-full bg-background/55 text-muted-foreground hover:bg-background hover:text-destructive"
               title={t('vault.lock')}
             >
               <Unlock className="w-4 h-4" />
             </Button>
           )}
           {view === 'vault' && security.locked && (
-            <div className="h-8 w-8 flex items-center justify-center text-muted-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-background/45 text-muted-foreground">
               <Lock className="w-4 h-4" />
             </div>
           )}
@@ -223,7 +238,8 @@ export default function PanelWindow(): React.JSX.Element {
             variant="ghost"
             size="icon"
             onClick={() => setView('onboarding')}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            aria-label={t('panel.help.tooltip')}
+            className="h-8 w-8 rounded-full bg-background/55 text-muted-foreground hover:bg-background hover:text-foreground"
             title={t('panel.help.tooltip')}
           >
             <HelpCircle className="w-4 h-4" />
@@ -232,7 +248,8 @@ export default function PanelWindow(): React.JSX.Element {
             variant="ghost"
             size="icon"
             onClick={() => setView('settings')}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            aria-label={t('panel.settings.tooltip')}
+            className="h-8 w-8 rounded-full bg-background/55 text-muted-foreground hover:bg-background hover:text-foreground"
             title={t('panel.settings.tooltip')}
           >
             <Settings className="w-4 h-4" />
@@ -251,12 +268,12 @@ export default function PanelWindow(): React.JSX.Element {
             )}
             <div className="flex-1 flex min-h-0 relative">
               <div
-                className={`flex flex-col min-h-0 relative ${!previewCollapsed && (previewItem || (editingItem && selectedItem)) ? 'w-[52%] border-r' : 'flex-1'}`}
+                className={`relative flex min-h-0 flex-col ${!previewCollapsed && (previewItem || (editingItem && selectedItem)) ? 'w-[56%] border-r border-border/60' : 'flex-1'}`}
                 ref={tagPickerAnchorRef}
               >
                 <ClipboardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
                 {tagPickerItemId && (
-                  <div className="absolute left-2 top-8 z-50">
+                  <div className="absolute left-2.5 top-8 z-50">
                     <TagPicker
                       itemId={tagPickerItemId}
                       onClose={() => setTagPickerItemId(null)}
@@ -276,7 +293,8 @@ export default function PanelWindow(): React.JSX.Element {
               {previewCollapsed && (previewItem || selectedItem) && (
                 <button
                   onClick={togglePreview}
-                  className="shrink-0 flex items-center justify-center w-8 border-l bg-muted/10 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t('panel.preview.expand')}
+                  className="surface-subtle shrink-0 flex w-8 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-secondary/65 hover:text-foreground"
                   title={t('panel.preview.expand')}
                 >
                   <PanelRightOpen className="w-3.5 h-3.5" />
@@ -295,9 +313,9 @@ export default function PanelWindow(): React.JSX.Element {
 
       {/* Queue status bar */}
       {isQueueActive && (
-        <div className="flex items-center gap-2 px-4 py-2 border-t bg-primary/10">
+        <div className="flex items-center gap-2 border-t border-primary/15 bg-primary/10 px-3 py-2">
           <ListOrdered className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-medium text-primary flex-1">
+          <span className="flex-1 text-xs font-semibold text-primary">
             {t('panel.queue.active', { count: sequenceQueue.length })}
           </span>
           <Button
@@ -307,7 +325,7 @@ export default function PanelWindow(): React.JSX.Element {
               clearQueue()
               window.api.queueClear()
             }}
-            className="h-6 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="h-7 rounded-full px-3 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <X className="w-3 h-3 mr-1" />
             {t('panel.queue.abandon')}
@@ -331,10 +349,10 @@ function TabButton({
     <button
       onClick={onClick}
       className={cn(
-        "px-3 py-1 text-xs font-medium rounded-md transition-all",
+        'rounded-full px-3 py-1 text-xs font-semibold transition-[background-color,color,box-shadow] duration-200',
         active
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
       )}
     >
       {label}
