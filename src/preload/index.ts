@@ -59,6 +59,8 @@ const api = {
   getSimilarTags: (name: string) => ipcRenderer.invoke('tags:similar', name),
   // Source app
   getSourceApps: () => ipcRenderer.invoke('sourceApps:getAll'),
+  getContentTypeCounts: (options?: { leftFilter?: LeftFilter; sourceApp?: string }) =>
+    ipcRenderer.invoke('clipboard:getContentTypeCounts', options),
   getAppIcon: (bundleId: string) => ipcRenderer.invoke('sourceApps:getIcon', bundleId),
   // Sequence paste queue
   queueAdd: (item: { id: string; content: string }) => ipcRenderer.invoke('queue:add', item),

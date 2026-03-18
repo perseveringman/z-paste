@@ -236,6 +236,7 @@
   "vault.setup.description": "設定主密碼，將恢復金鑰儲存在安全位置。",
   "vault.setup.masterPassword": "主密碼",
   "vault.setup.confirmPassword": "確認密碼",
+  "vault.setup.next": "下一步",
   "vault.setup.settingUp": "設定中...",
   "vault.setup.setMasterPassword": "設定主密碼",
   "vault.setup.recoveryKeyLabel": "恢復金鑰 — 請儲存在安全的地方！",

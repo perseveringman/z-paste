@@ -16,7 +16,7 @@ export default function VaultSetup(): React.JSX.Element {
     clearError
   } = useVaultStore()
 
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(recoveryKey ? 3 : 1)
   const [securityMode, setSecurityMode] = useState<'strict' | 'relaxed'>('strict')
   const [masterPassword, setMasterPassword] = useState('')
   const [masterPasswordConfirm, setMasterPasswordConfirm] = useState('')
@@ -59,23 +59,20 @@ export default function VaultSetup(): React.JSX.Element {
   }
 
   return (
-    <div className="h-full w-full flex items-center justify-center p-6 bg-background/50 backdrop-blur-md relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]" />
-
+    <div className="h-full w-full flex items-center justify-center p-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg bg-background border shadow-xl rounded-2xl overflow-hidden z-10"
+        className="w-full max-w-md"
       >
-        <div className="p-8 space-y-8">
+        <div className="space-y-5">
           {/* Header */}
-          <div className="flex flex-col items-center text-center space-y-2">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
-              <Shield className="w-6 h-6 text-primary" />
+          <div className="flex flex-col items-center text-center space-y-1.5">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-1">
+              <Shield className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold tracking-tight">{t('vault.setup.title')}</h2>
-            <p className="text-sm text-muted-foreground max-w-xs">{t('vault.setup.description')}</p>
+            <h2 className="text-xl font-bold tracking-tight">{t('vault.setup.title')}</h2>
+            <p className="text-xs text-muted-foreground max-w-xs">{t('vault.setup.description')}</p>
           </div>
 
           {/* Progress Indicator */}
@@ -90,7 +87,7 @@ export default function VaultSetup(): React.JSX.Element {
             ))}
           </div>
 
-          <div className="min-h-[280px]">
+          <div>
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div 
@@ -100,36 +97,36 @@ export default function VaultSetup(): React.JSX.Element {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3">
                     <button 
                       onClick={() => setSecurityMode('strict')}
-                      className={`p-5 rounded-xl border text-left transition-all ${
-                        securityMode === 'strict' ? 'bg-primary/5 border-primary shadow-sm' : 'hover:bg-muted/40 border-transparent'
+                      className={`p-4 rounded-xl border text-left transition-all ${
+                        securityMode === 'strict' ? 'bg-primary/10 border-primary/40 ring-1 ring-primary/20' : 'bg-muted/20 hover:bg-muted/40 border-border/50'
                       }`}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <Lock className={`w-5 h-5 ${securityMode === 'strict' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <Lock className={`w-4 h-4 ${securityMode === 'strict' ? 'text-primary' : 'text-muted-foreground'}`} />
                         <h4 className="font-semibold text-sm">{t('vault.setup.strict')}</h4>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{t('vault.setup.strictDesc')}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed pl-7">{t('vault.setup.strictDesc')}</p>
                     </button>
 
                     <button 
                       onClick={() => setSecurityMode('relaxed')}
-                      className={`p-5 rounded-xl border text-left transition-all ${
-                        securityMode === 'relaxed' ? 'bg-primary/5 border-primary shadow-sm' : 'hover:bg-muted/40 border-transparent'
+                      className={`p-4 rounded-xl border text-left transition-all ${
+                        securityMode === 'relaxed' ? 'bg-primary/10 border-primary/40 ring-1 ring-primary/20' : 'bg-muted/20 hover:bg-muted/40 border-border/50'
                       }`}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <Shield className={`w-5 h-5 ${securityMode === 'relaxed' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <Shield className={`w-4 h-4 ${securityMode === 'relaxed' ? 'text-primary' : 'text-muted-foreground'}`} />
                         <h4 className="font-semibold text-sm">{t('vault.setup.relaxed')}</h4>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{t('vault.setup.relaxedDesc')}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed pl-7">{t('vault.setup.relaxedDesc')}</p>
                     </button>
                   </div>
-                  <div className="flex justify-end pt-4">
-                    <Button onClick={() => setStep(2)} disabled={!canContinueToStep2} className="w-full h-11">
-                      {t('vault.reset.stepArrow')} <ArrowRight className="w-4 h-4 ml-2" />
+                  <div className="flex justify-end pt-2">
+                    <Button onClick={() => setStep(2)} disabled={!canContinueToStep2} className="w-full h-10">
+                      {t('vault.setup.next') || '下一步'} <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
                 </motion.div>
@@ -199,27 +196,27 @@ export default function VaultSetup(): React.JSX.Element {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl relative group overflow-hidden">
-                    <div className="absolute top-0 right-0 p-3 opacity-10">
-                      <Key className="w-12 h-12" />
+                  <div className="p-5 bg-primary/10 border border-primary/20 rounded-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-3 opacity-5">
+                      <Key className="w-10 h-10" />
                     </div>
                     <p className="text-xs text-primary/70 font-semibold uppercase tracking-wider mb-2">{t('vault.setup.recoveryKeyLabel')}</p>
-                    <p className="text-lg font-mono break-all font-bold tracking-tight text-primary select-all py-2">{recoveryKey}</p>
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-primary/10">
-                      <Button variant="ghost" size="sm" onClick={handleCopy} className="text-xs h-9 bg-white shadow-sm hover:bg-white/90">
+                    <p className="text-base font-mono break-all font-bold tracking-tight text-primary select-all py-1">{recoveryKey}</p>
+                    <div className="flex gap-2 mt-3 pt-3 border-t border-primary/10">
+                      <Button variant="ghost" size="sm" onClick={handleCopy} className="text-xs h-8">
                         {copied ? <Check className="w-3.5 h-3.5 mr-2 text-green-500" /> : <Copy className="w-3.5 h-3.5 mr-2" />}
                         {t('vault.setup.copyRecoveryKey')}
                       </Button>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl">
-                    <p className="text-[11px] text-amber-700 leading-relaxed font-medium">
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
                       ⚠️ {t('vault.setup.recoveryKeyDesc') || 'This recovery key is the ONLY way to access your vault if you forget your master password. Save it in a safe place!'}
                     </p>
                   </div>
 
-                  <Button onClick={handleFinish} className="w-full h-12 shadow-xl shadow-primary/20">
+                  <Button onClick={handleFinish} className="w-full h-11">
                     <Check className="w-5 h-5 mr-2" /> {t('vault.setup.savedContinue')}
                   </Button>
                 </motion.div>
@@ -229,8 +226,8 @@ export default function VaultSetup(): React.JSX.Element {
         </div>
 
         {error && (
-          <div className="px-8 pb-4">
-            <div className="p-3 bg-destructive/5 border border-destructive/10 rounded-lg flex items-center gap-2 text-xs text-destructive font-medium cursor-pointer" onClick={clearError}>
+          <div className="mt-4">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-xs text-destructive font-medium cursor-pointer" onClick={clearError}>
               <AlertCircle className="w-3 h-3" />
               {error}
             </div>

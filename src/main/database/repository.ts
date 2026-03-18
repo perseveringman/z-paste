@@ -475,6 +475,45 @@ export function getSimilarTags(name: string): Tag[] {
   return db.prepare('SELECT * FROM tags WHERE slug LIKE ? LIMIT 5').all(pattern) as Tag[]
 }
 
+export function getContentTypeCounts(options?: {
+  leftFilter?: LeftFilter
+  sourceApp?: string
+}): Record<string, number> {
+  const db = getDatabase()
+  const conditions: string[] = []
+  const params: unknown[] = []
+  let fromClause = 'FROM clipboard_items ci'
+
+  const leftFilter = options?.leftFilter ?? { type: 'all' as const }
+
+  if (leftFilter.type === 'starred') {
+    conditions.push('ci.is_favorite = 1')
+  } else if (leftFilter.type === 'tag') {
+    fromClause += `
+      JOIN clipboard_item_tags cit ON cit.item_id = ci.id
+      JOIN tags t ON t.id = cit.tag_id AND t.slug = ?`
+    params.push(leftFilter.slug)
+  }
+
+  if (options?.sourceApp) {
+    conditions.push('ci.source_app LIKE ?')
+    params.push(`%"bundleId":"${options.sourceApp}"%`)
+  }
+
+  let query = `SELECT ci.content_type, COUNT(*) as count ${fromClause}`
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ')
+  }
+  query += ' GROUP BY ci.content_type'
+
+  const rows = db.prepare(query).all(...params) as { content_type: string; count: number }[]
+  const result: Record<string, number> = {}
+  for (const row of rows) {
+    result[row.content_type] = row.count
+  }
+  return result
+}
+
 export function getSourceApps(): { name: string; bundleId: string; count: number }[] {
   const db = getDatabase()
   const rows = db.prepare(`

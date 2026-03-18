@@ -4,7 +4,7 @@ import { is } from '@electron-toolkit/utils'
 
 export class WidgetWindowManager {
   private widgetWindow: BrowserWindow | null = null
-  private isPinned = false
+  private isPinned = true
   private savedPosition: { x: number; y: number } | null = null
 
   create(): BrowserWindow {

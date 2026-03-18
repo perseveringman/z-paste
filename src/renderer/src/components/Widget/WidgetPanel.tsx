@@ -42,7 +42,7 @@ function truncate(text: string, max: number): string {
 
 function WidgetPanel(): React.JSX.Element {
   const [items, setItems] = useState<ClipboardItem[]>([])
-  const [pinned, setPinned] = useState(false)
+  const [pinned, setPinned] = useState(true)
 
   const loadItems = useCallback(async () => {
     const fetched = await window.electron.ipcRenderer.invoke('widget:getItems')

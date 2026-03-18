@@ -412,6 +412,11 @@ app.whenReady().then(() => {
     }
   })
 
+  // Content type counts
+  ipcMain.handle('clipboard:getContentTypeCounts', async (_, options) => {
+    return repository.getContentTypeCounts(options)
+  })
+
   // Source app IPC handlers
   ipcMain.handle('sourceApps:getAll', async () => {
     return repository.getSourceApps()

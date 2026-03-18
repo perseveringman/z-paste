@@ -127,6 +127,7 @@ interface ZPasteAPI {
   getSimilarTags: (name: string) => Promise<TagWithCount[]>
   // Source app
   getSourceApps: () => Promise<{ name: string; bundleId: string; count: number }[]>
+  getContentTypeCounts: (options?: { leftFilter?: LeftFilter; sourceApp?: string }) => Promise<Record<string, number>>
   getAppIcon: (bundleId: string) => Promise<string | null>
   // Sequence paste queue
   queueAdd: (item: { id: string; content: string }) => Promise<number>

@@ -15,7 +15,7 @@ const iconCache = new Map<string, string>()
 
 export default function FilterTabs(): React.JSX.Element {
   const { t } = useTranslation()
-  const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items, sortBy, setSortBy } = useClipboardStore()
+  const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items, sortBy, setSortBy, leftFilter } = useClipboardStore()
 
   const tabs = [
     { label: t('panel.filter.all'), value: null },
@@ -28,6 +28,7 @@ export default function FilterTabs(): React.JSX.Element {
   ]
   const [sourceApps, setSourceApps] = useState<SourceApp[]>([])
   const [appIcons, setAppIcons] = useState<Map<string, string>>(new Map())
+  const [typeCounts, setTypeCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     window.api.getSourceApps().then((apps) => {
@@ -49,12 +50,23 @@ export default function FilterTabs(): React.JSX.Element {
     })
   }, [items])
 
+  // Load content type counts whenever items, leftFilter, or sourceAppFilter change
+  useEffect(() => {
+    window.api.getContentTypeCounts({
+      leftFilter: leftFilter,
+      sourceApp: sourceAppFilter || undefined
+    }).then(setTypeCounts)
+  }, [items, leftFilter, sourceAppFilter])
+
+  const totalCount = Object.values(typeCounts).reduce((sum, c) => sum + c, 0)
+
   return (
     <div className="border-b bg-muted/20">
       {/* Content type row */}
       <div className="flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto no-scrollbar">
         {tabs.map(({ label, value }) => {
           const isActive = filterType === value
+          const count = value === null ? totalCount : (typeCounts[value] || 0)
           return (
             <Badge
               key={label}
@@ -67,6 +79,14 @@ export default function FilterTabs(): React.JSX.Element {
               onClick={() => setFilterType(value)}
             >
               {label}
+              {count > 0 && (
+                <span className={cn(
+                  'ml-1 text-[10px]',
+                  isActive ? 'opacity-80' : 'opacity-50'
+                )}>
+                  {count}
+                </span>
+              )}
             </Badge>
           )
         })}

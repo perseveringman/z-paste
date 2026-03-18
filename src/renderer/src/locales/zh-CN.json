@@ -236,6 +236,7 @@
   "vault.setup.description": "设置主密码，将恢复密钥保存在安全位置。",
   "vault.setup.masterPassword": "主密码",
   "vault.setup.confirmPassword": "确认密码",
+  "vault.setup.next": "下一步",
   "vault.setup.settingUp": "设置中...",
   "vault.setup.setMasterPassword": "设置主密码",
   "vault.setup.recoveryKeyLabel": "恢复密钥 — 请保存在安全的地方！",

@@ -236,6 +236,7 @@
   "vault.setup.description": "Set a master password. Save your recovery key in a safe place.",
   "vault.setup.masterPassword": "Master Password",
   "vault.setup.confirmPassword": "Confirm Password",
+  "vault.setup.next": "Next",
   "vault.setup.settingUp": "Setting up...",
   "vault.setup.setMasterPassword": "Set Master Password",
   "vault.setup.recoveryKeyLabel": "Recovery Key — save this in a safe place!",
