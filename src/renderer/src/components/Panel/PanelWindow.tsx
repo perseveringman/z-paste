@@ -360,7 +360,7 @@ export default function PanelWindow(): React.JSX.Element {
         <TemplateList />
       ) : (
         <div className="flex-1 min-h-0">
-          <VaultView createType={vaultCreateType} onCreateTypeChange={setVaultCreateType} />
+          <VaultView layoutMode={layoutMode} createType={vaultCreateType} onCreateTypeChange={setVaultCreateType} />
         </div>
       )}
 

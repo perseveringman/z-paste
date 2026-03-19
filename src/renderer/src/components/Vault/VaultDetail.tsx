@@ -23,9 +23,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface VaultDetailProps {
   createType?: 'login' | 'secure_note' | null
   onCancelCreate?: () => void
+  compact?: boolean
 }
 
-export default function VaultDetail({ createType, onCancelCreate }: VaultDetailProps): React.JSX.Element {
+export default function VaultDetail({ createType, onCancelCreate, compact = false }: VaultDetailProps): React.JSX.Element {
   const { t } = useTranslation()
   const {
     detail,
@@ -312,11 +313,11 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
           >
             {/* Detail Header */}
             {detail && (
-              <div className="px-8 py-6 border-b shrink-0 bg-muted/5">
+              <div className={compact ? 'px-4 py-3 border-b shrink-0 bg-muted/5' : 'px-8 py-6 border-b shrink-0 bg-muted/5'}>
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-2xl font-bold truncate">{detail.meta.title}</h2>
+                      <h2 className={compact ? 'text-lg font-bold truncate' : 'text-2xl font-bold truncate'}>{detail.meta.title}</h2>
                       {detail.meta.website && (
                         <a 
                           href={detail.meta.website.startsWith('http') ? detail.meta.website : `https://${detail.meta.website}`} 
@@ -336,12 +337,13 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
                   <div className="flex items-center gap-2 ml-4">
                     <button
                       onClick={() => toggleFavorite(detail.meta.id)}
-                      className={`p-1 rounded transition-colors ${
+                      className={`p-1 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                         detail.meta.favorite
                           ? 'text-yellow-500 hover:text-yellow-600'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                       title={detail.meta.favorite ? t('vault.item.unfavorite') : t('vault.item.favorite')}
+                      aria-label={detail.meta.favorite ? t('vault.item.unfavorite') : t('vault.item.favorite')}
                     >
                       <Star className={`w-4 h-4 ${detail.meta.favorite ? 'fill-yellow-500' : ''}`} />
                     </button>
@@ -368,7 +370,7 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
                 </div>
 
                 {detail.type === 'login' && (
-                  <div className="flex items-center gap-3 mt-6">
+                  <div className={compact ? 'flex items-center gap-2 mt-3' : 'flex items-center gap-3 mt-6'}>
                     <Button variant="default" size="sm" onClick={() => handleAutoType(true)} className="h-9 shadow-sm">
                       <ShieldCheck className="w-3.5 h-3.5 mr-2" />
                       {t('vault.action.autoTypeEnter')}
@@ -388,8 +390,8 @@ export default function VaultDetail({ createType, onCancelCreate }: VaultDetailP
 
             {/* Detail Content */}
             {detail && (
-              <div className="flex-1 overflow-auto p-8">
-                <div className="max-w-2xl mx-auto space-y-8">
+              <div className={compact ? 'flex-1 overflow-auto p-4' : 'flex-1 overflow-auto p-8'}>
+                <div className={compact ? 'space-y-4' : 'max-w-2xl mx-auto space-y-8'}>
                   {detail.type === 'login' && (
                     <div className="grid grid-cols-1 gap-6">
                       {/* Credential Card */}

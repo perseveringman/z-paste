@@ -130,6 +130,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ theme, resolvedTheme: resolved })
     get().saveSettings()
     applyTheme(resolved)
+    window.api.setTheme?.(theme)
   },
 
   setLanguage: (lang) => {

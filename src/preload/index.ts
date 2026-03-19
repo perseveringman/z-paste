@@ -47,6 +47,11 @@ const api = {
   setLaunchAtLogin: (enabled: boolean) => ipcRenderer.invoke('settings:setLaunchAtLogin', enabled),
   getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
   setLanguage: (lang: string) => ipcRenderer.invoke('settings:setLanguage', lang),
+  setTheme: (theme: string) => ipcRenderer.invoke('settings:setTheme', theme),
+  onThemeChanged: (callback: (theme: string) => void) => {
+    ipcRenderer.on('settings:themeChanged', (_, theme) => callback(theme))
+    return () => ipcRenderer.removeAllListeners('settings:themeChanged')
+  },
   setLayoutMode: (mode: string) => ipcRenderer.invoke('settings:setLayoutMode', mode),
   onLayoutModeChanged: (callback: (mode: string) => void) => {
     ipcRenderer.on('settings:layoutModeChanged', (_, mode) => callback(mode))
@@ -192,6 +197,8 @@ const api = {
     ipcRenderer.invoke('vault:setLockOnBlur', enabled),
   vaultSetAutoLockMinutes: (minutes: number) =>
     ipcRenderer.invoke('vault:setAutoLockMinutes', minutes),
+  // App info
+  getVersion: () => ipcRenderer.invoke('app:getVersion'),
 }
 
 if (process.contextIsolated) {

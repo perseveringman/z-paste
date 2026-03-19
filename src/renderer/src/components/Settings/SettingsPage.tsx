@@ -4,6 +4,7 @@ import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../sto
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { Switch } from '../ui/switch'
+import { AppLogo } from '../ui/app-logo'
 import {
   Select,
   SelectContent,
@@ -855,16 +856,22 @@ function WidgetSection(): React.JSX.Element {
 
 function AboutSection(): React.JSX.Element {
   const { t } = useTranslation()
+  const [version, setVersion] = useState<string>('1.0.0')
+
+  useEffect(() => {
+    window.api.getVersion().then((v) => {
+      setVersion(v)
+    })
+  }, [])
+
   return (
     <div>
       <SectionTitle title={t('settings.about.title')} />
       <div className="flex flex-col items-center py-8 text-center space-y-4">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-          S
-        </div>
+        <AppLogo size="md" />
         <div>
           <h3 className="text-lg font-semibold">Stash</h3>
-          <p className="text-sm text-muted-foreground">{t('settings.about.version', { version: '1.0.0' })}</p>
+          <p className="text-sm text-muted-foreground">{t('settings.about.version', { version })}</p>
         </div>
         <p className="text-sm text-muted-foreground max-w-xs">
           {t('settings.about.description')}

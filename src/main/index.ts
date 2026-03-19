@@ -153,6 +153,11 @@ app.whenReady().then(() => {
   }, 10 * 60 * 1000)
 
   // IPC handlers
+  // App info
+  ipcMain.handle('app:getVersion', async () => {
+    return app.getVersion()
+  })
+
   ipcMain.handle('clipboard:getItems', async (_, options) => {
     return repository.getItems(options)
   })
@@ -301,6 +306,15 @@ app.whenReady().then(() => {
 
   ipcMain.handle('settings:setLanguage', async (_, lang: string) => {
     trayManager.setLanguage(lang)
+  })
+
+  ipcMain.handle('settings:setTheme', async (_, theme: string) => {
+    // Broadcast to all renderer windows so their stores stay in sync
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send('settings:themeChanged', theme)
+      }
+    }
   })
 
   ipcMain.handle('settings:setLayoutMode', async (_, mode: string) => {

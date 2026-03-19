@@ -115,6 +115,8 @@ interface ZPasteAPI {
   setLaunchAtLogin: (enabled: boolean) => Promise<void>
   getLaunchAtLogin: () => Promise<boolean>
   setLanguage: (lang: string) => Promise<void>
+  setTheme: (theme: string) => Promise<void>
+  onThemeChanged: (callback: (theme: string) => void) => () => void
   setLayoutMode: (mode: string) => Promise<void>
   onLayoutModeChanged: (callback: (mode: string) => void) => () => void
   openSettingsWindow: (view?: string) => Promise<void>
@@ -229,6 +231,8 @@ interface ZPasteAPI {
   }>
   vaultSetLockOnBlur: (enabled: boolean) => Promise<void>
   vaultSetAutoLockMinutes: (minutes: number) => Promise<void>
+  // App info
+  getVersion: () => Promise<string>
 }
 
 declare global {

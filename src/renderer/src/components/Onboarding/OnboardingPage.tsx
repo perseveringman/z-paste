@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { Button } from '../ui/button'
 import { Switch } from '../ui/switch'
+import { AppLogo } from '../ui/app-logo'
+import { Rocket, Keyboard, Lock, Sparkles, Shield, Fingerprint, Clock, Zap, Clipboard, Search, Palette, Eye } from 'lucide-react'
 
 interface Step {
   title: string
   description: string
-  icon: string
+  icon: React.ElementType
   content: React.ReactNode
 }
 
@@ -26,20 +28,33 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
     {
       title: t('onboarding.step1.title'),
       description: t('onboarding.step1.description'),
-      icon: '🚀',
+      icon: Rocket,
       content: (
         <div className="space-y-4">
-          <Feature icon="📋" title={t('onboarding.step1.feature1.title')} desc={t('onboarding.step1.feature1.desc')} />
-          <Feature icon="🔍" title={t('onboarding.step1.feature2.title')} desc={t('onboarding.step1.feature2.desc')} />
-          <Feature icon="📝" title={t('onboarding.step1.feature3.title')} desc={t('onboarding.step1.feature3.desc')} />
-          <Feature icon="🎨" title={t('onboarding.step1.feature4.title')} desc={t('onboarding.step1.feature4.desc')} />
+          <Feature icon={Clipboard} title={t('onboarding.step1.feature1.title')} desc={t('onboarding.step1.feature1.desc')} />
+          <Feature icon={Search} title={t('onboarding.step1.feature2.title')} desc={t('onboarding.step1.feature2.desc')} />
+          <Feature icon={Palette} title={t('onboarding.step1.feature3.title')} desc={t('onboarding.step1.feature3.desc')} />
+          <Feature icon={Eye} title={t('onboarding.step1.feature4.title')} desc={t('onboarding.step1.feature4.desc')} />
         </div>
       )
     },
     {
       title: t('onboarding.step2.title'),
       description: t('onboarding.step2.description'),
-      icon: '⌨️',
+      icon: Shield,
+      content: (
+        <div className="space-y-4">
+          <Feature icon={Fingerprint} title={t('onboarding.step2.feature1.title')} desc={t('onboarding.step2.feature1.desc')} />
+          <Feature icon={Lock} title={t('onboarding.step2.feature2.title')} desc={t('onboarding.step2.feature2.desc')} />
+          <Feature icon={Clock} title={t('onboarding.step2.feature3.title')} desc={t('onboarding.step2.feature3.desc')} />
+          <Feature icon={Zap} title={t('onboarding.step2.feature4.title')} desc={t('onboarding.step2.feature4.desc')} />
+        </div>
+      )
+    },
+    {
+      title: t('onboarding.step3.title'),
+      description: t('onboarding.step3.description'),
+      icon: Keyboard,
       content: (
         <div className="flex flex-col items-center gap-5">
           <div className="flex items-center gap-2">
@@ -50,54 +65,26 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             <KeyCap label="V" />
           </div>
           <p className="text-center text-xs leading-6 text-muted-foreground">
-            {t('onboarding.step2.shortcutHint')}
+            {t('onboarding.step3.shortcutHint')}
             <br />
-            {t('onboarding.step2.autoPaste')}
+            {t('onboarding.step3.autoPaste')}
           </p>
           <div className="mt-1 w-full rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{t('onboarding.step2.moreShortcuts')}</p>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{t('onboarding.step3.moreShortcuts')}</p>
             <div className="space-y-2 text-xs text-foreground/80">
               <div className="flex justify-between">
-                <span>{t('onboarding.step2.numbers')}</span>
-                <span className="text-muted-foreground">{t('onboarding.step2.numbersDesc')}</span>
+                <span>{t('onboarding.step3.numbers')}</span>
+                <span className="text-muted-foreground">{t('onboarding.step3.numbersDesc')}</span>
               </div>
               <div className="flex justify-between">
                 <span>⌘ ,</span>
-                <span className="text-muted-foreground">{t('onboarding.step2.openSettings')}</span>
+                <span className="text-muted-foreground">{t('onboarding.step3.openSettings')}</span>
               </div>
               <div className="flex justify-between">
                 <span>Esc</span>
-                <span className="text-muted-foreground">{t('onboarding.step2.closePanel')}</span>
+                <span className="text-muted-foreground">{t('onboarding.step3.closePanel')}</span>
               </div>
             </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: t('onboarding.step3.title'),
-      description: t('onboarding.step3.description'),
-      icon: '🔒',
-      content: (
-        <div className="space-y-4">
-          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
-            <p className="mb-2 text-xs font-semibold text-foreground">{t('onboarding.step3.storage.title')}</p>
-            <p className="text-[11px] leading-6 text-muted-foreground">
-              {t('onboarding.step3.storage.desc')}
-            </p>
-          </div>
-          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold text-foreground">{t('onboarding.step3.sync.title')}</p>
-              <Switch
-                checked={syncChoice}
-                onCheckedChange={setSyncChoice}
-                aria-label={t('onboarding.step3.sync.title')}
-              />
-            </div>
-            <p className="text-[11px] leading-6 text-muted-foreground">
-              {t('onboarding.step3.sync.desc')}
-            </p>
           </div>
         </div>
       )
@@ -105,16 +92,42 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
     {
       title: t('onboarding.step4.title'),
       description: t('onboarding.step4.description'),
-      icon: '✨',
+      icon: Lock,
+      content: (
+        <div className="space-y-4">
+          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+            <p className="mb-2 text-xs font-semibold text-foreground">{t('onboarding.step4.storage.title')}</p>
+            <p className="text-[11px] leading-6 text-muted-foreground">
+              {t('onboarding.step4.storage.desc')}
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold text-foreground">{t('onboarding.step4.sync.title')}</p>
+              <Switch
+                checked={syncChoice}
+                onCheckedChange={setSyncChoice}
+                aria-label={t('onboarding.step4.sync.title')}
+              />
+            </div>
+            <p className="text-[11px] leading-6 text-muted-foreground">
+              {t('onboarding.step4.sync.desc')}
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: t('onboarding.step5.title'),
+      description: t('onboarding.step5.description'),
+      icon: Sparkles,
       content: (
         <div className="flex flex-col items-center gap-5">
-          <div className="flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-primary/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.82),_rgba(255,255,255,0)_55%),linear-gradient(135deg,rgba(200,120,56,0.95),rgba(93,143,117,0.9))] text-3xl font-bold text-white shadow-[0_20px_45px_rgba(98,67,44,0.18)]">
-            Z
-          </div>
+          <AppLogo size="lg" />
           <p className="text-center text-xs leading-6 text-muted-foreground">
-            {t('onboarding.step4.ready')}
+            {t('onboarding.step5.ready')}
             <br />
-            {t('onboarding.step4.hint')}
+            {t('onboarding.step5.hint')}
           </p>
         </div>
       )
@@ -163,8 +176,8 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
         <div className="grid flex-1 min-h-0 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
           <div className="flex flex-col justify-between rounded-[1.5rem] border border-border/60 bg-background/60 p-5 shadow-sm">
             <div>
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary/75 text-4xl shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
-                {step.icon}
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                <step.icon className="w-8 h-8 text-foreground" />
               </div>
               <div className="space-y-2">
                 {steps.map((candidate, index) => (
@@ -183,7 +196,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
                 ))}
               </div>
             </div>
-            <p className="text-[11px] leading-6 text-muted-foreground">{t('onboarding.step4.hint')}</p>
+            <p className="text-[11px] leading-6 text-muted-foreground">{t('onboarding.step5.hint')}</p>
           </div>
 
           <div className="flex flex-col rounded-[1.75rem] border border-border/65 bg-background/78 px-8 py-6 shadow-[0_20px_55px_rgba(101,68,43,0.12)] overflow-y-auto">
@@ -239,17 +252,17 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
 }
 
 function Feature({
-  icon,
+  icon: Icon,
   title,
   desc
 }: {
-  icon: string
+  icon: React.ElementType
   title: string
   desc: string
 }): React.JSX.Element {
   return (
     <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/55 bg-background/65 px-4 py-3 shadow-sm">
-      <span className="mt-0.5 text-base">{icon}</span>
+      <Icon className="w-4 h-4 mt-0.5 text-foreground shrink-0" />
       <div>
         <p className="text-xs font-semibold text-foreground">{title}</p>
         <p className="text-[11px] leading-5 text-muted-foreground">{desc}</p>

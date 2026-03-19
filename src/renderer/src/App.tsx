@@ -37,11 +37,16 @@ function App(): React.JSX.Element {
       }
     })
 
+    const unsubTheme = window.api.onThemeChanged((theme) => {
+      useSettingsStore.getState().loadSettings()
+    })
+
     return () => {
       unsubNewItem()
       unsubShown()
       unsubHidden()
       unsubLayout()
+      unsubTheme()
     }
   }, [])
 

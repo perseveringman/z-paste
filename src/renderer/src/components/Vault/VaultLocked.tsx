@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useVaultStore } from '../../stores/vaultStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Fingerprint, Lock, Unlock, AlertCircle, HelpCircle } from 'lucide-react'
@@ -23,6 +24,8 @@ export default function VaultLocked(): React.JSX.Element {
   const [recoveryKey, setRecoveryKey] = useState('')
   const [hintAnswer, setHintAnswer] = useState('')
   const [mode, setMode] = useState<'password' | 'recovery' | 'hint'>('password')
+  const layoutMode = useSettingsStore((s) => s.layoutMode)
+  const isBottom = layoutMode === 'bottom'
 
   const handleUnlock = async (): Promise<void> => {
     if (mode === 'password' && password) {
@@ -44,24 +47,26 @@ export default function VaultLocked(): React.JSX.Element {
   }, [security.locked])
 
   return (
-    <div className="h-full w-full flex items-center justify-center bg-background/50 backdrop-blur-2xl relative overflow-hidden">
+    <div className={`h-full w-full flex items-center justify-center bg-background/50 backdrop-blur-2xl relative ${isBottom ? 'overflow-hidden' : 'overflow-auto'}`}>
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
 
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-sm p-8 flex flex-col items-center relative z-10"
+        className={`w-full max-w-sm flex flex-col items-center relative z-10 ${isBottom ? 'px-6 py-3' : 'px-8 py-6'}`}
       >
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 shadow-sm border border-primary/10 group">
-          <Lock className="w-8 h-8 text-primary group-hover:hidden" />
-          <Unlock className="w-8 h-8 text-primary hidden group-hover:block" />
-        </div>
+        {!isBottom && (
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 shadow-sm border border-primary/10 group">
+            <Lock className="w-7 h-7 text-primary group-hover:hidden" />
+            <Unlock className="w-7 h-7 text-primary hidden group-hover:block" />
+          </div>
+        )}
 
-        <h2 className="text-xl font-semibold mb-1">{t('vault.locked.title')}</h2>
-        <p className="text-sm text-muted-foreground mb-8 text-center">{t('vault.locked.description')}</p>
+        <h2 className={`font-semibold mb-1 ${isBottom ? 'text-base' : 'text-xl'}`}>{t('vault.locked.title')}</h2>
+        <p className={`text-muted-foreground text-center ${isBottom ? 'text-xs mb-3' : 'text-sm mb-5'}`}>{t('vault.locked.description')}</p>
 
-        <div className="w-full space-y-4">
+        <div className={`w-full ${isBottom ? 'space-y-2' : 'space-y-4'}`}>
           <AnimatePresence mode="wait">
             {mode === 'password' && (
               <motion.div
@@ -138,7 +143,7 @@ export default function VaultLocked(): React.JSX.Element {
           </AnimatePresence>
 
           <Button 
-            className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg shadow-primary/20" 
+            className={`w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg shadow-primary/20 ${isBottom ? 'h-9' : 'h-11'}`}
             onClick={handleUnlock} 
             disabled={loading || (mode === 'password' && !password) || (mode === 'recovery' && !recoveryKey) || (mode === 'hint' && !hintAnswer)}
           >
@@ -157,7 +162,7 @@ export default function VaultLocked(): React.JSX.Element {
             </motion.div>
           )}
 
-          <div className="flex items-center justify-center gap-4 mt-8 pt-4 border-t border-muted/20">
+          <div className={`flex items-center justify-center gap-4 border-t border-muted/20 ${isBottom ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>
             {mode !== 'password' && (
               <button 
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"

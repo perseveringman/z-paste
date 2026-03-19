@@ -21,11 +21,12 @@ export default function VaultSidebar(): React.JSX.Element {
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`flex-1 text-[10px] px-1.5 py-1 rounded transition-all font-medium ${
+              className={`flex-1 text-[10px] px-1.5 py-1 rounded transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
                 filterType === type
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
+              aria-pressed={filterType === type}
             >
               {type === 'all' ? t('vault.filter.all') : type === 'login' ? t('vault.filter.login') : t('vault.filter.note')}
             </button>
@@ -33,12 +34,14 @@ export default function VaultSidebar(): React.JSX.Element {
         </div>
         <button
           onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-          className={`p-1.5 rounded-md transition-colors ${
+          className={`p-1.5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
             showFavoritesOnly
               ? 'text-yellow-500 bg-yellow-500/10'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
           title={t('vault.filter.favoritesOnly')}
+          aria-label={t('vault.filter.favoritesOnly')}
+          aria-pressed={showFavoritesOnly}
         >
           <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-yellow-500' : ''}`} />
         </button>
@@ -48,11 +51,12 @@ export default function VaultSidebar(): React.JSX.Element {
           <button
             key={item.id}
             onClick={() => selectItem(item.id)}
-            className={`w-full text-left rounded-lg px-3 py-2.5 transition-all group ${
+            className={`w-full text-left rounded-lg px-3 py-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
               detail?.meta.id === item.id
                 ? 'bg-accent text-accent-foreground shadow-sm'
                 : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
             }`}
+            aria-current={detail?.meta.id === item.id ? 'true' : undefined}
           >
             <div className="flex items-center gap-3">
               <div className={`p-1.5 rounded-md ${detail?.meta.id === item.id ? 'bg-primary/10 text-primary' : 'bg-muted group-hover:bg-background transition-colors'}`}>
@@ -94,7 +98,7 @@ export default function VaultSidebar(): React.JSX.Element {
           </div>
         ) : (
           <button
-            className="text-[10px] text-muted-foreground hover:text-destructive transition-colors"
+            className="text-[10px] text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
             onClick={() => setShowResetConfirm(true)}
           >
             {t('vault.resetVault.button')}
