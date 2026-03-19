@@ -47,6 +47,12 @@ const api = {
   setLaunchAtLogin: (enabled: boolean) => ipcRenderer.invoke('settings:setLaunchAtLogin', enabled),
   getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
   setLanguage: (lang: string) => ipcRenderer.invoke('settings:setLanguage', lang),
+  setLayoutMode: (mode: string) => ipcRenderer.invoke('settings:setLayoutMode', mode),
+  onLayoutModeChanged: (callback: (mode: string) => void) => {
+    ipcRenderer.on('settings:layoutModeChanged', (_, mode) => callback(mode))
+    return () => ipcRenderer.removeAllListeners('settings:layoutModeChanged')
+  },
+  openSettingsWindow: (view?: string) => ipcRenderer.invoke('settings:openWindow', view || 'settings'),
   syncNow: () => ipcRenderer.invoke('sync:now'),
   listTags: () => ipcRenderer.invoke('tags:list'),
   applyTags: (itemId: string, slugs: string[]) => ipcRenderer.invoke('tags:apply', itemId, slugs),

@@ -115,6 +115,9 @@ interface ZPasteAPI {
   setLaunchAtLogin: (enabled: boolean) => Promise<void>
   getLaunchAtLogin: () => Promise<boolean>
   setLanguage: (lang: string) => Promise<void>
+  setLayoutMode: (mode: string) => Promise<void>
+  onLayoutModeChanged: (callback: (mode: string) => void) => () => void
+  openSettingsWindow: (view?: string) => Promise<void>
   syncNow: () => Promise<void>
   listTags: () => Promise<TagWithCount[]>
   applyTags: (itemId: string, slugs: string[]) => Promise<void>

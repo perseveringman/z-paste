@@ -147,8 +147,8 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,252,248,0.96),rgba(250,244,236,0.92))] backdrop-blur-xl dark:bg-[linear-gradient(180deg,rgba(41,34,29,0.96),rgba(30,25,22,0.92))]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(208,140,82,0.18),_transparent_58%)]" />
-      <div className="relative flex flex-1 flex-col justify-center px-10 py-8">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="relative flex flex-1 min-h-0 flex-col px-10 py-6">
+        <div className="mb-5 flex shrink-0 items-center justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Stash</p>
             <p data-display="true" className="mt-2 text-2xl font-semibold text-balance text-foreground">
@@ -160,7 +160,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
           </div>
         </div>
 
-        <div className="grid flex-1 gap-8 md:grid-cols-[120px_minmax(0,1fr)]">
+        <div className="grid flex-1 min-h-0 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
           <div className="flex flex-col justify-between rounded-[1.5rem] border border-border/60 bg-background/60 p-5 shadow-sm">
             <div>
               <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary/75 text-4xl shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
@@ -186,11 +186,11 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             <p className="text-[11px] leading-6 text-muted-foreground">{t('onboarding.step4.hint')}</p>
           </div>
 
-          <div className="flex flex-col justify-center rounded-[1.75rem] border border-border/65 bg-background/78 px-8 py-8 shadow-[0_20px_55px_rgba(101,68,43,0.12)]">
-            <h2 data-display="true" className="mb-2 text-3xl font-semibold text-balance text-foreground">
+          <div className="flex flex-col rounded-[1.75rem] border border-border/65 bg-background/78 px-8 py-6 shadow-[0_20px_55px_rgba(101,68,43,0.12)] overflow-y-auto">
+            <h2 data-display="true" className="mb-2 text-2xl font-semibold text-balance text-foreground">
               {step.title}
             </h2>
-            <p className="mb-8 max-w-md text-sm leading-7 text-muted-foreground">
+            <p className="mb-5 max-w-md text-sm leading-7 text-muted-foreground">
               {step.description}
             </p>
             <div className="w-full max-w-md">{step.content}</div>
@@ -198,7 +198,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
         </div>
       </div>
 
-      <div className="relative flex items-center justify-between border-t border-border/60 px-8 py-5">
+      <div className="relative flex shrink-0 items-center justify-between border-t border-border/60 px-8 py-4">
         <div className="flex items-center gap-2">
           {steps.map((_, i) => (
             <div

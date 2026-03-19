@@ -21,9 +21,10 @@ import { useClipboardStore } from '../../stores/clipboardStore'
 
 interface Props {
   item: ClipboardItem | null
+  layout?: 'side' | 'bottom'
 }
 
-export default function PreviewPanel({ item }: Props): React.JSX.Element {
+export default function PreviewPanel({ item, layout = 'side' }: Props): React.JSX.Element {
   const { togglePreview } = useClipboardStore()
 
   if (!item) {
@@ -38,7 +39,7 @@ export default function PreviewPanel({ item }: Props): React.JSX.Element {
   }
 
   return (
-    <div className="surface-subtle flex min-w-0 flex-1 flex-col border-l border-border/60">
+    <div className={`surface-subtle flex min-w-0 flex-1 flex-col ${layout === 'side' ? 'border-l border-border/60' : ''}`}>
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

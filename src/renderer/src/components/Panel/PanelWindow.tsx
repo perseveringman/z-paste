@@ -2,14 +2,14 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
+import ClipboardCardList from './ClipboardCardList'
 import FilterTabs from './FilterTabs'
 import TagBar from './TagBar'
 import TagPicker from './TagPicker'
 import PreviewPanel from '../Preview/PreviewPanel'
 import QuickEdit from './QuickEdit'
+
 import TemplateList from '../Templates/TemplateList'
-import SettingsPage from '../Settings/SettingsPage'
-import OnboardingPage from '../Onboarding/OnboardingPage'
 import VaultView from '../Vault/VaultView'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import { useQueueToast } from '../../hooks/useQueueToast'
@@ -22,11 +22,12 @@ import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X, Lock, Unlock, Fil
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 
-export type PanelView = 'clipboard' | 'templates' | 'vault' | 'settings' | 'onboarding'
+export type PanelView = 'clipboard' | 'templates' | 'vault'
 
 export default function PanelWindow(): React.JSX.Element {
   const { t } = useTranslation()
   const [view, setView] = useState<PanelView>('clipboard')
+  const layoutMode = useSettingsStore((s) => s.layoutMode)
   useKeyboard(view)
   useQueueToast()
   const items = useSearch()
@@ -101,7 +102,7 @@ export default function PanelWindow(): React.JSX.Element {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (matchShortcut(e, openSettingsShortcut)) {
         e.preventDefault()
-        setView((v) => (v === 'settings' ? 'clipboard' : 'settings'))
+        window.api.openSettingsWindow('settings')
         return
       }
       // Clipboard-only shortcuts — suppress when vault is active
@@ -132,22 +133,6 @@ export default function PanelWindow(): React.JSX.Element {
 
   const containerClass =
     'surface-panel hairline flex h-full w-full flex-col overflow-hidden rounded-[1.15rem] border border-border/70 backdrop-blur-xl'
-
-  if (view === 'settings') {
-    return (
-      <div className={containerClass}>
-        <SettingsPage onClose={() => setView('clipboard')} />
-      </div>
-    )
-  }
-
-  if (view === 'onboarding') {
-    return (
-      <div className={containerClass}>
-        <OnboardingPage onComplete={() => setView('clipboard')} isRevisit />
-      </div>
-    )
-  }
 
   return (
     <div className={containerClass}>
@@ -237,7 +222,7 @@ export default function PanelWindow(): React.JSX.Element {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setView('onboarding')}
+            onClick={() => window.api.openSettingsWindow('onboarding')}
             aria-label={t('panel.help.tooltip')}
             className="h-8 w-8 rounded-full bg-background/55 text-muted-foreground hover:bg-background hover:text-foreground"
             title={t('panel.help.tooltip')}
@@ -247,7 +232,7 @@ export default function PanelWindow(): React.JSX.Element {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setView('settings')}
+            onClick={() => window.api.openSettingsWindow('settings')}
             aria-label={t('panel.settings.tooltip')}
             className="h-8 w-8 rounded-full bg-background/55 text-muted-foreground hover:bg-background hover:text-foreground"
             title={t('panel.settings.tooltip')}
@@ -258,51 +243,119 @@ export default function PanelWindow(): React.JSX.Element {
       </div>
 
       {view === 'clipboard' ? (
-        <div className="flex flex-1 min-h-0">
-          <div className="flex flex-col flex-1 min-h-0 min-w-0">
+        layoutMode === 'bottom' ? (
+          /* ── Bottom slide-out: horizontal card carousel ── */
+          <div className="flex flex-1 min-h-0 flex-col">
             {!filtersCollapsed && (
               <>
                 <TagBar />
                 <FilterTabs />
               </>
             )}
-            <div className="flex-1 flex min-h-0 relative">
-              <div
-                className={`relative flex min-h-0 flex-col ${!previewCollapsed && (previewItem || (editingItem && selectedItem)) ? 'w-[56%] border-r border-border/60' : 'flex-1'}`}
-                ref={tagPickerAnchorRef}
-              >
-                <ClipboardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
-                {tagPickerItemId && (
-                  <div className="absolute left-2.5 top-8 z-50">
-                    <TagPicker
-                      itemId={tagPickerItemId}
-                      onClose={() => setTagPickerItemId(null)}
+            <ClipboardCardList />
+          </div>
+        ) : layoutMode === 'side' ? (
+          /* ── Side slide-out: list + preview below ── */
+          <div className="flex flex-1 min-h-0 flex-col">
+            <div className="flex flex-col flex-1 min-h-0 min-w-0">
+              {!filtersCollapsed && (
+                <>
+                  <TagBar />
+                  <FilterTabs />
+                </>
+              )}
+              <div className="flex flex-1 flex-col min-h-0 relative">
+                <div
+                  className="relative flex min-h-0 flex-1 flex-col"
+                  ref={tagPickerAnchorRef}
+                >
+                  <ClipboardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
+                  {tagPickerItemId && (
+                    <div className="absolute left-2.5 top-8 z-50">
+                      <TagPicker
+                        itemId={tagPickerItemId}
+                        onClose={() => setTagPickerItemId(null)}
+                      />
+                    </div>
+                  )}
+                </div>
+                {!previewCollapsed && (editingItem && selectedItem ? (
+                  <div className="shrink-0 max-h-[40%] overflow-y-auto border-t border-border/60">
+                    <QuickEdit
+                      content={selectedItem.content}
+                      onSave={handleEditSave}
+                      onCancel={() => setEditingItem(null)}
                     />
                   </div>
+                ) : previewItem ? (
+                  <div className="shrink-0 max-h-[40%] overflow-y-auto border-t border-border/60">
+                    <PreviewPanel item={previewItem} layout="bottom" />
+                  </div>
+                ) : null)}
+                {previewCollapsed && (previewItem || selectedItem) && (
+                  <button
+                    onClick={togglePreview}
+                    aria-label={t('panel.preview.expand')}
+                    className="surface-subtle shrink-0 flex h-8 items-center justify-center border-t border-border/60 text-muted-foreground transition-colors hover:bg-secondary/65 hover:text-foreground"
+                    title={t('panel.preview.expand')}
+                  >
+                    <PanelRightOpen className="w-3.5 h-3.5 rotate-90" />
+                  </button>
                 )}
               </div>
-              {!previewCollapsed && (editingItem && selectedItem ? (
-                <QuickEdit
-                  content={selectedItem.content}
-                  onSave={handleEditSave}
-                  onCancel={() => setEditingItem(null)}
-                />
-              ) : previewItem ? (
-                <PreviewPanel item={previewItem} />
-              ) : null)}
-              {previewCollapsed && (previewItem || selectedItem) && (
-                <button
-                  onClick={togglePreview}
-                  aria-label={t('panel.preview.expand')}
-                  className="surface-subtle shrink-0 flex w-8 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-secondary/65 hover:text-foreground"
-                  title={t('panel.preview.expand')}
-                >
-                  <PanelRightOpen className="w-3.5 h-3.5" />
-                </button>
-              )}
             </div>
           </div>
-        </div>
+        ) : (
+          /* ── Center: list + preview on right ── */
+          <div className="flex flex-1 min-h-0">
+            <div className="flex flex-col flex-1 min-h-0 min-w-0">
+              {!filtersCollapsed && (
+                <>
+                  <TagBar />
+                  <FilterTabs />
+                </>
+              )}
+              <div className="flex-1 flex min-h-0 relative">
+                <div
+                  className={cn(
+                    'relative flex min-h-0 flex-col',
+                    !previewCollapsed && (previewItem || (editingItem && selectedItem)) ? 'w-[56%] border-r border-border/60' : 'flex-1'
+                  )}
+                  ref={tagPickerAnchorRef}
+                >
+                  <ClipboardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
+                  {tagPickerItemId && (
+                    <div className="absolute left-2.5 top-8 z-50">
+                      <TagPicker
+                        itemId={tagPickerItemId}
+                        onClose={() => setTagPickerItemId(null)}
+                      />
+                    </div>
+                  )}
+                </div>
+                {!previewCollapsed && (editingItem && selectedItem ? (
+                  <QuickEdit
+                    content={selectedItem.content}
+                    onSave={handleEditSave}
+                    onCancel={() => setEditingItem(null)}
+                  />
+                ) : previewItem ? (
+                  <PreviewPanel item={previewItem} />
+                ) : null)}
+                {previewCollapsed && (previewItem || selectedItem) && (
+                  <button
+                    onClick={togglePreview}
+                    aria-label={t('panel.preview.expand')}
+                    className="surface-subtle shrink-0 flex w-8 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-secondary/65 hover:text-foreground"
+                    title={t('panel.preview.expand')}
+                  >
+                    <PanelRightOpen className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )
       ) : view === 'templates' ? (
         <TemplateList />
       ) : (

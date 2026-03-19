@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSettingsStore, ThemeMode, LanguageMode } from '../../stores/settingsStore'
+import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { Switch } from '../ui/switch'
@@ -54,7 +54,7 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
   ]
 
   return (
-    <div className="flex flex-col h-full bg-background text-foreground">
+    <div className="flex flex-col h-full bg-background text-foreground rounded-[1.5rem] border border-border/70 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b">
         <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
@@ -152,7 +152,9 @@ function GeneralSection(): React.JSX.Element {
     maxItems,
     setMaxItems,
     language,
-    setLanguage
+    setLanguage,
+    layoutMode,
+    setLayoutMode
   } = useSettingsStore()
 
   return (
@@ -168,6 +170,19 @@ function GeneralSection(): React.JSX.Element {
             <SelectItem value="zh-CN">{t('settings.general.language.zhCN')}</SelectItem>
             <SelectItem value="en">{t('settings.general.language.en')}</SelectItem>
             <SelectItem value="zh-TW">{t('settings.general.language.zhTW')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </SettingsItem>
+      <Separator />
+      <SettingsItem label={t('settings.general.layoutMode')} description={t('settings.general.layoutMode.desc')}>
+        <Select value={layoutMode} onValueChange={(v) => setLayoutMode(v as LayoutMode)}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="center">{t('settings.general.layoutMode.center')}</SelectItem>
+            <SelectItem value="side">{t('settings.general.layoutMode.side')}</SelectItem>
+            <SelectItem value="bottom">{t('settings.general.layoutMode.bottom')}</SelectItem>
           </SelectContent>
         </Select>
       </SettingsItem>

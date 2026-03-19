@@ -3,6 +3,7 @@ import i18n from '../i18n'
 
 export type ThemeMode = 'auto' | 'dark' | 'light'
 export type LanguageMode = 'auto' | 'zh-CN' | 'en' | 'zh-TW'
+export type LayoutMode = 'center' | 'side' | 'bottom'
 
 export interface Settings {
   theme: ThemeMode
@@ -25,6 +26,7 @@ export interface Settings {
   widgetFollowFilter: boolean
   widgetToggleShortcut: string
   widgetQuickPastePrefix: string
+  layoutMode: LayoutMode
 }
 
 interface SettingsState extends Settings {
@@ -49,6 +51,7 @@ interface SettingsState extends Settings {
   setWidgetFollowFilter: (value: boolean) => void
   setWidgetToggleShortcut: (shortcut: string) => void
   setWidgetQuickPastePrefix: (prefix: string) => void
+  setLayoutMode: (mode: LayoutMode) => void
   loadSettings: () => void
   saveSettings: () => void
 }
@@ -111,7 +114,8 @@ const defaults: Settings = {
   openSettingsShortcut: 'CommandOrControl+,',
   widgetFollowFilter: false,
   widgetToggleShortcut: 'Alt+W',
-  widgetQuickPastePrefix: 'Alt'
+  widgetQuickPastePrefix: 'Alt',
+  layoutMode: 'center'
 }
 
 const stored = loadFromStorage()
@@ -226,6 +230,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     get().saveSettings()
   },
 
+  setLayoutMode: (mode) => {
+    set({ layoutMode: mode })
+    window.api.setLayoutMode?.(mode)
+    get().saveSettings()
+  },
+
   loadSettings: () => {
     const stored = loadFromStorage()
     const merged = { ...defaults, ...stored }
@@ -256,7 +266,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       openSettingsShortcut: state.openSettingsShortcut,
       widgetFollowFilter: state.widgetFollowFilter,
       widgetToggleShortcut: state.widgetToggleShortcut,
-      widgetQuickPastePrefix: state.widgetQuickPastePrefix
+      widgetQuickPastePrefix: state.widgetQuickPastePrefix,
+      layoutMode: state.layoutMode
     }
     saveToStorage(settings)
   }

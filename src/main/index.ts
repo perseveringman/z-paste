@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain, clipboard, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, clipboard, dialog, Menu } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
 import { ShortcutManager } from './shortcuts'
 import { TrayManager } from './tray'
+import { SettingsWindowManager } from './settings-window'
 import { ClipboardMonitor } from './clipboard/monitor'
 import { initDatabase, getDatabase } from './database/connection'
 import { createTables } from './database/schema'
@@ -23,6 +24,7 @@ let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
 let shortcutManager: ShortcutManager
 let trayManager: TrayManager
+let settingsWindowManager: SettingsWindowManager
 let clipboardMonitor: ClipboardMonitor
 let syncService: iCloudSync | null = null
 let vaultSession: VaultSessionManager
@@ -86,6 +88,32 @@ function setupAutoUpdater(): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
 
+  // Set application menu with zoom shortcuts (Cmd+-, Cmd+=, Cmd+0)
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      {
+        label: app.name,
+        submenu: [{ role: 'quit' }]
+      },
+      {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' }
+        ]
+      },
+      {
+        label: 'View',
+        submenu: [{ role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'resetZoom' }]
+      }
+    ])
+  )
+
   // Hide dock icon — only show in menu bar tray
   if (app.dock) app.dock.hide()
 
@@ -101,6 +129,10 @@ app.whenReady().then(() => {
   shortcutManager = new ShortcutManager(windowManager)
   shortcutManager.setWidgetManager(widgetManager)
   trayManager = new TrayManager(windowManager)
+  settingsWindowManager = new SettingsWindowManager()
+  settingsWindowManager.onClosed(() => {
+    windowManager.show()
+  })
   clipboardMonitor = new ClipboardMonitor()
   const worker = new VaultCryptoWorkerClient()
   vaultCryptoWorker = worker
@@ -268,6 +300,22 @@ app.whenReady().then(() => {
 
   ipcMain.handle('settings:setLanguage', async (_, lang: string) => {
     trayManager.setLanguage(lang)
+  })
+
+  ipcMain.handle('settings:setLayoutMode', async (_, mode: string) => {
+    if (mode === 'center' || mode === 'side' || mode === 'bottom') {
+      windowManager.setLayoutMode(mode)
+      // Broadcast to all renderer windows so their stores stay in sync
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) {
+          win.webContents.send('settings:layoutModeChanged', mode)
+        }
+      }
+    }
+  })
+
+  ipcMain.handle('settings:openWindow', async (_, view: string) => {
+    settingsWindowManager.open(view === 'onboarding' ? 'onboarding' : 'settings')
   })
 
   ipcMain.handle('sync:now', async () => {

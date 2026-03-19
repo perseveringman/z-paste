@@ -31,10 +31,17 @@ function App(): React.JSX.Element {
       setVisible(false)
     })
 
+    const unsubLayout = window.api.onLayoutModeChanged((mode) => {
+      if (mode === 'center' || mode === 'side' || mode === 'bottom') {
+        useSettingsStore.setState({ layoutMode: mode })
+      }
+    })
+
     return () => {
       unsubNewItem()
       unsubShown()
       unsubHidden()
+      unsubLayout()
     }
   }, [])
 
