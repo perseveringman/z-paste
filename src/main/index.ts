@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
 import { ShortcutManager } from './shortcuts'
+import { writeItemToClipboard } from './clipboard/paste-utils'
 import { TrayManager } from './tray'
 import { SettingsWindowManager } from './settings-window'
 import { ClipboardMonitor } from './clipboard/monitor'
@@ -176,7 +177,7 @@ app.whenReady().then(() => {
     const item = repository.getItemById(id)
     if (!item) return
 
-    clipboard.writeText(item.content)
+    writeItemToClipboard(item.content, item.content_type)
     const previousApp = windowManager.getPreviousAppBundleId()
     windowManager.hide()
 
@@ -475,12 +476,12 @@ app.whenReady().then(() => {
   })
 
   // Sequence paste IPC handlers
-  ipcMain.handle('queue:add', async (_, item: { id: string; content: string }) => {
+  ipcMain.handle('queue:add', async (_, item: { id: string; content: string; content_type: string }) => {
     shortcutManager.addToQueue(item)
     return shortcutManager.getQueueCount()
   })
 
-  ipcMain.handle('queue:addMultiple', async (_, items: { id: string; content: string }[]) => {
+  ipcMain.handle('queue:addMultiple', async (_, items: { id: string; content: string; content_type: string }[]) => {
     shortcutManager.addMultipleToQueue(items)
     return shortcutManager.getQueueCount()
   })
@@ -567,7 +568,7 @@ app.whenReady().then(() => {
     const item = repository.getItemById(id)
     if (!item) return
 
-    clipboard.writeText(item.content)
+    writeItemToClipboard(item.content, item.content_type)
 
     // Hide widget if not pinned
     if (!widgetManager.getPinned()) {

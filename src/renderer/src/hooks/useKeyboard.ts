@@ -37,7 +37,7 @@ export function useKeyboard(view: PanelView): void {
             // Add all selected items to queue
             const selected = items.filter((i) => selectedItems.has(i.id))
             addMultipleToQueue(selected)
-            selected.forEach((i) => window.api.queueAdd({ id: i.id, content: i.content }))
+            selected.forEach((i) => window.api.queueAdd({ id: i.id, content: i.content, content_type: i.content_type }))
             clearSelection()
           } else if (items[selectedIndex]) {
             pasteItem(items[selectedIndex].id)
@@ -49,7 +49,7 @@ export function useKeyboard(view: PanelView): void {
           if (items[selectedIndex]) {
             const item = items[selectedIndex]
             addToQueue(item)
-            window.api.queueAdd({ id: item.id, content: item.content })
+            window.api.queueAdd({ id: item.id, content: item.content, content_type: item.content_type })
           }
           break
         case 'Escape':

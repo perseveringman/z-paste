@@ -133,8 +133,8 @@ interface ZPasteAPI {
   getContentTypeCounts: (options?: { leftFilter?: LeftFilter; sourceApp?: string }) => Promise<Record<string, number>>
   getAppIcon: (bundleId: string) => Promise<string | null>
   // Sequence paste queue
-  queueAdd: (item: { id: string; content: string }) => Promise<number>
-  queueAddMultiple: (items: { id: string; content: string }[]) => Promise<number>
+  queueAdd: (item: { id: string; content: string; content_type: string }) => Promise<number>
+  queueAddMultiple: (items: { id: string; content: string; content_type: string }[]) => Promise<number>
   queueClear: () => Promise<void>
   queueGetCount: () => Promise<number>
   queueGetItems: () => Promise<{ id: string; content: string }[]>

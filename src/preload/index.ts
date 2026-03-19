@@ -69,8 +69,8 @@ const api = {
     ipcRenderer.invoke('clipboard:getContentTypeCounts', options),
   getAppIcon: (bundleId: string) => ipcRenderer.invoke('sourceApps:getIcon', bundleId),
   // Sequence paste queue
-  queueAdd: (item: { id: string; content: string }) => ipcRenderer.invoke('queue:add', item),
-  queueAddMultiple: (items: { id: string; content: string }[]) => ipcRenderer.invoke('queue:addMultiple', items),
+  queueAdd: (item: { id: string; content: string; content_type: string }) => ipcRenderer.invoke('queue:add', item),
+  queueAddMultiple: (items: { id: string; content: string; content_type: string }[]) => ipcRenderer.invoke('queue:addMultiple', items),
   queueClear: () => ipcRenderer.invoke('queue:clear'),
   queueGetCount: () => ipcRenderer.invoke('queue:getCount'),
   queueGetItems: () => ipcRenderer.invoke('queue:getItems'),

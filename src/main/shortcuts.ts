@@ -3,10 +3,12 @@ import { exec } from 'child_process'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
 import * as repository from './database/repository'
+import { writeItemToClipboard } from './clipboard/paste-utils'
 
 interface QueueItem {
   id: string
   content: string
+  content_type: string
 }
 
 export class ShortcutManager {
@@ -67,7 +69,7 @@ export class ShortcutManager {
     if (index >= items.length) return
 
     const item = items[index]
-    clipboard.writeText(item.content)
+    writeItemToClipboard(item.content, item.content_type)
     process.nextTick(() => repository.incrementUseCount(item.id))
 
     // Get frontmost app before paste
@@ -106,7 +108,7 @@ export class ShortcutManager {
       }
 
       const item = this.sequenceQueue[this.queueIndex]
-      clipboard.writeText(item.content)
+      writeItemToClipboard(item.content, item.content_type)
       this.queueIndex++
 
       this.notifyRenderer('queue:pasted', {
