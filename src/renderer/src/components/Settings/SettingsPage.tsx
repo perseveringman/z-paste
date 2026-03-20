@@ -1,19 +1,22 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { Switch } from '../ui/switch'
 import { AppLogo } from '../ui/app-logo'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '../ui/select'
+import { Input } from '../ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Button } from '../ui/button'
 import { Separator } from '../ui/separator'
+import { showToast } from '../../utils/toast'
+import {
+  MAX_ITEMS_CUSTOM_MIN,
+  MAX_ITEMS_PRESETS,
+  MAX_ITEMS_UNLIMITED,
+  isPresetMaxItems,
+} from '../../../../shared/max-items'
 import {
   Settings,
   Keyboard,
@@ -30,10 +33,18 @@ import {
   Pencil,
   GitMerge,
   AlertTriangle,
-  LayoutGrid
+  LayoutGrid,
 } from 'lucide-react'
 
-type SettingsSection = 'general' | 'shortcuts' | 'widget' | 'sync' | 'privacy' | 'theme' | 'tags' | 'about'
+type SettingsSection =
+  | 'general'
+  | 'shortcuts'
+  | 'widget'
+  | 'sync'
+  | 'privacy'
+  | 'theme'
+  | 'tags'
+  | 'about'
 
 interface Props {
   onClose: () => void
@@ -51,11 +62,16 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
     { id: 'privacy', label: t('settings.nav.privacy'), icon: Lock },
     { id: 'theme', label: t('settings.nav.theme'), icon: Palette },
     { id: 'tags', label: t('settings.nav.tags'), icon: Tag },
-    { id: 'about', label: t('settings.nav.about'), icon: Info }
+    { id: 'about', label: t('settings.nav.about'), icon: Info },
   ]
 
   return (
-    <div className="flex flex-col h-full bg-background text-foreground rounded-[1.5rem] border border-border/70 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="flex flex-col h-full bg-background text-foreground rounded-[1.5rem] border border-border/70 overflow-hidden"
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b">
         <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
@@ -88,7 +104,7 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
           <SectionContent section={activeSection} />
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -126,7 +142,7 @@ function SectionTitle({ title }: { title: string }): React.JSX.Element {
 function SettingsItem({
   label,
   description,
-  children
+  children,
 }: {
   label: string
   description?: string
@@ -155,13 +171,71 @@ function GeneralSection(): React.JSX.Element {
     language,
     setLanguage,
     layoutMode,
-    setLayoutMode
+    setLayoutMode,
   } = useSettingsStore()
+  const [isCustomMaxItemsSelected, setIsCustomMaxItemsSelected] = useState(
+    maxItems > 0 && !isPresetMaxItems(maxItems)
+  )
+  const [customMaxItems, setCustomMaxItems] = useState(
+    maxItems > 0 && !isPresetMaxItems(maxItems) ? String(maxItems) : String(MAX_ITEMS_CUSTOM_MIN)
+  )
+
+  useEffect(() => {
+    if (maxItems === MAX_ITEMS_UNLIMITED) {
+      setIsCustomMaxItemsSelected(false)
+      return
+    }
+
+    if (isPresetMaxItems(maxItems)) {
+      setIsCustomMaxItemsSelected(false)
+      return
+    }
+
+    setIsCustomMaxItemsSelected(true)
+    setCustomMaxItems(String(maxItems))
+  }, [maxItems])
+
+  const parsedCustomMaxItems = Number(customMaxItems)
+  const canSaveCustomMaxItems =
+    /^\d+$/.test(customMaxItems.trim()) && parsedCustomMaxItems >= MAX_ITEMS_CUSTOM_MIN
+  const maxItemsSelectValue = isCustomMaxItemsSelected
+    ? 'custom'
+    : maxItems === MAX_ITEMS_UNLIMITED
+      ? 'unlimited'
+      : String(maxItems)
+
+  const handleMaxItemsChange = (value: string): void => {
+    if (value === 'custom') {
+      setIsCustomMaxItemsSelected(true)
+      setCustomMaxItems(
+        String(Math.max(maxItems || MAX_ITEMS_CUSTOM_MIN, MAX_ITEMS_CUSTOM_MIN))
+      )
+      return
+    }
+
+    setIsCustomMaxItemsSelected(false)
+
+    if (value === 'unlimited') {
+      setMaxItems(MAX_ITEMS_UNLIMITED)
+      return
+    }
+
+    setMaxItems(Number(value))
+  }
+
+  const saveCustomMaxItems = (): void => {
+    if (!canSaveCustomMaxItems) return
+    setMaxItems(parsedCustomMaxItems)
+    showToast(t('settings.general.maxItems.saved'))
+  }
 
   return (
     <div>
       <SectionTitle title={t('settings.general.title')} />
-      <SettingsItem label={t('settings.general.language')} description={t('settings.general.language.desc')}>
+      <SettingsItem
+        label={t('settings.general.language')}
+        description={t('settings.general.language.desc')}
+      >
         <Select value={language} onValueChange={(v) => setLanguage(v as LanguageMode)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue />
@@ -175,7 +249,10 @@ function GeneralSection(): React.JSX.Element {
         </Select>
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.general.layoutMode')} description={t('settings.general.layoutMode.desc')}>
+      <SettingsItem
+        label={t('settings.general.layoutMode')}
+        description={t('settings.general.layoutMode.desc')}
+      >
         <Select value={layoutMode} onValueChange={(v) => setLayoutMode(v as LayoutMode)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue />
@@ -188,7 +265,10 @@ function GeneralSection(): React.JSX.Element {
         </Select>
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.general.launchAtLogin')} description={t('settings.general.launchAtLogin.desc')}>
+      <SettingsItem
+        label={t('settings.general.launchAtLogin')}
+        description={t('settings.general.launchAtLogin.desc')}
+      >
         <Switch
           checked={launchAtLogin}
           onCheckedChange={(v) => {
@@ -198,7 +278,10 @@ function GeneralSection(): React.JSX.Element {
         />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.general.historyRetention')} description={t('settings.general.historyRetention.desc')}>
+      <SettingsItem
+        label={t('settings.general.historyRetention')}
+        description={t('settings.general.historyRetention.desc')}
+      >
         <Select
           value={String(historyRetention)}
           onValueChange={(v) => setHistoryRetention(Number(v))}
@@ -215,17 +298,55 @@ function GeneralSection(): React.JSX.Element {
         </Select>
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.general.maxItems')} description={t('settings.general.maxItems.desc')}>
-        <Select value={String(maxItems)} onValueChange={(v) => setMaxItems(Number(v))}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="500">500</SelectItem>
-            <SelectItem value="1000">1000</SelectItem>
-            <SelectItem value="2000">2000</SelectItem>
-          </SelectContent>
-        </Select>
+      <SettingsItem
+        label={t('settings.general.maxItems')}
+        description={t('settings.general.maxItems.desc')}
+      >
+        <div className="flex flex-col items-end gap-2">
+          <Select value={maxItemsSelectValue} onValueChange={handleMaxItemsChange}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MAX_ITEMS_PRESETS.map((value) => (
+                <SelectItem key={value} value={String(value)}>
+                  {value}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">{t('settings.general.maxItems.custom')}</SelectItem>
+              <SelectItem value="unlimited">
+                {t('settings.general.maxItems.unlimited')}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {isCustomMaxItemsSelected && (
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={MAX_ITEMS_CUSTOM_MIN}
+                  step={1}
+                  inputMode="numeric"
+                  value={customMaxItems}
+                  onChange={(e) => setCustomMaxItems(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveCustomMaxItems()
+                  }}
+                  placeholder={t('settings.general.maxItems.customPlaceholder')}
+                  className="h-9 w-[140px] text-right"
+                />
+                <Button size="sm" onClick={saveCustomMaxItems} disabled={!canSaveCustomMaxItems}>
+                  {t('common.save')}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {t('settings.general.maxItems.customHint', {
+                  min: MAX_ITEMS_CUSTOM_MIN,
+                })}
+              </p>
+            </div>
+          )}
+        </div>
       </SettingsItem>
     </div>
   )
@@ -243,7 +364,7 @@ function ShortcutBadge({ shortcut }: { shortcut: string }): React.JSX.Element {
 
 function ShortcutRecorder({
   value,
-  onChange
+  onChange,
 }: {
   value: string
   onChange: (shortcut: string) => void
@@ -295,55 +416,86 @@ function ShortcutsSection(): React.JSX.Element {
     batchPasteShortcut,
     batchPasteSeparator,
     setBatchPasteSeparator,
-    toggleFilterShortcut, setToggleFilterShortcut,
-    togglePreviewShortcut, setTogglePreviewShortcut,
-    openTagShortcut, setOpenTagShortcut,
-    openSettingsShortcut, setOpenSettingsShortcut
+    toggleFilterShortcut,
+    setToggleFilterShortcut,
+    togglePreviewShortcut,
+    setTogglePreviewShortcut,
+    openTagShortcut,
+    setOpenTagShortcut,
+    openSettingsShortcut,
+    setOpenSettingsShortcut,
   } = useSettingsStore()
 
   const separatorOptions = [
     { value: '\n', label: t('settings.shortcuts.separator.newline') },
     { value: '\t', label: t('settings.shortcuts.separator.tab') },
     { value: ', ', label: t('settings.shortcuts.separator.comma') },
-    { value: ' ', label: t('settings.shortcuts.separator.space') }
+    { value: ' ', label: t('settings.shortcuts.separator.space') },
   ]
 
   return (
     <div>
       <SectionTitle title={t('settings.shortcuts.title')} />
-      <SettingsItem label={t('settings.shortcuts.showPanel')} description={t('settings.shortcuts.showPanel.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.showPanel')}
+        description={t('settings.shortcuts.showPanel.desc')}
+      >
         <ShortcutBadge shortcut={customShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.sequencePaste')} description={t('settings.shortcuts.sequencePaste.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.sequencePaste')}
+        description={t('settings.shortcuts.sequencePaste.desc')}
+      >
         <ShortcutBadge shortcut={sequencePasteShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.batchPaste')} description={t('settings.shortcuts.batchPaste.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.batchPaste')}
+        description={t('settings.shortcuts.batchPaste.desc')}
+      >
         <ShortcutBadge shortcut={batchPasteShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.addToQueue')} description={t('settings.shortcuts.addToQueue.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.addToQueue')}
+        description={t('settings.shortcuts.addToQueue.desc')}
+      >
         <ShortcutBadge shortcut="Space" />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.toggleFilter')} description={t('settings.shortcuts.toggleFilter.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.toggleFilter')}
+        description={t('settings.shortcuts.toggleFilter.desc')}
+      >
         <ShortcutRecorder value={toggleFilterShortcut} onChange={setToggleFilterShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.togglePreview')} description={t('settings.shortcuts.togglePreview.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.togglePreview')}
+        description={t('settings.shortcuts.togglePreview.desc')}
+      >
         <ShortcutRecorder value={togglePreviewShortcut} onChange={setTogglePreviewShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.openTag')} description={t('settings.shortcuts.openTag.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.openTag')}
+        description={t('settings.shortcuts.openTag.desc')}
+      >
         <ShortcutRecorder value={openTagShortcut} onChange={setOpenTagShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.openSettings')} description={t('settings.shortcuts.openSettings.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.openSettings')}
+        description={t('settings.shortcuts.openSettings.desc')}
+      >
         <ShortcutRecorder value={openSettingsShortcut} onChange={setOpenSettingsShortcut} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.shortcuts.batchSeparator')} description={t('settings.shortcuts.batchSeparator.desc')}>
+      <SettingsItem
+        label={t('settings.shortcuts.batchSeparator')}
+        description={t('settings.shortcuts.batchSeparator.desc')}
+      >
         <Select
           value={batchPasteSeparator}
           onValueChange={(v) => {
@@ -363,9 +515,7 @@ function ShortcutsSection(): React.JSX.Element {
           </SelectContent>
         </Select>
       </SettingsItem>
-      <p className="text-xs text-muted-foreground mt-4">
-        {t('settings.shortcuts.hint')}
-      </p>
+      <p className="text-xs text-muted-foreground mt-4">{t('settings.shortcuts.hint')}</p>
     </div>
   )
 }
@@ -477,18 +627,26 @@ function PrivacySection(): React.JSX.Element {
   return (
     <div>
       <SectionTitle title={t('settings.privacy.title')} />
-      <SettingsItem label={t('settings.privacy.encryption')} description={t('settings.privacy.encryption.desc')}>
+      <SettingsItem
+        label={t('settings.privacy.encryption')}
+        description={t('settings.privacy.encryption.desc')}
+      >
         <Switch checked={encryptionEnabled} onCheckedChange={setEncryptionEnabled} />
       </SettingsItem>
       <Separator />
-      <SettingsItem label={t('settings.privacy.vaultStatus')} description={t('settings.privacy.vaultStatus.desc')}>
+      <SettingsItem
+        label={t('settings.privacy.vaultStatus')}
+        description={t('settings.privacy.vaultStatus.desc')}
+      >
         <span className="text-xs rounded-md border px-2 py-1 bg-muted">{vaultStatus}</span>
       </SettingsItem>
       <Separator />
       <div className="py-4">
         <p className="text-sm font-medium mb-2">{t('settings.privacy.recentEvents')}</p>
         {auditEvents.length === 0 ? (
-          <p className="text-xs text-muted-foreground">{t('settings.privacy.recentEvents.empty')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('settings.privacy.recentEvents.empty')}
+          </p>
         ) : (
           <div className="space-y-1">
             {auditEvents.map((event) => (
@@ -503,7 +661,10 @@ function PrivacySection(): React.JSX.Element {
         )}
       </div>
       <Separator />
-      <SettingsItem label={t('settings.privacy.clearAll')} description={t('settings.privacy.clearAll.desc')}>
+      <SettingsItem
+        label={t('settings.privacy.clearAll')}
+        description={t('settings.privacy.clearAll.desc')}
+      >
         <Button
           variant={confirming ? 'destructive' : 'outline'}
           size="sm"
@@ -548,7 +709,9 @@ function PrivacySection(): React.JSX.Element {
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-sm">{t('settings.vault.autoLockTimeout')}</p>
-            <p className="text-xs text-muted-foreground">{t('settings.vault.autoLockTimeoutDesc')}</p>
+            <p className="text-xs text-muted-foreground">
+              {t('settings.vault.autoLockTimeoutDesc')}
+            </p>
           </div>
           <Select
             value={String(security.autoLockMinutes)}
@@ -578,7 +741,7 @@ function ThemeSection(): React.JSX.Element {
   const themes: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
     { value: 'auto', label: t('settings.theme.auto'), icon: Monitor },
     { value: 'dark', label: t('settings.theme.dark'), icon: Moon },
-    { value: 'light', label: t('settings.theme.light'), icon: Sun }
+    { value: 'light', label: t('settings.theme.light'), icon: Sun },
   ]
 
   return (
@@ -595,8 +758,12 @@ function ThemeSection(): React.JSX.Element {
                 : 'border-transparent bg-muted hover:bg-muted/80'
             }`}
           >
-            <th.icon className={`w-6 h-6 ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-sm font-medium ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}>
+            <th.icon
+              className={`w-6 h-6 ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}
+            />
+            <span
+              className={`text-sm font-medium ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}
+            >
               {th.label}
             </span>
           </button>
@@ -630,7 +797,7 @@ function TagManagementSection(): React.JSX.Element {
       const s = await window.api.getTagStats()
       setStats(s)
     },
-    [renameValue, renameTag]
+    [renameValue, renameTag],
   )
 
   const handleDelete = useCallback(
@@ -644,7 +811,7 @@ function TagManagementSection(): React.JSX.Element {
         setConfirmDelete(slug)
       }
     },
-    [confirmDelete, deleteTag]
+    [confirmDelete, deleteTag],
   )
 
   const handleMerge = useCallback(
@@ -657,7 +824,7 @@ function TagManagementSection(): React.JSX.Element {
       const s = await window.api.getTagStats()
       setStats(s)
     },
-    [mergeTarget, mergeTag]
+    [mergeTarget, mergeTag],
   )
 
   return (
@@ -700,7 +867,10 @@ function TagManagementSection(): React.JSX.Element {
                 onChange={(e) => setRenameValue(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleRenameConfirm(tag.slug)
-                  if (e.key === 'Escape') { setRenamingSlug(null); setRenameValue('') }
+                  if (e.key === 'Escape') {
+                    setRenamingSlug(null)
+                    setRenameValue('')
+                  }
                 }}
                 className="flex-1 text-sm bg-background border rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary"
               />
@@ -711,42 +881,92 @@ function TagManagementSection(): React.JSX.Element {
                 onChange={(e) => setMergeTarget(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleMerge(tag.slug)
-                  if (e.key === 'Escape') { setMergingSlug(null); setMergeTarget('') }
+                  if (e.key === 'Escape') {
+                    setMergingSlug(null)
+                    setMergeTarget('')
+                  }
                 }}
                 className="flex-1 text-sm bg-background border rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="">{t('settings.tags.selectTarget')}</option>
-                {tags.filter((tg) => tg.slug !== tag.slug).map((tg) => (
-                  <option key={tg.slug} value={tg.slug}>{tg.name}</option>
-                ))}
+                {tags
+                  .filter((tg) => tg.slug !== tag.slug)
+                  .map((tg) => (
+                    <option key={tg.slug} value={tg.slug}>
+                      {tg.name}
+                    </option>
+                  ))}
               </select>
             ) : (
               <span className="flex-1 text-sm truncate">{tag.name}</span>
             )}
 
-            <span className="text-[10px] text-muted-foreground/60 tabular-nums mr-1">{tag.count}</span>
+            <span className="text-[10px] text-muted-foreground/60 tabular-nums mr-1">
+              {tag.count}
+            </span>
 
             {renamingSlug === tag.slug ? (
               <>
-                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleRenameConfirm(tag.slug)}>{t('common.confirm')}</Button>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setRenamingSlug(null); setRenameValue('') }}>{t('common.cancel')}</Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => handleRenameConfirm(tag.slug)}
+                >
+                  {t('common.confirm')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => {
+                    setRenamingSlug(null)
+                    setRenameValue('')
+                  }}
+                >
+                  {t('common.cancel')}
+                </Button>
               </>
             ) : mergingSlug === tag.slug ? (
               <>
-                <Button size="sm" variant="default" className="h-6 px-2 text-xs" onClick={() => handleMerge(tag.slug)} disabled={!mergeTarget}>{t('settings.tags.merge')}</Button>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setMergingSlug(null); setMergeTarget('') }}>{t('common.cancel')}</Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => handleMerge(tag.slug)}
+                  disabled={!mergeTarget}
+                >
+                  {t('settings.tags.merge')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => {
+                    setMergingSlug(null)
+                    setMergeTarget('')
+                  }}
+                >
+                  {t('common.cancel')}
+                </Button>
               </>
             ) : (
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  onClick={() => { setRenamingSlug(tag.slug); setRenameValue(tag.name) }}
+                  onClick={() => {
+                    setRenamingSlug(tag.slug)
+                    setRenameValue(tag.name)
+                  }}
                   className="p-1 rounded hover:bg-background/80 text-muted-foreground"
                   title={t('settings.tags.rename')}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 <button
-                  onClick={() => { setMergingSlug(tag.slug); setMergeTarget('') }}
+                  onClick={() => {
+                    setMergingSlug(tag.slug)
+                    setMergeTarget('')
+                  }}
                   className="p-1 rounded hover:bg-background/80 text-muted-foreground"
                   title={t('settings.tags.mergeTo')}
                 >
@@ -755,7 +975,11 @@ function TagManagementSection(): React.JSX.Element {
                 <button
                   onClick={() => handleDelete(tag.slug)}
                   className={`p-1 rounded hover:bg-background/80 ${confirmDelete === tag.slug ? 'text-destructive' : 'text-muted-foreground'}`}
-                  title={confirmDelete === tag.slug ? t('settings.tags.confirmDelete') : t('common.delete')}
+                  title={
+                    confirmDelete === tag.slug
+                      ? t('settings.tags.confirmDelete')
+                      : t('common.delete')
+                  }
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -764,7 +988,9 @@ function TagManagementSection(): React.JSX.Element {
           </div>
         ))}
         {tags.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">{t('settings.tags.empty')}</p>
+          <p className="text-sm text-muted-foreground text-center py-8">
+            {t('settings.tags.empty')}
+          </p>
         )}
       </div>
     </div>
@@ -779,13 +1005,13 @@ function WidgetSection(): React.JSX.Element {
     widgetToggleShortcut,
     setWidgetToggleShortcut,
     widgetQuickPastePrefix,
-    setWidgetQuickPastePrefix
+    setWidgetQuickPastePrefix,
   } = useSettingsStore()
 
   const prefixOptions = [
     { value: 'Alt', label: '⌥ Option' },
     { value: 'Control', label: '⌃ Control' },
-    { value: 'CommandOrControl', label: '⌘ Command' }
+    { value: 'CommandOrControl', label: '⌘ Command' },
   ]
 
   return (
@@ -821,10 +1047,13 @@ function WidgetSection(): React.JSX.Element {
         label={t('settings.shortcuts.widgetToggle')}
         description={t('settings.shortcuts.widgetToggle.desc')}
       >
-        <ShortcutRecorder value={widgetToggleShortcut} onChange={(v) => {
-          setWidgetToggleShortcut(v)
-          window.api.updateShortcuts({ widgetToggle: v })
-        }} />
+        <ShortcutRecorder
+          value={widgetToggleShortcut}
+          onChange={(v) => {
+            setWidgetToggleShortcut(v)
+            window.api.updateShortcuts({ widgetToggle: v })
+          }}
+        />
       </SettingsItem>
       <Separator />
       <SettingsItem
@@ -871,11 +1100,11 @@ function AboutSection(): React.JSX.Element {
         <AppLogo size="md" />
         <div>
           <h3 className="text-lg font-semibold">Stash</h3>
-          <p className="text-sm text-muted-foreground">{t('settings.about.version', { version })}</p>
+          <p className="text-sm text-muted-foreground">
+            {t('settings.about.version', { version })}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground max-w-xs">
-          {t('settings.about.description')}
-        </p>
+        <p className="text-sm text-muted-foreground max-w-xs">{t('settings.about.description')}</p>
         <div className="flex gap-4">
           <Button variant="link" asChild>
             <a

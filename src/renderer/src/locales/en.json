@@ -81,6 +81,11 @@
   "settings.general.retention.forever": "Forever",
   "settings.general.maxItems": "Max Items",
   "settings.general.maxItems.desc": "Oldest non-inbox records are deleted when limit is exceeded",
+  "settings.general.maxItems.custom": "Custom",
+  "settings.general.maxItems.unlimited": "Unlimited",
+  "settings.general.maxItems.customPlaceholder": "Minimum 500",
+  "settings.general.maxItems.customHint": "Custom values must be at least {{min}}",
+  "settings.general.maxItems.saved": "Max items saved",
 
   "settings.shortcuts.title": "Shortcuts",
   "settings.shortcuts.showPanel": "Show Panel",

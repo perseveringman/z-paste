@@ -39,8 +39,8 @@ export default function PreviewPanel({ item, layout = 'side' }: Props): React.JS
   }
 
   return (
-    <div className={`surface-subtle flex min-w-0 flex-1 flex-col ${layout === 'side' ? 'border-l border-border/60' : ''}`}>
-      <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+    <div className={`surface-subtle flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${layout === 'side' ? 'border-l border-border/60' : ''}`}>
+      <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {item.content_type}
@@ -71,7 +71,7 @@ export default function PreviewPanel({ item, layout = 'side' }: Props): React.JS
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-auto">
         <PreviewContent item={item} />
       </div>
 
@@ -123,7 +123,7 @@ function TextToolbar({ content }: { content: string }): React.JSX.Element {
   ]
 
   return (
-    <div className="flex flex-wrap gap-2 border-t border-border/60 bg-background/25 px-3 py-2.5">
+    <div className="flex shrink-0 flex-wrap gap-2 border-t border-border/60 bg-background/25 px-3 py-2.5">
       {tools.map(({ label, fn }) => (
         <Button
           key={label}
@@ -148,7 +148,7 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
   }, [expanded, content])
 
   return (
-    <div className="border-t border-border/60 bg-background/25">
+    <div className="shrink-0 border-t border-border/60 bg-background/25">
       <div className="px-3 py-2">
         <div className="flex items-center justify-between">
           <button
@@ -184,7 +184,7 @@ function UrlToolbar({ content }: { content: string }): React.JSX.Element {
   const showDecoded = decoded !== content
 
   return (
-    <div className="flex flex-wrap gap-2 border-t border-border/60 bg-background/25 px-3 py-2.5">
+    <div className="flex shrink-0 flex-wrap gap-2 border-t border-border/60 bg-background/25 px-3 py-2.5">
       <Button
         variant="outline"
         size="sm"

@@ -280,7 +280,7 @@ export default function PanelWindow(): React.JSX.Element {
                   )}
                 </div>
                 {!previewCollapsed && (editingItem && selectedItem ? (
-                  <div className="shrink-0 max-h-[40%] overflow-y-auto border-t border-border/60">
+                  <div className="flex shrink-0 max-h-[40%] flex-col overflow-hidden border-t border-border/60">
                     <QuickEdit
                       content={selectedItem.content}
                       onSave={handleEditSave}
@@ -288,7 +288,7 @@ export default function PanelWindow(): React.JSX.Element {
                     />
                   </div>
                 ) : previewItem ? (
-                  <div className="shrink-0 max-h-[40%] overflow-y-auto border-t border-border/60">
+                  <div className="flex shrink-0 max-h-[40%] flex-col overflow-hidden border-t border-border/60">
                     <PreviewPanel item={previewItem} layout="bottom" />
                   </div>
                 ) : null)}
@@ -315,7 +315,7 @@ export default function PanelWindow(): React.JSX.Element {
                   <FilterTabs />
                 </>
               )}
-              <div className="flex-1 flex min-h-0 relative">
+              <div className="flex-1 flex min-h-0 overflow-hidden relative">
                 <div
                   className={cn(
                     'relative flex min-h-0 flex-col',

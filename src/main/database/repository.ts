@@ -1,5 +1,6 @@
 import { getDatabase } from './connection'
 import { encryptContent, decryptContent, isKeySet } from '../security/encryption'
+import { getAutoCleanupDeleteCount } from '../../shared/max-items'
 
 export interface ClipboardItem {
   id: string
@@ -324,19 +325,21 @@ export function updateItemCategory(itemId: string, categoryId: string | null): v
 
 export function autoCleanup(maxItems: number = 2000): void {
   const count = getItemCount()
-  if (count > maxItems) {
-    const db = getDatabase()
-    db.prepare(
-      `DELETE FROM clipboard_items
-       WHERE id IN (
-         SELECT id FROM clipboard_items
-         WHERE is_favorite = 0 AND is_pinned = 0
-           AND id NOT IN (SELECT DISTINCT item_id FROM clipboard_item_tags)
-         ORDER BY updated_at ASC
-         LIMIT ?
-       )`
-    ).run(count - maxItems)
-  }
+  const deleteCount = getAutoCleanupDeleteCount(count, maxItems)
+
+  if (deleteCount <= 0) return
+
+  const db = getDatabase()
+  db.prepare(
+    `DELETE FROM clipboard_items
+     WHERE id IN (
+       SELECT id FROM clipboard_items
+       WHERE is_favorite = 0 AND is_pinned = 0
+         AND id NOT IN (SELECT DISTINCT item_id FROM clipboard_item_tags)
+       ORDER BY updated_at ASC
+       LIMIT ?
+     )`
+  ).run(deleteCount)
 }
 
 export function cleanupByRetention(days: number): void {

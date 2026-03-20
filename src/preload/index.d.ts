@@ -116,6 +116,7 @@ interface ZPasteAPI {
   getLaunchAtLogin: () => Promise<boolean>
   setLanguage: (lang: string) => Promise<void>
   setTheme: (theme: string) => Promise<void>
+  setMaxItems: (value: number) => Promise<number>
   onThemeChanged: (callback: (theme: string) => void) => () => void
   setLayoutMode: (mode: string) => Promise<void>
   onLayoutModeChanged: (callback: (mode: string) => void) => () => void

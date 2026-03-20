@@ -48,6 +48,7 @@ const api = {
   getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
   setLanguage: (lang: string) => ipcRenderer.invoke('settings:setLanguage', lang),
   setTheme: (theme: string) => ipcRenderer.invoke('settings:setTheme', theme),
+  setMaxItems: (value: number) => ipcRenderer.invoke('settings:setMaxItems', value),
   onThemeChanged: (callback: (theme: string) => void) => {
     ipcRenderer.on('settings:themeChanged', (_, theme) => callback(theme))
     return () => ipcRenderer.removeAllListeners('settings:themeChanged')

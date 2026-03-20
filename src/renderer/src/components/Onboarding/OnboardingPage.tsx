@@ -1,10 +1,24 @@
 import { useState, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { Button } from '../ui/button'
 import { Switch } from '../ui/switch'
 import { AppLogo } from '../ui/app-logo'
-import { Rocket, Keyboard, Lock, Sparkles, Shield, Fingerprint, Clock, Zap, Clipboard, Search, Palette, Eye } from 'lucide-react'
+import {
+  Rocket,
+  Keyboard,
+  Lock,
+  Sparkles,
+  Shield,
+  Fingerprint,
+  Clock,
+  Zap,
+  Clipboard,
+  Search,
+  Palette,
+  Eye,
+} from 'lucide-react'
 
 interface Step {
   title: string
@@ -31,12 +45,28 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       icon: Rocket,
       content: (
         <div className="space-y-4">
-          <Feature icon={Clipboard} title={t('onboarding.step1.feature1.title')} desc={t('onboarding.step1.feature1.desc')} />
-          <Feature icon={Search} title={t('onboarding.step1.feature2.title')} desc={t('onboarding.step1.feature2.desc')} />
-          <Feature icon={Palette} title={t('onboarding.step1.feature3.title')} desc={t('onboarding.step1.feature3.desc')} />
-          <Feature icon={Eye} title={t('onboarding.step1.feature4.title')} desc={t('onboarding.step1.feature4.desc')} />
+          <Feature
+            icon={Clipboard}
+            title={t('onboarding.step1.feature1.title')}
+            desc={t('onboarding.step1.feature1.desc')}
+          />
+          <Feature
+            icon={Search}
+            title={t('onboarding.step1.feature2.title')}
+            desc={t('onboarding.step1.feature2.desc')}
+          />
+          <Feature
+            icon={Palette}
+            title={t('onboarding.step1.feature3.title')}
+            desc={t('onboarding.step1.feature3.desc')}
+          />
+          <Feature
+            icon={Eye}
+            title={t('onboarding.step1.feature4.title')}
+            desc={t('onboarding.step1.feature4.desc')}
+          />
         </div>
-      )
+      ),
     },
     {
       title: t('onboarding.step2.title'),
@@ -44,12 +74,28 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       icon: Shield,
       content: (
         <div className="space-y-4">
-          <Feature icon={Fingerprint} title={t('onboarding.step2.feature1.title')} desc={t('onboarding.step2.feature1.desc')} />
-          <Feature icon={Lock} title={t('onboarding.step2.feature2.title')} desc={t('onboarding.step2.feature2.desc')} />
-          <Feature icon={Clock} title={t('onboarding.step2.feature3.title')} desc={t('onboarding.step2.feature3.desc')} />
-          <Feature icon={Zap} title={t('onboarding.step2.feature4.title')} desc={t('onboarding.step2.feature4.desc')} />
+          <Feature
+            icon={Fingerprint}
+            title={t('onboarding.step2.feature1.title')}
+            desc={t('onboarding.step2.feature1.desc')}
+          />
+          <Feature
+            icon={Lock}
+            title={t('onboarding.step2.feature2.title')}
+            desc={t('onboarding.step2.feature2.desc')}
+          />
+          <Feature
+            icon={Clock}
+            title={t('onboarding.step2.feature3.title')}
+            desc={t('onboarding.step2.feature3.desc')}
+          />
+          <Feature
+            icon={Zap}
+            title={t('onboarding.step2.feature4.title')}
+            desc={t('onboarding.step2.feature4.desc')}
+          />
         </div>
-      )
+      ),
     },
     {
       title: t('onboarding.step3.title'),
@@ -70,7 +116,9 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             {t('onboarding.step3.autoPaste')}
           </p>
           <div className="mt-1 w-full rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{t('onboarding.step3.moreShortcuts')}</p>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              {t('onboarding.step3.moreShortcuts')}
+            </p>
             <div className="space-y-2 text-xs text-foreground/80">
               <div className="flex justify-between">
                 <span>{t('onboarding.step3.numbers')}</span>
@@ -87,7 +135,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             </div>
           </div>
         </div>
-      )
+      ),
     },
     {
       title: t('onboarding.step4.title'),
@@ -96,14 +144,18 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       content: (
         <div className="space-y-4">
           <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
-            <p className="mb-2 text-xs font-semibold text-foreground">{t('onboarding.step4.storage.title')}</p>
+            <p className="mb-2 text-xs font-semibold text-foreground">
+              {t('onboarding.step4.storage.title')}
+            </p>
             <p className="text-[11px] leading-6 text-muted-foreground">
               {t('onboarding.step4.storage.desc')}
             </p>
           </div>
           <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold text-foreground">{t('onboarding.step4.sync.title')}</p>
+              <p className="text-xs font-semibold text-foreground">
+                {t('onboarding.step4.sync.title')}
+              </p>
               <Switch
                 checked={syncChoice}
                 onCheckedChange={setSyncChoice}
@@ -115,7 +167,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             </p>
           </div>
         </div>
-      )
+      ),
     },
     {
       title: t('onboarding.step5.title'),
@@ -130,8 +182,8 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             {t('onboarding.step5.hint')}
           </p>
         </div>
-      )
-    }
+      ),
+    },
   ]
 
   const isLastStep = currentStep === steps.length - 1
@@ -158,13 +210,23 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
   const step = steps[currentStep]
 
   return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,252,248,0.96),rgba(250,244,236,0.92))] backdrop-blur-xl dark:bg-[linear-gradient(180deg,rgba(41,34,29,0.96),rgba(30,25,22,0.92))]">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,252,248,0.96),rgba(250,244,236,0.92))] backdrop-blur-xl dark:bg-[linear-gradient(180deg,rgba(41,34,29,0.96),rgba(30,25,22,0.92))]"
+    >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(208,140,82,0.18),_transparent_58%)]" />
       <div className="relative flex flex-1 min-h-0 flex-col px-10 py-6">
         <div className="mb-5 flex shrink-0 items-center justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Stash</p>
-            <p data-display="true" className="mt-2 text-2xl font-semibold text-balance text-foreground">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Stash
+            </p>
+            <p
+              data-display="true"
+              className="mt-2 text-2xl font-semibold text-balance text-foreground"
+            >
               {t('onboarding.step1.description')}
             </p>
           </div>
@@ -196,11 +258,16 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
                 ))}
               </div>
             </div>
-            <p className="text-[11px] leading-6 text-muted-foreground">{t('onboarding.step5.hint')}</p>
+            <p className="text-[11px] leading-6 text-muted-foreground">
+              {t('onboarding.step5.hint')}
+            </p>
           </div>
 
           <div className="flex flex-col rounded-[1.75rem] border border-border/65 bg-background/78 px-8 py-6 shadow-[0_20px_55px_rgba(101,68,43,0.12)] overflow-y-auto">
-            <h2 data-display="true" className="mb-2 text-2xl font-semibold text-balance text-foreground">
+            <h2
+              data-display="true"
+              className="mb-2 text-2xl font-semibold text-balance text-foreground"
+            >
               {step.title}
             </h2>
             <p className="mb-5 max-w-md text-sm leading-7 text-muted-foreground">
@@ -217,11 +284,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             <div
               key={i}
               className={`h-2 w-2 rounded-full transition-colors ${
-                i === currentStep
-                  ? 'bg-primary'
-                  : i < currentStep
-                    ? 'bg-primary/40'
-                    : 'bg-border'
+                i === currentStep ? 'bg-primary' : i < currentStep ? 'bg-primary/40' : 'bg-border'
               }`}
             />
           ))}
@@ -238,23 +301,19 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
               {t('onboarding.skip')}
             </Button>
           )}
-          <Button
-            onClick={handleNext}
-            size="sm"
-            className="px-4 text-xs"
-          >
+          <Button onClick={handleNext} size="sm" className="px-4 text-xs">
             {isLastStep ? t('onboarding.start') : t('onboarding.next')}
           </Button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 function Feature({
   icon: Icon,
   title,
-  desc
+  desc,
 }: {
   icon: React.ElementType
   title: string

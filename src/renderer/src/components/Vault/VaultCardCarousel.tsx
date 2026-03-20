@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback, useState, memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useVaultStore, VaultItemMeta, VaultItemDetail } from '../../stores/vaultStore'
+import { useVaultStore, VaultItemMeta } from '../../stores/vaultStore'
 import VaultDetail from './VaultDetail'
 import { Key, FileText, Star, Copy, ShieldCheck, Eye, X } from 'lucide-react'
 import { Button } from '../ui/button'

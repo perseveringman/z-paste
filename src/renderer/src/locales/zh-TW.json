@@ -81,6 +81,11 @@
   "settings.general.retention.forever": "永久",
   "settings.general.maxItems": "最大記錄數",
   "settings.general.maxItems.desc": "超過限制時自動刪除最舊的非收集箱記錄",
+  "settings.general.maxItems.custom": "自訂",
+  "settings.general.maxItems.unlimited": "不限制",
+  "settings.general.maxItems.customPlaceholder": "最低 500",
+  "settings.general.maxItems.customHint": "自訂值最低 {{min}} 條",
+  "settings.general.maxItems.saved": "最大記錄數已儲存",
 
   "settings.shortcuts.title": "快捷鍵",
   "settings.shortcuts.showPanel": "喚起面板",

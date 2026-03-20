@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import i18n from '../i18n'
+import { normalizeMaxItems } from '../../../shared/max-items'
 
 export type ThemeMode = 'auto' | 'dark' | 'light'
 export type LanguageMode = 'auto' | 'zh-CN' | 'en' | 'zh-TW'
@@ -94,6 +95,13 @@ function saveToStorage(settings: Settings): void {
   }
 }
 
+function normalizeSettings(settings: Settings): Settings {
+  return {
+    ...settings,
+    maxItems: normalizeMaxItems(settings.maxItems),
+  }
+}
+
 const defaults: Settings = {
   theme: 'auto',
   language: 'auto',
@@ -119,7 +127,7 @@ const defaults: Settings = {
 }
 
 const stored = loadFromStorage()
-const initialSettings: Settings = { ...defaults, ...stored }
+const initialSettings: Settings = normalizeSettings({ ...defaults, ...stored })
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...initialSettings,
@@ -152,7 +160,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   setMaxItems: (count) => {
-    set({ maxItems: count })
+    const normalized = normalizeMaxItems(count)
+    set({ maxItems: normalized })
+    window.api.setMaxItems?.(normalized)
     get().saveSettings()
   },
 
@@ -239,10 +249,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   loadSettings: () => {
     const stored = loadFromStorage()
-    const merged = { ...defaults, ...stored }
+    const merged = normalizeSettings({ ...defaults, ...stored })
     const resolved = resolveTheme(merged.theme)
     set({ ...merged, resolvedTheme: resolved })
     applyTheme(resolved)
+    window.api.setMaxItems?.(merged.maxItems)
   },
 
   saveSettings: () => {
@@ -252,7 +263,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       language: state.language,
       launchAtLogin: state.launchAtLogin,
       historyRetention: state.historyRetention,
-      maxItems: state.maxItems,
+      maxItems: normalizeMaxItems(state.maxItems),
       iCloudSync: state.iCloudSync,
       encryptionEnabled: state.encryptionEnabled,
       hasCompletedOnboarding: state.hasCompletedOnboarding,
@@ -299,4 +310,5 @@ if (typeof window !== 'undefined') {
 
   // Apply initial theme
   applyTheme(resolveTheme(initialSettings.theme))
+  window.api.setMaxItems?.(initialSettings.maxItems)
 }

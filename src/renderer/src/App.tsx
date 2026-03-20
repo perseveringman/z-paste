@@ -37,7 +37,7 @@ function App(): React.JSX.Element {
       }
     })
 
-    const unsubTheme = window.api.onThemeChanged((theme) => {
+    const unsubTheme = window.api.onThemeChanged(() => {
       useSettingsStore.getState().loadSettings()
     })
 

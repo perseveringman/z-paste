@@ -20,6 +20,7 @@ import { AutoTypeAgent } from './vault/auto-type'
 import { nanoid } from 'nanoid'
 import { VaultCryptoWorkerClient } from './vault/worker-client'
 import { autoUpdater } from 'electron-updater'
+import { DEFAULT_MAX_ITEMS, normalizeMaxItems } from '../shared/max-items'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -32,6 +33,7 @@ let vaultSession: VaultSessionManager
 let vaultService: VaultService
 let autoTypeAgent: AutoTypeAgent
 let vaultCryptoWorker: VaultCryptoWorkerClient | null = null
+let cleanupMaxItems = DEFAULT_MAX_ITEMS
 
 function setupAutoUpdater(): void {
   // 开发模式下跳过
@@ -149,7 +151,7 @@ app.whenReady().then(() => {
 
   // Auto cleanup every 10 minutes
   setInterval(() => {
-    repository.autoCleanup(2000)
+    repository.autoCleanup(cleanupMaxItems)
   }, 10 * 60 * 1000)
 
   // IPC handlers
@@ -327,6 +329,11 @@ app.whenReady().then(() => {
         }
       }
     }
+  })
+
+  ipcMain.handle('settings:setMaxItems', async (_, value: number) => {
+    cleanupMaxItems = normalizeMaxItems(value)
+    return cleanupMaxItems
   })
 
   ipcMain.handle('settings:openWindow', async (_, view: string) => {
