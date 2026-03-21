@@ -155,10 +155,20 @@ export class iCloudSync {
       case 'update': {
         const existing = repository.getItemByHash(item.content_hash)
         if (existing) {
-          const winner = this.resolveConflict(existing, item)
-          if (winner.id !== existing.id) {
+          // Merge: keep favorite/pinned if either side has it
+          const merged = {
+            ...existing,
+            is_favorite: existing.is_favorite || item.is_favorite ? 1 : 0,
+            is_pinned: existing.is_pinned || item.is_pinned ? 1 : 0,
+            updated_at: Math.max(existing.updated_at, item.updated_at)
+          }
+          if (
+            merged.is_favorite !== existing.is_favorite ||
+            merged.is_pinned !== existing.is_pinned ||
+            merged.updated_at !== existing.updated_at
+          ) {
             repository.deleteItem(existing.id)
-            repository.insertItem(winner)
+            repository.insertItem(merged)
           }
         } else {
           const byId = repository.getItemById(item.id)
