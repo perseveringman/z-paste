@@ -1,6 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, unlinkSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'fs'
 import { join } from 'path'
-import { homedir } from 'os'
+import { homedir, hostname } from 'os'
+import { app } from 'electron'
 import * as repository from '../database/repository'
 import type { ClipboardItem } from '../database/repository'
 
@@ -17,18 +18,27 @@ interface SyncFile {
   exportedAt: number
 }
 
+interface SyncState {
+  lastSyncTime: number
+  processedFiles: string[]
+}
+
 export class iCloudSync {
   private syncDir: string
   private syncInterval: ReturnType<typeof setInterval> | null = null
   private deviceId: string
   private lastSyncTime: number = 0
+  private processedFiles: Set<string> = new Set()
+  private stateFile: string
 
   constructor() {
     this.syncDir = join(
       homedir(),
       'Library/Mobile Documents/com~apple~CloudDocs/ZPaste'
     )
+    this.stateFile = join(app.getPath('userData'), 'sync-state.json')
     this.deviceId = this.getDeviceId()
+    this.loadSyncState()
   }
 
   start(): void {
@@ -53,6 +63,10 @@ export class iCloudSync {
   exportChanges(): void {
     try {
       this.ensureSyncDir()
+
+      // Clean up old sync files from this device before exporting
+      this.cleanupOldSyncFiles()
+
       const items = repository.getItems({ limit: 2000 })
       const changes: ChangeRecord[] = items
         .filter((item) => item.updated_at > this.lastSyncTime)
@@ -74,8 +88,7 @@ export class iCloudSync {
       const filename = `sync_${this.deviceId}_${Date.now()}.json`
       writeFileSync(join(this.syncDir, filename), JSON.stringify(syncFile, null, 2), 'utf-8')
       this.lastSyncTime = Date.now()
-
-      this.cleanupOldSyncFiles()
+      this.saveSyncState()
     } catch (error) {
       console.error('[iCloudSync] export error:', error)
     }
@@ -89,6 +102,8 @@ export class iCloudSync {
       )
 
       for (const file of files) {
+        if (this.processedFiles.has(file)) continue
+
         try {
           const content = readFileSync(join(this.syncDir, file), 'utf-8')
           const syncFile: SyncFile = JSON.parse(content)
@@ -97,11 +112,13 @@ export class iCloudSync {
             this.applyChange(change)
           }
 
-          unlinkSync(join(this.syncDir, file))
+          this.processedFiles.add(file)
         } catch {
           console.error(`[iCloudSync] failed to import ${file}`)
         }
       }
+
+      this.saveSyncState()
     } catch (error) {
       console.error('[iCloudSync] import error:', error)
     }
@@ -112,6 +129,7 @@ export class iCloudSync {
       this.exportChanges()
       this.importChanges()
       this.lastSyncTime = Date.now()
+      this.saveSyncState()
     } catch (error) {
       console.error('[iCloudSync] full sync error:', error)
     }
@@ -170,7 +188,9 @@ export class iCloudSync {
   }
 
   private getDeviceId(): string {
-    const idFile = join(this.syncDir.replace('/ZPaste', ''), '.zpaste-device-id')
+    // Store device ID locally (NOT in iCloud Drive) to prevent sync between machines
+    const localDir = app.getPath('userData')
+    const idFile = join(localDir, '.zpaste-device-id')
     try {
       if (existsSync(idFile)) {
         return readFileSync(idFile, 'utf-8').trim()
@@ -179,15 +199,37 @@ export class iCloudSync {
       // ignore
     }
 
-    const id = `device_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    const id = `device_${hostname()}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
     try {
-      const dir = join(this.syncDir.replace('/ZPaste', ''))
-      if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
       writeFileSync(idFile, id, 'utf-8')
     } catch {
       // ignore
     }
     return id
+  }
+
+  private loadSyncState(): void {
+    try {
+      if (existsSync(this.stateFile)) {
+        const data: SyncState = JSON.parse(readFileSync(this.stateFile, 'utf-8'))
+        this.lastSyncTime = data.lastSyncTime || 0
+        this.processedFiles = new Set(data.processedFiles || [])
+      }
+    } catch {
+      // ignore, start fresh
+    }
+  }
+
+  private saveSyncState(): void {
+    try {
+      const state: SyncState = {
+        lastSyncTime: this.lastSyncTime,
+        processedFiles: Array.from(this.processedFiles)
+      }
+      writeFileSync(this.stateFile, JSON.stringify(state), 'utf-8')
+    } catch {
+      // ignore
+    }
   }
 
   private cleanupOldSyncFiles(): void {
@@ -200,8 +242,22 @@ export class iCloudSync {
         const sorted = files.sort()
         const toDelete = sorted.slice(0, files.length - 5)
         for (const file of toDelete) {
-          unlinkSync(join(this.syncDir, file))
+          // Remove from all devices' processed lists by just keeping the file gone
+          // Other devices should have already processed these old files
+          try {
+            const { unlinkSync } = require('fs')
+            unlinkSync(join(this.syncDir, file))
+          } catch {
+            // ignore
+          }
         }
+      }
+
+      // Clean up stale entries from processedFiles that no longer exist on disk
+      const allFiles = new Set(readdirSync(this.syncDir))
+      const staleEntries = Array.from(this.processedFiles).filter((f) => !allFiles.has(f))
+      for (const entry of staleEntries) {
+        this.processedFiles.delete(entry)
       }
     } catch {
       // ignore
