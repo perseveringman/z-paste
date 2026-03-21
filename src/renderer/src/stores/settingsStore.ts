@@ -168,6 +168,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   setICloudSync: (value) => {
     set({ iCloudSync: value })
+    if (value) {
+      window.api.syncStart?.()
+    } else {
+      window.api.syncStop?.()
+    }
     get().saveSettings()
   },
 
@@ -254,6 +259,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ ...merged, resolvedTheme: resolved })
     applyTheme(resolved)
     window.api.setMaxItems?.(merged.maxItems)
+    if (merged.iCloudSync) {
+      window.api.syncStart?.()
+    }
   },
 
   saveSettings: () => {

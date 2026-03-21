@@ -122,6 +122,8 @@ interface ZPasteAPI {
   onLayoutModeChanged: (callback: (mode: string) => void) => () => void
   openSettingsWindow: (view?: string) => Promise<void>
   syncNow: () => Promise<void>
+  syncStart: () => Promise<void>
+  syncStop: () => Promise<void>
   listTags: () => Promise<TagWithCount[]>
   applyTags: (itemId: string, slugs: string[]) => Promise<void>
   removeTag: (itemId: string, slug: string) => Promise<void>

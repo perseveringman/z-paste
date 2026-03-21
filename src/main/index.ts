@@ -341,9 +341,11 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('sync:now', async () => {
-    if (syncService) {
-      syncService.syncNow()
+    if (!syncService) {
+      syncService = new iCloudSync()
+      syncService.start()
     }
+    syncService.syncNow()
   })
 
   ipcMain.handle('vault:delete', async (_, id: string) => {

@@ -60,6 +60,8 @@ const api = {
   },
   openSettingsWindow: (view?: string) => ipcRenderer.invoke('settings:openWindow', view || 'settings'),
   syncNow: () => ipcRenderer.invoke('sync:now'),
+  syncStart: () => ipcRenderer.invoke('sync:start'),
+  syncStop: () => ipcRenderer.invoke('sync:stop'),
   listTags: () => ipcRenderer.invoke('tags:list'),
   applyTags: (itemId: string, slugs: string[]) => ipcRenderer.invoke('tags:apply', itemId, slugs),
   removeTag: (itemId: string, slug: string) => ipcRenderer.invoke('tags:remove', itemId, slug),
