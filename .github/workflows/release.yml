@@ -89,7 +89,7 @@ jobs:
           coscmd config -a "$TENCENT_SECRET_ID" -s "$TENCENT_SECRET_KEY" -b "$COS_BUCKET" -r "$COS_REGION"
 
           VERSION=${GITHUB_REF#refs/tags/}
-          COS_PREFIX="releases/${VERSION}"
+          COS_PREFIX="Stash/releases/${VERSION}"
 
           for file in dist/*.dmg dist/*.zip dist/*.blockmap dist/latest-mac.yml; do
             [ -f "$file" ] && coscmd upload "$file" "${COS_PREFIX}/$(basename "$file")"
