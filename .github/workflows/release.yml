@@ -78,6 +78,25 @@ jobs:
           ls dist/*.dmg dist/latest-mac.yml
           test -f dist/latest-mac.yml
 
+      - name: Upload to Tencent Cloud COS
+        env:
+          TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          COS_BUCKET: ${{ secrets.COS_BUCKET }}
+          COS_REGION: ${{ secrets.COS_REGION }}
+        run: |
+          pip install coscmd
+          coscmd config -a "$TENCENT_SECRET_ID" -s "$TENCENT_SECRET_KEY" -b "$COS_BUCKET" -r "$COS_REGION"
+
+          VERSION=${GITHUB_REF#refs/tags/}
+          COS_PREFIX="releases/${VERSION}"
+
+          for file in dist/*.dmg dist/*.zip dist/*.blockmap dist/latest-mac.yml; do
+            [ -f "$file" ] && coscmd upload "$file" "${COS_PREFIX}/$(basename "$file")"
+          done
+
+          echo "✅ Uploaded artifacts to cos://${COS_BUCKET}/${COS_PREFIX}/"
+
       - name: Clean up keychain
         if: ${{ always() }}
         run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
