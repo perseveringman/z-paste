@@ -65,7 +65,7 @@ jobs:
         run: npm ci
 
       - name: Build, sign, notarize and publish
-        run: npx electron-vite build && npx electron-builder --mac --publish always
+        run: npx electron-vite build && npx electron-builder --mac --arm64 --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
