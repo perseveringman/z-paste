@@ -202,6 +202,10 @@ const api = {
     ipcRenderer.invoke('vault:setAutoLockMinutes', minutes),
   // App info
   getVersion: () => ipcRenderer.invoke('app:getVersion'),
+  // License
+  getLicenseStatus: () => ipcRenderer.invoke('license:getStatus'),
+  activateLicense: (code: string) => ipcRenderer.invoke('license:activate', code),
+  deactivateLicense: () => ipcRenderer.invoke('license:deactivate'),
 }
 
 if (process.contextIsolated) {

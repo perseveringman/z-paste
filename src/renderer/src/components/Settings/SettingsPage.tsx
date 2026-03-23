@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
+import { useLicenseStore } from '../../stores/licenseStore'
 import { Switch } from '../ui/switch'
 import { AppLogo } from '../ui/app-logo'
 import { Input } from '../ui/input'
@@ -34,6 +35,7 @@ import {
   GitMerge,
   AlertTriangle,
   LayoutGrid,
+  Crown,
 } from 'lucide-react'
 
 type SettingsSection =
@@ -44,6 +46,7 @@ type SettingsSection =
   | 'privacy'
   | 'theme'
   | 'tags'
+  | 'license'
   | 'about'
 
 interface Props {
@@ -62,6 +65,7 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
     { id: 'privacy', label: t('settings.nav.privacy'), icon: Lock },
     { id: 'theme', label: t('settings.nav.theme'), icon: Palette },
     { id: 'tags', label: t('settings.nav.tags'), icon: Tag },
+    { id: 'license', label: t('license.nav'), icon: Crown },
     { id: 'about', label: t('settings.nav.about'), icon: Info },
   ]
 
@@ -124,6 +128,8 @@ function SectionContent({ section }: { section: SettingsSection }): React.JSX.El
       return <ThemeSection />
     case 'tags':
       return <TagManagementSection />
+    case 'license':
+      return <LicenseSection />
     case 'about':
       return <AboutSection />
     default:
@@ -1079,6 +1085,168 @@ function WidgetSection(): React.JSX.Element {
           </SelectContent>
         </Select>
       </SettingsItem>
+    </div>
+  )
+}
+
+function LicenseSection(): React.JSX.Element {
+  const { t } = useTranslation()
+  const { type, trialDaysLeft, activationCode, loading, fetchStatus, activate, deactivate } =
+    useLicenseStore()
+  const [code, setCode] = useState('')
+  const [activating, setActivating] = useState(false)
+  const [error, setError] = useState('')
+  const [confirmDeactivate, setConfirmDeactivate] = useState(false)
+
+  useEffect(() => {
+    fetchStatus()
+  }, [fetchStatus])
+
+  const handleActivate = useCallback(async () => {
+    if (!code.trim()) return
+    setActivating(true)
+    setError('')
+    const result = await activate(code.trim())
+    setActivating(false)
+    if (result.ok) {
+      setCode('')
+      showToast(t('license.activateSuccess'))
+    } else {
+      setError(t('license.activateError'))
+    }
+  }, [code, activate, t])
+
+  const handleDeactivate = useCallback(async () => {
+    if (!confirmDeactivate) {
+      setConfirmDeactivate(true)
+      setTimeout(() => setConfirmDeactivate(false), 3000)
+      return
+    }
+    await deactivate()
+    setConfirmDeactivate(false)
+  }, [confirmDeactivate, deactivate])
+
+  if (loading) {
+    return (
+      <div>
+        <SectionTitle title={t('license.title')} />
+        <p className="text-sm text-muted-foreground py-8 text-center">...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <SectionTitle title={t('license.title')} />
+
+      {/* Status display */}
+      <SettingsItem label={t('license.status')} description={t('license.status.desc')}>
+        {type === 'activated' ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-600 dark:text-green-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+            {t('license.activated')}
+          </span>
+        ) : type === 'trial' ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            {t('license.trialActive', { days: trialDaysLeft })}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-600 dark:text-red-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+            {t('license.expired')}
+          </span>
+        )}
+      </SettingsItem>
+
+      {type === 'activated' && activationCode && (
+        <>
+          <Separator />
+          <SettingsItem label={t('license.currentCode')}>
+            <span className="font-mono text-xs text-muted-foreground tracking-wider">
+              {activationCode.slice(0, 4)}–••••–••••–{activationCode.slice(-4)}
+            </span>
+          </SettingsItem>
+        </>
+      )}
+
+      <Separator />
+
+      {/* Activation input (show when not activated) */}
+      {type !== 'activated' && (
+        <>
+          {type === 'expired' && (
+            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {t('license.expiredDesc')}
+              </p>
+            </div>
+          )}
+          <SettingsItem label={t('license.code')} description={t('license.code.desc')}>
+            <div className="flex items-center gap-2">
+              <Input
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value)
+                  setError('')
+                }}
+                placeholder={t('license.codePlaceholder')}
+                className="w-[220px] font-mono text-xs tracking-wider"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleActivate()
+                }}
+              />
+              <Button size="sm" onClick={handleActivate} disabled={activating || !code.trim()}>
+                {activating ? t('license.activating') : t('license.activate')}
+              </Button>
+            </div>
+          </SettingsItem>
+          {error && (
+            <p className="text-xs text-destructive mt-1 mb-3 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              {error}
+            </p>
+          )}
+          <Separator />
+          {/* Buy CTA */}
+          <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-5">
+            <div className="flex items-start gap-3">
+              <Crown className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">{t('license.getPro')}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('license.getProDesc')}</p>
+                <Button variant="default" size="sm" className="mt-3" asChild>
+                  <a
+                    href={t('license.buyUrl')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t('license.buyButton')} →
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Deactivate (show when activated) */}
+      {type === 'activated' && (
+        <>
+          <SettingsItem
+            label={t('license.deactivate')}
+            description={t('license.deactivate.desc')}
+          >
+            <Button
+              variant={confirmDeactivate ? 'destructive' : 'outline'}
+              size="sm"
+              onClick={handleDeactivate}
+            >
+              {confirmDeactivate ? t('license.deactivateConfirm') : t('license.deactivate')}
+            </Button>
+          </SettingsItem>
+        </>
+      )}
     </div>
   )
 }

@@ -236,6 +236,14 @@ interface ZPasteAPI {
   vaultSetAutoLockMinutes: (minutes: number) => Promise<void>
   // App info
   getVersion: () => Promise<string>
+  // License
+  getLicenseStatus: () => Promise<{
+    type: 'trial' | 'activated' | 'expired'
+    trialDaysLeft: number
+    activationCode: string | null
+  }>
+  activateLicense: (code: string) => Promise<{ ok: boolean; error?: string }>
+  deactivateLicense: () => Promise<void>
 }
 
 declare global {

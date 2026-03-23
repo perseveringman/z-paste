@@ -21,6 +21,7 @@ import { nanoid } from 'nanoid'
 import { VaultCryptoWorkerClient } from './vault/worker-client'
 import { autoUpdater } from 'electron-updater'
 import { DEFAULT_MAX_ITEMS, normalizeMaxItems } from '../shared/max-items'
+import * as license from './license'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -158,6 +159,19 @@ app.whenReady().then(() => {
   // App info
   ipcMain.handle('app:getVersion', async () => {
     return app.getVersion()
+  })
+
+  // License IPC handlers
+  ipcMain.handle('license:getStatus', async () => {
+    return license.getLicenseStatus()
+  })
+
+  ipcMain.handle('license:activate', async (_, code: string) => {
+    return license.activateLicense(code)
+  })
+
+  ipcMain.handle('license:deactivate', async () => {
+    license.deactivateLicense()
   })
 
   ipcMain.handle('clipboard:getItems', async (_, options) => {

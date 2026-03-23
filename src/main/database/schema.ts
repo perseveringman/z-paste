@@ -111,6 +111,11 @@ export function createTables(): void {
 
     CREATE INDEX IF NOT EXISTS idx_vault_audit_event_type ON vault_audit_events(event_type);
     CREATE INDEX IF NOT EXISTS idx_vault_audit_created ON vault_audit_events(created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key    TEXT PRIMARY KEY,
+      value  TEXT NOT NULL
+    );
   `)
 
   // Add title column if missing

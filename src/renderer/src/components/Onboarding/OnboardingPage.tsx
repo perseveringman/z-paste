@@ -2,8 +2,10 @@ import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { useLicenseStore } from '../../stores/licenseStore'
 import { Button } from '../ui/button'
 import { Switch } from '../ui/switch'
+import { Input } from '../ui/input'
 import { AppLogo } from '../ui/app-logo'
 import {
   Rocket,
@@ -18,6 +20,7 @@ import {
   Search,
   Palette,
   Eye,
+  CheckCircle2,
 } from 'lucide-react'
 
 interface Step {
@@ -36,7 +39,11 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
   const { setICloudSync, setHasCompletedOnboarding } = useSettingsStore()
+  const { activate: activateLicense } = useLicenseStore()
   const [syncChoice, setSyncChoice] = useState(false)
+  const [showActivation, setShowActivation] = useState(false)
+  const [activationCode, setActivationCode] = useState('')
+  const [activationStatus, setActivationStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const steps: Step[] = [
     {
@@ -179,8 +186,56 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
           <p className="text-center text-xs leading-6 text-muted-foreground">
             {t('onboarding.step5.ready')}
             <br />
-            {t('onboarding.step5.hint')}
+            {t('onboarding.step5.trialInfo')}
           </p>
+          {!showActivation ? (
+            <button
+              onClick={() => setShowActivation(true)}
+              className="text-xs text-primary hover:underline"
+            >
+              {t('onboarding.step5.activateNow')}
+            </button>
+          ) : (
+            <div className="w-full max-w-xs space-y-2">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={activationCode}
+                  onChange={(e) => {
+                    setActivationCode(e.target.value)
+                    setActivationStatus('idle')
+                  }}
+                  placeholder={t('onboarding.step5.activatePlaceholder')}
+                  className="font-mono text-xs tracking-wider flex-1"
+                  onKeyDown={async (e) => {
+                    if (e.key === 'Enter' && activationCode.trim()) {
+                      const result = await activateLicense(activationCode.trim())
+                      setActivationStatus(result.ok ? 'success' : 'error')
+                    }
+                  }}
+                />
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (!activationCode.trim()) return
+                    const result = await activateLicense(activationCode.trim())
+                    setActivationStatus(result.ok ? 'success' : 'error')
+                  }}
+                  disabled={!activationCode.trim()}
+                >
+                  {t('license.activate')}
+                </Button>
+              </div>
+              {activationStatus === 'success' && (
+                <p className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {t('license.activateSuccess')}
+                </p>
+              )}
+              {activationStatus === 'error' && (
+                <p className="text-xs text-destructive">{t('license.activateError')}</p>
+              )}
+            </div>
+          )}
         </div>
       ),
     },
