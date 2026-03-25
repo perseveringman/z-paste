@@ -88,6 +88,11 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
         name={view === 'vault' ? 'vault-search' : 'clipboard-search'}
         value={localQuery}
         onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            inputRef.current?.blur()
+          }
+        }}
         aria-label={view === 'vault' ? t('vault.search.placeholder') : t('panel.search.placeholder')}
         autoComplete="off"
         spellCheck={false}
