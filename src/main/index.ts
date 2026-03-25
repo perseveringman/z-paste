@@ -19,6 +19,7 @@ import { VaultService } from './vault/service'
 import { AutoTypeAgent } from './vault/auto-type'
 import { nanoid } from 'nanoid'
 import { VaultCryptoWorkerClient } from './vault/worker-client'
+import { startExtensionBridge, stopExtensionBridge } from './extension-bridge'
 import { autoUpdater } from 'electron-updater'
 import { DEFAULT_MAX_ITEMS, normalizeMaxItems } from '../shared/max-items'
 import * as license from './license'
@@ -144,6 +145,7 @@ app.whenReady().then(() => {
   vaultService = new VaultService(vaultSession, worker)
   windowManager.setVaultSession(vaultSession)
   autoTypeAgent = new AutoTypeAgent()
+  startExtensionBridge(vaultSession, vaultService)
 
   shortcutManager.register()
   trayManager.create()
@@ -673,6 +675,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('will-quit', () => {
+  stopExtensionBridge()
   shortcutManager.unregister()
   clipboardMonitor.stop()
   if (vaultCryptoWorker) {
