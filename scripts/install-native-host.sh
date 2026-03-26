@@ -28,7 +28,7 @@ EOF
 )
 
 # Install for Chrome
-CHROME_DIR="$HOME/Library/Google/Chrome/NativeMessagingHosts"
+CHROME_DIR="$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts"
 mkdir -p "$CHROME_DIR"
 echo "$MANIFEST" > "$CHROME_DIR/$HOST_NAME.json"
 echo "✅ Installed for Chrome: $CHROME_DIR/$HOST_NAME.json"

@@ -252,7 +252,17 @@ export default function PanelWindow(): React.JSX.Element {
                 <FilterTabs />
               </>
             )}
-            <ClipboardCardList />
+            <div className="relative flex flex-1 min-h-0">
+              <ClipboardCardList onDoubleClick={handleDoubleClick} onOpenTagPicker={openTagPicker} />
+              {tagPickerItemId && (
+                <div className="absolute left-3 top-3 z-50">
+                  <TagPicker
+                    itemId={tagPickerItemId}
+                    onClose={() => setTagPickerItemId(null)}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         ) : layoutMode === 'side' ? (
           /* ── Side slide-out: list + preview below ── */

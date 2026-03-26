@@ -28,6 +28,8 @@ class NativeMessagingClient {
         }
       })
       this.port.onDisconnect.addListener(() => {
+        const error = chrome.runtime.lastError
+        console.error('[stash] native host disconnected:', error?.message || 'unknown reason')
         this.port = null
         for (const [, pending] of this.pending) {
           pending.reject(new Error('Native host disconnected'))

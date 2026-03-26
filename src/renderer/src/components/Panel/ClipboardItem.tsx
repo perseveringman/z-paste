@@ -1,9 +1,10 @@
-import { useCallback, useState, useRef, useEffect, useMemo, memo } from 'react'
+import { useCallback, useState, useRef, useEffect, useMemo, memo, useLayoutEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
 import { useAppIcon } from '../../hooks/useAppIcon'
 import { cn } from '../../lib/utils'
+import { getContextMenuPosition } from '../../utils/contextMenu'
 import {
   FileText,
   Code,
@@ -87,6 +88,7 @@ function ClipboardItemRow({
   const isMultiSelected = useClipboardStore((s) => s.selectedItems.has(item.id))
   const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+  const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editingTitle, setEditingTitle] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -150,6 +152,22 @@ function ClipboardItemRow({
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [contextMenu])
+
+  useLayoutEffect(() => {
+    if (!contextMenu || !menuRef.current) {
+      setMenuPosition(null)
+      return
+    }
+
+    const rect = menuRef.current.getBoundingClientRect()
+    setMenuPosition(
+      getContextMenuPosition(
+        contextMenu,
+        { width: rect.width, height: rect.height },
+        { width: window.innerWidth, height: window.innerHeight }
+      )
+    )
   }, [contextMenu])
 
   const rootClassName = cn(
@@ -313,11 +331,11 @@ function ClipboardItemRow({
       {contextMenu && (
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[8rem] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
+          className="fixed z-50 max-w-[calc(100vw-24px)] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
+          style={menuPosition ?? { left: contextMenu.x, top: contextMenu.y }}
         >
           <ContextMenuItem
-            icon={<Pencil className="w-4 h-4" />}
+            icon={<Pencil className="h-3.5 w-3.5" />}
             label={t('panel.context.editTitle')}
             onClick={() => {
               startEditTitle()
@@ -326,7 +344,7 @@ function ClipboardItemRow({
           />
           <div className="-mx-1 my-1 h-px bg-muted" />
           <ContextMenuItem
-            icon={<Trash2 className="w-4 h-4" />}
+            icon={<Trash2 className="h-3.5 w-3.5" />}
             label={t('panel.context.delete')}
             danger
             onClick={() => {
@@ -402,11 +420,11 @@ function ContextMenuItem({
   return (
     <button
       onClick={onClick}
-      className={`relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-2 text-sm outline-none transition-colors hover:bg-secondary hover:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${
+      className={`relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-1.5 text-[13px] outline-none transition-colors hover:bg-secondary hover:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${
         danger ? 'text-destructive focus:text-destructive' : ''
       }`}
     >
-      {icon && <span className="mr-2 h-4 w-4">{icon}</span>}
+      {icon && <span className="mr-2 h-3.5 w-3.5">{icon}</span>}
       {label}
     </button>
   )

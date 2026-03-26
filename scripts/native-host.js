@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/Users/ryanbzhou/.local/share/fnm/node-versions/v22.21.1/installation/bin/node
 'use strict'
 
 const net = require('net')

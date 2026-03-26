@@ -21,9 +21,9 @@ export function App() {
   const loadState = useCallback(async () => {
     try {
       const resp = await chrome.runtime.sendMessage({ type: 'getState' })
-      const { connected, securityState } = resp as {
+      const { connected, security: securityState } = resp as {
         connected: boolean
-        securityState: VaultSecurityState | null
+        security: VaultSecurityState | null
       }
 
       if (!connected || !securityState) {

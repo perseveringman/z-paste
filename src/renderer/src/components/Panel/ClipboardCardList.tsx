@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useMemo, memo, useState } from 'react'
+import { useRef, useEffect, useCallback, useMemo, memo, useState, useLayoutEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
@@ -9,6 +9,7 @@ import JsonPreview from '../Preview/JsonPreview'
 import ColorPreview from '../Preview/ColorPreview'
 import ImagePreview from '../Preview/ImagePreview'
 import { cn } from '../../lib/utils'
+import { getContextMenuPosition } from '../../utils/contextMenu'
 import {
   FileText,
   Code,
@@ -20,6 +21,7 @@ import {
   File,
   Pin,
   Star,
+  Tag,
   Pencil,
   Trash2
 } from 'lucide-react'
@@ -81,18 +83,33 @@ function CardPreviewContent({ item }: { item: ClipboardItem }): React.JSX.Elemen
 
 const ClipboardCard = memo(function ClipboardCard({
   item,
-  index
+  index,
+  onDoubleClick,
+  onOpenTagPicker
 }: {
   item: ClipboardItem
   index: number
+  onDoubleClick?: (itemId: string) => void
+  onOpenTagPicker?: (itemId: string) => void
 }): React.JSX.Element {
   const { t } = useTranslation()
   const isSelected = useClipboardStore((s) => s.selectedIndex === index)
   const setSelectedIndex = useClipboardStore((s) => s.setSelectedIndex)
   const pasteItem = useClipboardStore((s) => s.pasteItem)
   const deleteItem = useClipboardStore((s) => s.deleteItem)
+  const toggleFavorite = useClipboardStore((s) => s.toggleFavorite)
+  const togglePin = useClipboardStore((s) => s.togglePin)
+  const toggleSelectItem = useClipboardStore((s) => s.toggleSelectItem)
   const updateTitle = useClipboardStore((s) => s.updateTitle)
+  const inQueue = useClipboardStore((s) => s.sequenceQueue.some((q) => q.id === item.id))
+  const queuePos = useClipboardStore((s) => {
+    if (!inQueue) return 0
+    return s.sequenceQueue.findIndex((q) => q.id === item.id) + 1
+  })
+  const isMultiSelected = useClipboardStore((s) => s.selectedItems.has(item.id))
+  const hasTag = !!item.tag_slugs
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+  const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editingTitle, setEditingTitle] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
@@ -104,10 +121,15 @@ const ClipboardCard = memo(function ClipboardCard({
   }, [item.source_app])
   const appIcon = useAppIcon(sourceApp?.bundleId)
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey) {
+      e.preventDefault()
+      toggleSelectItem(item.id)
+      return
+    }
     setSelectedIndex(index)
     pasteItem(item.id)
-  }, [index, item.id, setSelectedIndex, pasteItem])
+  }, [index, item.id, setSelectedIndex, pasteItem, toggleSelectItem])
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -148,17 +170,39 @@ const ClipboardCard = memo(function ClipboardCard({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [contextMenu])
 
+  useLayoutEffect(() => {
+    if (!contextMenu || !menuRef.current) {
+      setMenuPosition(null)
+      return
+    }
+
+    const rect = menuRef.current.getBoundingClientRect()
+    setMenuPosition(
+      getContextMenuPosition(
+        contextMenu,
+        { width: rect.width, height: rect.height },
+        { width: window.innerWidth, height: window.innerHeight }
+      )
+    )
+  }, [contextMenu])
+
   return (
     <>
       <div
         onClick={handleClick}
+        onDoubleClick={(e) => {
+          e.stopPropagation()
+          onDoubleClick?.(item.id)
+        }}
         onContextMenu={handleContextMenu}
         onMouseEnter={() => setSelectedIndex(index)}
         className={cn(
-          'flex h-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[1rem] border transition-all duration-200',
-          isSelected
-            ? 'border-primary/60 bg-background/95 shadow-lg shadow-primary/10 scale-[1.02]'
-            : 'border-border/50 bg-background/70 hover:border-border/80 hover:bg-background/85'
+          'group flex h-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[1rem] border transition-all duration-200',
+          isMultiSelected
+            ? 'border-primary/35 bg-primary/10 shadow-sm'
+            : isSelected
+              ? 'border-primary/60 bg-background/95 shadow-lg shadow-primary/10 scale-[1.02]'
+              : 'border-border/50 bg-background/70 hover:border-border/80 hover:bg-background/85'
         )}
         style={{ width: CARD_WIDTH }}
       >
@@ -188,9 +232,57 @@ const ClipboardCard = memo(function ClipboardCard({
               {item.title || item.preview || item.content_type.toUpperCase()}
             </span>
           )}
-          <div className="ml-auto flex items-center gap-0.5">
-            {item.is_pinned !== 0 && <Pin className="w-3 h-3 text-primary" />}
-            {item.is_favorite !== 0 && <Star className="w-3 h-3 text-yellow-500" />}
+          <div className="relative ml-auto flex min-w-[52px] items-center justify-end">
+            {/* Hover action buttons */}
+            <div className="absolute inset-0 flex items-center justify-end gap-0.5 bg-inherit opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onOpenTagPicker?.(item.id)
+                }}
+                aria-label={t('panel.context.tag')}
+                className="rounded-full p-0.5 text-muted-foreground transition-colors hover:bg-secondary/85 hover:text-foreground"
+                title={t('panel.context.tag')}
+              >
+                <Tag className="w-3 h-3" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  togglePin(item.id)
+                }}
+                aria-label={item.is_pinned ? t('panel.context.unpin') : t('panel.context.pin')}
+                className={`rounded-full p-0.5 transition-colors hover:bg-secondary/85 ${
+                  item.is_pinned ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                <Pin className="w-3 h-3" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleFavorite(item.id)
+                }}
+                aria-label={item.is_favorite ? t('panel.context.unfavorite') : t('panel.context.favorite')}
+                className={`rounded-full p-0.5 transition-colors hover:bg-secondary/85 ${
+                  item.is_favorite ? 'text-yellow-500' : 'text-muted-foreground'
+                }`}
+              >
+                <Star className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* Static indicator icons */}
+            <div className="flex items-center gap-0.5 transition-opacity duration-200 group-hover:opacity-0">
+              {inQueue && (
+                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                  {queuePos}
+                </span>
+              )}
+              {item.is_pinned !== 0 && <Pin className="w-3 h-3 text-primary" />}
+              {item.is_favorite !== 0 && <Star className="w-3 h-3 text-yellow-500" />}
+              {hasTag && <Tag className="w-3 h-3 text-blue-500" />}
+            </div>
           </div>
         </div>
 
@@ -229,17 +321,47 @@ const ClipboardCard = memo(function ClipboardCard({
       {contextMenu && (
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[8rem] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
+          className="fixed z-50 max-w-[calc(100vw-24px)] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
+          style={menuPosition ?? { left: contextMenu.x, top: contextMenu.y }}
         >
+          <button
+            onClick={() => {
+              onOpenTagPicker?.(item.id)
+              setContextMenu(null)
+            }}
+            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-1.5 text-[13px] outline-none transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            <span className="mr-2 h-3.5 w-3.5"><Tag className="h-3.5 w-3.5" /></span>
+            {t('panel.context.tag')}
+          </button>
+          <button
+            onClick={() => {
+              togglePin(item.id)
+              setContextMenu(null)
+            }}
+            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-1.5 text-[13px] outline-none transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            <span className="mr-2 h-3.5 w-3.5"><Pin className="h-3.5 w-3.5" /></span>
+            {item.is_pinned ? t('panel.context.unpin') : t('panel.context.pin')}
+          </button>
+          <button
+            onClick={() => {
+              toggleFavorite(item.id)
+              setContextMenu(null)
+            }}
+            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-1.5 text-[13px] outline-none transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            <span className="mr-2 h-3.5 w-3.5"><Star className="h-3.5 w-3.5" /></span>
+            {item.is_favorite ? t('panel.context.unfavorite') : t('panel.context.favorite')}
+          </button>
           <button
             onClick={() => {
               startEditTitle()
               setContextMenu(null)
             }}
-            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-2 text-sm outline-none transition-colors hover:bg-secondary hover:text-foreground"
+            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-1.5 text-[13px] outline-none transition-colors hover:bg-secondary hover:text-foreground"
           >
-            <span className="mr-2 h-4 w-4"><Pencil className="w-4 h-4" /></span>
+            <span className="mr-2 h-3.5 w-3.5"><Pencil className="h-3.5 w-3.5" /></span>
             {t('panel.context.editTitle')}
           </button>
           <div className="-mx-1 my-1 h-px bg-muted" />
@@ -248,9 +370,9 @@ const ClipboardCard = memo(function ClipboardCard({
               deleteItem(item.id)
               setContextMenu(null)
             }}
-            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-2 text-sm text-destructive outline-none transition-colors hover:bg-secondary hover:text-destructive"
+            className="relative flex w-full cursor-default select-none items-center rounded-xl px-3 py-1.5 text-[13px] text-destructive outline-none transition-colors hover:bg-secondary hover:text-destructive"
           >
-            <span className="mr-2 h-4 w-4"><Trash2 className="w-4 h-4" /></span>
+            <span className="mr-2 h-3.5 w-3.5"><Trash2 className="h-3.5 w-3.5" /></span>
             {t('panel.context.delete')}
           </button>
         </div>
@@ -259,7 +381,10 @@ const ClipboardCard = memo(function ClipboardCard({
   )
 })
 
-export default function ClipboardCardList(): React.JSX.Element {
+export default function ClipboardCardList({ onDoubleClick, onOpenTagPicker }: {
+  onDoubleClick?: (itemId: string) => void
+  onOpenTagPicker?: (itemId: string) => void
+}): React.JSX.Element {
   const items = useSearch()
   const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -302,7 +427,7 @@ export default function ClipboardCardList(): React.JSX.Element {
       className="no-scrollbar flex flex-1 items-stretch gap-3 overflow-x-auto px-3 py-3"
     >
       {items.map((item, index) => (
-        <ClipboardCard key={item.id} item={item} index={index} />
+        <ClipboardCard key={item.id} item={item} index={index} onDoubleClick={onDoubleClick} onOpenTagPicker={onOpenTagPicker} />
       ))}
     </div>
   )
