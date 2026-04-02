@@ -46,6 +46,10 @@ export class WindowManager {
     }
   }
 
+  getLayoutMode(): LayoutMode {
+    return this.layoutMode
+  }
+
   setLayoutMode(mode: LayoutMode): void {
     this.layoutMode = mode
     this.saveLayoutMode()

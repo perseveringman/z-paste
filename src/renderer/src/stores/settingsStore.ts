@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import i18n from '../i18n'
 import { normalizeMaxItems } from '../../../shared/max-items'
+import type { LayoutMode } from '../../../shared/layout-mode'
+export type { LayoutMode } from '../../../shared/layout-mode'
 
 export type ThemeMode = 'auto' | 'dark' | 'light'
 export type LanguageMode = 'auto' | 'zh-CN' | 'en' | 'zh-TW'
-export type LayoutMode = 'center' | 'side' | 'bottom'
 
 export interface Settings {
   theme: ThemeMode
@@ -24,6 +25,7 @@ export interface Settings {
   togglePreviewShortcut: string
   openTagShortcut: string
   openSettingsShortcut: string
+  cycleLayoutShortcut: string
   widgetFollowFilter: boolean
   widgetToggleShortcut: string
   widgetQuickPastePrefix: string
@@ -49,6 +51,7 @@ interface SettingsState extends Settings {
   setTogglePreviewShortcut: (shortcut: string) => void
   setOpenTagShortcut: (shortcut: string) => void
   setOpenSettingsShortcut: (shortcut: string) => void
+  setCycleLayoutShortcut: (shortcut: string) => void
   setWidgetFollowFilter: (value: boolean) => void
   setWidgetToggleShortcut: (shortcut: string) => void
   setWidgetQuickPastePrefix: (prefix: string) => void
@@ -58,6 +61,8 @@ interface SettingsState extends Settings {
 }
 
 const STORAGE_KEY = 'zpaste-settings'
+const LAYOUT_SHORTCUT_LEGACY_DEFAULT = 'Alt+L'
+const LAYOUT_SHORTCUT_DEFAULT = 'CommandOrControl+J'
 
 function getSystemTheme(): 'dark' | 'light' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -99,6 +104,10 @@ function normalizeSettings(settings: Settings): Settings {
   return {
     ...settings,
     maxItems: normalizeMaxItems(settings.maxItems),
+    cycleLayoutShortcut:
+      settings.cycleLayoutShortcut === LAYOUT_SHORTCUT_LEGACY_DEFAULT
+        ? LAYOUT_SHORTCUT_DEFAULT
+        : settings.cycleLayoutShortcut,
   }
 }
 
@@ -120,6 +129,7 @@ const defaults: Settings = {
   togglePreviewShortcut: 'Alt',
   openTagShortcut: 'T',
   openSettingsShortcut: 'CommandOrControl+,',
+  cycleLayoutShortcut: LAYOUT_SHORTCUT_DEFAULT,
   widgetFollowFilter: false,
   widgetToggleShortcut: 'Alt+W',
   widgetQuickPastePrefix: 'Alt',
@@ -231,6 +241,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     get().saveSettings()
   },
 
+  setCycleLayoutShortcut: (shortcut) => {
+    set({ cycleLayoutShortcut: shortcut })
+    get().saveSettings()
+  },
+
   setWidgetFollowFilter: (value) => {
     set({ widgetFollowFilter: value })
     get().saveSettings()
@@ -284,6 +299,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       togglePreviewShortcut: state.togglePreviewShortcut,
       openTagShortcut: state.openTagShortcut,
       openSettingsShortcut: state.openSettingsShortcut,
+      cycleLayoutShortcut: state.cycleLayoutShortcut,
       widgetFollowFilter: state.widgetFollowFilter,
       widgetToggleShortcut: state.widgetToggleShortcut,
       widgetQuickPastePrefix: state.widgetQuickPastePrefix,

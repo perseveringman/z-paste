@@ -4,6 +4,7 @@ import { ArrowDownWideNarrow } from 'lucide-react'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { Badge } from '../ui/badge'
 import { cn } from '../../lib/utils'
+import { getCachedSourceApps, setCachedSourceApps } from './filterTabsCache'
 
 interface SourceApp {
   name: string
@@ -26,12 +27,20 @@ export default function FilterTabs(): React.JSX.Element {
     { label: t('panel.filter.color'), value: 'color' },
     { label: t('panel.filter.image'), value: 'image' }
   ]
-  const [sourceApps, setSourceApps] = useState<SourceApp[]>([])
-  const [appIcons, setAppIcons] = useState<Map<string, string>>(new Map())
+  const [sourceApps, setSourceApps] = useState<SourceApp[]>(() => getCachedSourceApps())
+  const [appIcons, setAppIcons] = useState<Map<string, string>>(
+    () =>
+      new Map(
+        getCachedSourceApps()
+          .filter((app) => app.bundleId && iconCache.has(app.bundleId))
+          .map((app) => [app.bundleId, iconCache.get(app.bundleId)!])
+      )
+  )
   const [typeCounts, setTypeCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     window.api.getSourceApps().then((apps) => {
+      setCachedSourceApps(apps)
       setSourceApps(apps)
       for (const app of apps) {
         if (!app.bundleId || iconCache.has(app.bundleId)) {

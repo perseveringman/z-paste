@@ -578,6 +578,7 @@ app.whenReady().then(() => {
     batchPaste?: string
     widgetToggle?: string
     widgetQuickPastePrefix?: string
+    cycleLayout?: string
   }) => {
     shortcutManager.updateShortcuts(config)
     if (config.widgetQuickPastePrefix) {

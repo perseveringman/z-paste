@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import SettingsPage from './components/Settings/SettingsPage'
 import OnboardingPage from './components/Onboarding/OnboardingPage'
 import { useSettingsStore } from './stores/settingsStore'
@@ -13,6 +14,18 @@ function SettingsApp(): React.JSX.Element {
   const handleClose = (): void => {
     window.close()
   }
+
+  useEffect(() => {
+    const unsubLayout = window.api.onLayoutModeChanged((mode) => {
+      if (mode === 'center' || mode === 'side' || mode === 'bottom') {
+        useSettingsStore.setState({ layoutMode: mode })
+      }
+    })
+
+    return () => {
+      unsubLayout()
+    }
+  }, [])
 
   return (
     <div className={`w-full h-screen ${resolvedTheme}`}>

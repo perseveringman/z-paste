@@ -23,7 +23,7 @@ export function matchShortcut(e: KeyboardEvent, shortcut: string): boolean {
   if (needShift !== e.shiftKey) return false
   if (needAlt !== e.altKey) return false
 
-  return e.key.toLowerCase() === key.toLowerCase()
+  return getShortcutKey(e).toLowerCase() === key.toLowerCase()
 }
 
 /**
@@ -58,7 +58,7 @@ export function eventToShortcut(e: KeyboardEvent): string | null {
     '=': '='
   }
 
-  const mapped = keyMap[key] || key.toUpperCase()
+  const mapped = keyMap[key] || getShortcutKey(e)
   parts.push(mapped)
 
   return parts.join('+')
@@ -74,4 +74,33 @@ export function formatShortcut(shortcut: string): string {
     .replace('Alt', '⌥')
     .replace('Space', '␣')
     .replace(/\+/g, ' ')
+}
+
+function getShortcutKey(e: Pick<KeyboardEvent, 'key' | 'code'>): string {
+  const code = e.code || ''
+
+  if (code.startsWith('Key')) {
+    return code.slice(3).toUpperCase()
+  }
+
+  if (code.startsWith('Digit')) {
+    return code.slice(5)
+  }
+
+  const codeMap: Record<string, string> = {
+    Space: 'Space',
+    Comma: ',',
+    Period: '.',
+    Semicolon: ';',
+    Quote: "'",
+    Slash: '/',
+    Minus: '-',
+    Equal: '=',
+    Backquote: '`',
+    Backslash: '\\',
+    BracketLeft: '[',
+    BracketRight: ']',
+  }
+
+  return codeMap[code] || e.key.toUpperCase()
 }

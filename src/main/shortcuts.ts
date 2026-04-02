@@ -1,9 +1,10 @@
-import { globalShortcut, clipboard } from 'electron'
+import { globalShortcut, clipboard, BrowserWindow } from 'electron'
 import { exec } from 'child_process'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
 import * as repository from './database/repository'
 import { writeItemToClipboard } from './clipboard/paste-utils'
+import { cycleLayoutMode } from '../shared/layout-mode'
 
 interface QueueItem {
   id: string
@@ -18,6 +19,7 @@ export class ShortcutManager {
   private queueIndex = 0
   private widgetToggleShortcut = 'Alt+W'
   private widgetQuickPastePrefix = 'Alt'
+  private cycleLayoutShortcut = 'CommandOrControl+J'
 
   constructor(windowManager: WindowManager) {
     this.windowManager = windowManager
@@ -39,6 +41,29 @@ export class ShortcutManager {
     this.registerSequencePaste('CommandOrControl+;')
     this.registerBatchPaste("CommandOrControl+'")
     this.registerWidgetShortcuts()
+    this.registerCycleLayout()
+  }
+
+  private registerCycleLayout(): void {
+    try {
+      globalShortcut.register(this.cycleLayoutShortcut, () => {
+        const current = this.windowManager.getLayoutMode()
+        const next = cycleLayoutMode(current)
+        this.windowManager.setLayoutMode(next)
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) {
+            win.webContents.send('settings:layoutModeChanged', next)
+          }
+        }
+        // Re-show with new layout if panel is visible
+        const mainWin = this.windowManager.getWindow()
+        if (mainWin && !mainWin.isDestroyed() && mainWin.isVisible()) {
+          this.windowManager.show()
+        }
+      })
+    } catch {
+      // ignore if shortcut registration fails
+    }
   }
 
   private registerWidgetShortcuts(): void {
@@ -194,11 +219,13 @@ export class ShortcutManager {
     batchPaste?: string
     widgetToggle?: string
     widgetQuickPastePrefix?: string
+    cycleLayout?: string
   }): void {
     globalShortcut.unregisterAll()
 
     if (config.widgetToggle) this.widgetToggleShortcut = config.widgetToggle
     if (config.widgetQuickPastePrefix) this.widgetQuickPastePrefix = config.widgetQuickPastePrefix
+    if (config.cycleLayout) this.cycleLayoutShortcut = config.cycleLayout
 
     globalShortcut.register(config.panelShortcut || 'Shift+CommandOrControl+V', () => {
       this.windowManager.showWithView('clipboard')
@@ -211,6 +238,7 @@ export class ShortcutManager {
     this.registerSequencePaste(config.sequencePaste || 'CommandOrControl+;')
     this.registerBatchPaste(config.batchPaste || "CommandOrControl+'")
     this.registerWidgetShortcuts()
+    this.registerCycleLayout()
   }
 
   private notifyRenderer(channel: string, data: unknown): void {

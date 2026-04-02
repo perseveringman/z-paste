@@ -110,6 +110,8 @@
   "settings.shortcuts.openTag.desc": "Open tag picker for the selected item",
   "settings.shortcuts.openSettings": "Open Settings",
   "settings.shortcuts.openSettings.desc": "Open/close the settings page",
+  "settings.shortcuts.cycleLayout": "Cycle Window Layout",
+  "settings.shortcuts.cycleLayout.desc": "Cycle panel layout in this order: center, bottom, right side",
   "settings.shortcuts.recording": "Press a key...",
   "settings.shortcuts.hint": "Tip: Use ⌘+Click to multi-select items in the panel, press Enter to batch add to queue",
 

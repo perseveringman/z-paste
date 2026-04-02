@@ -34,7 +34,12 @@ export default function PanelWindow(): React.JSX.Element {
   useQueueToast()
   const items = useSearch()
   const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters, isQueueActive, sequenceQueue, clearQueue, tagBarCollapsed, toggleTagBar, typeFilterCollapsed, toggleTypeFilter, sourceAppFilterCollapsed, toggleSourceAppFilter } = useClipboardStore()
-  const { toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut } = useSettingsStore()
+  const {
+    toggleFilterShortcut,
+    togglePreviewShortcut,
+    openTagShortcut,
+    openSettingsShortcut,
+  } = useSettingsStore()
   const { security, lock: lockVault } = useVaultStore()
   const selectedItem = items[selectedIndex] || null
   const [editingItem, setEditingItem] = useState<string | null>(null)

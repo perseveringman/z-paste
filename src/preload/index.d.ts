@@ -144,7 +144,7 @@ interface ZPasteAPI {
   queueGetCount: () => Promise<number>
   queueGetItems: () => Promise<{ id: string; content: string }[]>
   queueSetSeparator: (separator: string) => Promise<void>
-  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string; widgetToggle?: string; widgetQuickPastePrefix?: string }) => Promise<void>
+  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string; widgetToggle?: string; widgetQuickPastePrefix?: string; cycleLayout?: string }) => Promise<void>
   onQueueUpdated: (callback: (data: { count: number }) => void) => () => void
   onQueuePasted: (callback: (data: { index: number; total: number }) => void) => () => void
   onQueueBatchPasted: (callback: (data: { count: number }) => void) => () => void

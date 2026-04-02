@@ -83,7 +83,7 @@ const api = {
   queueGetCount: () => ipcRenderer.invoke('queue:getCount'),
   queueGetItems: () => ipcRenderer.invoke('queue:getItems'),
   queueSetSeparator: (separator: string) => ipcRenderer.invoke('queue:setSeparator', separator),
-  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string; widgetToggle?: string; widgetQuickPastePrefix?: string }) =>
+  updateShortcuts: (config: { panelShortcut?: string; sequencePaste?: string; batchPaste?: string; widgetToggle?: string; widgetQuickPastePrefix?: string; cycleLayout?: string }) =>
     ipcRenderer.invoke('shortcuts:update', config),
   onQueueUpdated: (callback: (data: { count: number }) => void) => {
     ipcRenderer.on('queue:updated', (_, data) => callback(data))

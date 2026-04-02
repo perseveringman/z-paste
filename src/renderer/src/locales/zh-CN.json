@@ -110,6 +110,8 @@
   "settings.shortcuts.openTag.desc": "为当前选中条目打开标签选择器",
   "settings.shortcuts.openSettings": "打开设置",
   "settings.shortcuts.openSettings.desc": "打开/关闭设置页面",
+  "settings.shortcuts.cycleLayout": "切换窗口布局",
+  "settings.shortcuts.cycleLayout.desc": "按 居中、底部滑出、右侧滑出 的顺序循环切换主面板布局",
   "settings.shortcuts.recording": "按下快捷键...",
   "settings.shortcuts.hint": "提示：在面板中使用 ⌘+Click 多选条目，按 Enter 批量加入队列",
 

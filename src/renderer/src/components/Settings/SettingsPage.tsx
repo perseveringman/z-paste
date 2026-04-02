@@ -432,6 +432,8 @@ function ShortcutsSection(): React.JSX.Element {
     setOpenTagShortcut,
     openSettingsShortcut,
     setOpenSettingsShortcut,
+    cycleLayoutShortcut,
+    setCycleLayoutShortcut,
   } = useSettingsStore()
 
   const separatorOptions = [
@@ -498,6 +500,16 @@ function ShortcutsSection(): React.JSX.Element {
         description={t('settings.shortcuts.openSettings.desc')}
       >
         <ShortcutRecorder value={openSettingsShortcut} onChange={setOpenSettingsShortcut} />
+      </SettingsItem>
+      <Separator />
+      <SettingsItem
+        label={t('settings.shortcuts.cycleLayout')}
+        description={t('settings.shortcuts.cycleLayout.desc')}
+      >
+        <ShortcutRecorder value={cycleLayoutShortcut} onChange={(v) => {
+          setCycleLayoutShortcut(v)
+          window.api.updateShortcuts({ cycleLayout: v })
+        }} />
       </SettingsItem>
       <Separator />
       <SettingsItem
