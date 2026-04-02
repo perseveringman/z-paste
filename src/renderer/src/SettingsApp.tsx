@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import SettingsPage from './components/Settings/SettingsPage'
 import OnboardingPage from './components/Onboarding/OnboardingPage'
 import { useSettingsStore } from './stores/settingsStore'
+import { isThemeMode } from '../../shared/theme'
 
 function SettingsApp(): React.JSX.Element {
   const resolvedTheme = useSettingsStore((s) => s.resolvedTheme)
@@ -21,9 +22,14 @@ function SettingsApp(): React.JSX.Element {
         useSettingsStore.setState({ layoutMode: mode })
       }
     })
+    const unsubTheme = window.api.onThemeChanged((theme) => {
+      if (!isThemeMode(theme)) return
+      useSettingsStore.getState().syncTheme(theme)
+    })
 
     return () => {
       unsubLayout()
+      unsubTheme()
     }
   }, [])
 

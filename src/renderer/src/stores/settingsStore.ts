@@ -2,9 +2,9 @@ import { create } from 'zustand'
 import i18n from '../i18n'
 import { normalizeMaxItems } from '../../../shared/max-items'
 import type { LayoutMode } from '../../../shared/layout-mode'
+import { getThemeStatePatch, type ResolvedTheme, type ThemeMode } from '../../../shared/theme'
 export type { LayoutMode } from '../../../shared/layout-mode'
-
-export type ThemeMode = 'auto' | 'dark' | 'light'
+export type { ThemeMode } from '../../../shared/theme'
 export type LanguageMode = 'auto' | 'zh-CN' | 'en' | 'zh-TW'
 
 export interface Settings {
@@ -33,8 +33,9 @@ export interface Settings {
 }
 
 interface SettingsState extends Settings {
-  resolvedTheme: 'dark' | 'light'
+  resolvedTheme: ResolvedTheme
   setTheme: (theme: ThemeMode) => void
+  syncTheme: (theme: ThemeMode) => void
   setLanguage: (lang: LanguageMode) => void
   setLaunchAtLogin: (value: boolean) => void
   setHistoryRetention: (days: number) => void
@@ -64,13 +65,12 @@ const STORAGE_KEY = 'zpaste-settings'
 const LAYOUT_SHORTCUT_LEGACY_DEFAULT = 'Alt+L'
 const LAYOUT_SHORTCUT_DEFAULT = 'CommandOrControl+J'
 
-function getSystemTheme(): 'dark' | 'light' {
+function getSystemTheme(): ResolvedTheme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function resolveTheme(mode: ThemeMode): 'dark' | 'light' {
-  if (mode === 'auto') return getSystemTheme()
-  return mode
+function getThemePatch(theme: ThemeMode): { theme: ThemeMode; resolvedTheme: ResolvedTheme } {
+  return getThemeStatePatch(theme, getSystemTheme())
 }
 
 function resolveLanguage(mode: LanguageMode): string {
@@ -138,17 +138,32 @@ const defaults: Settings = {
 
 const stored = loadFromStorage()
 const initialSettings: Settings = normalizeSettings({ ...defaults, ...stored })
+const initialTheme = getThemePatch(initialSettings.theme)
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...initialSettings,
-  resolvedTheme: resolveTheme(initialSettings.theme),
+  resolvedTheme: initialTheme.resolvedTheme,
 
   setTheme: (theme) => {
-    const resolved = resolveTheme(theme)
-    set({ theme, resolvedTheme: resolved })
+    const patch = getThemePatch(theme)
+    const state = get()
+    if (state.theme === patch.theme && state.resolvedTheme === patch.resolvedTheme) {
+      return
+    }
+    set(patch)
     get().saveSettings()
-    applyTheme(resolved)
+    applyTheme(patch.resolvedTheme)
     window.api.setTheme?.(theme)
+  },
+
+  syncTheme: (theme) => {
+    const patch = getThemePatch(theme)
+    const state = get()
+    if (state.theme === patch.theme && state.resolvedTheme === patch.resolvedTheme) {
+      return
+    }
+    set(patch)
+    applyTheme(patch.resolvedTheme)
   },
 
   setLanguage: (lang) => {
@@ -270,9 +285,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   loadSettings: () => {
     const stored = loadFromStorage()
     const merged = normalizeSettings({ ...defaults, ...stored })
-    const resolved = resolveTheme(merged.theme)
-    set({ ...merged, resolvedTheme: resolved })
-    applyTheme(resolved)
+    const themePatch = getThemePatch(merged.theme)
+    set({ ...merged, resolvedTheme: themePatch.resolvedTheme })
+    applyTheme(themePatch.resolvedTheme)
     window.api.setMaxItems?.(merged.maxItems)
     if (merged.iCloudSync) {
       window.api.syncStart?.()
@@ -326,13 +341,16 @@ if (typeof window !== 'undefined') {
   mql.addEventListener('change', () => {
     const state = useSettingsStore.getState()
     if (state.theme === 'auto') {
-      const resolved = getSystemTheme()
-      useSettingsStore.setState({ resolvedTheme: resolved })
-      applyTheme(resolved)
+      const patch = getThemePatch('auto')
+      if (state.resolvedTheme === patch.resolvedTheme) {
+        return
+      }
+      useSettingsStore.setState(patch)
+      applyTheme(patch.resolvedTheme)
     }
   })
 
   // Apply initial theme
-  applyTheme(resolveTheme(initialSettings.theme))
+  applyTheme(initialTheme.resolvedTheme)
   window.api.setMaxItems?.(initialSettings.maxItems)
 }

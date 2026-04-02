@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { memo, useState, useCallback, useEffect, useRef } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import SearchBar from './SearchBar'
@@ -18,6 +18,7 @@ import { useSearch } from '../../hooks/useSearch'
 import { useClipboardStore } from '../../stores/clipboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
+import { useShallow } from 'zustand/react/shallow'
 import { matchShortcut } from '../../utils/shortcut'
 import appIcon from '../../assets/icon.png'
 import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X, Lock, Unlock, FilePlus, Key, FileText } from 'lucide-react'
@@ -26,7 +27,7 @@ import { cn } from '../../lib/utils'
 
 export type PanelView = 'clipboard' | 'templates' | 'vault'
 
-export default function PanelWindow(): React.JSX.Element {
+function PanelWindow(): React.JSX.Element {
   const { t } = useTranslation()
   const [view, setView] = useState<PanelView>('clipboard')
   const layoutMode = useSettingsStore((s) => s.layoutMode)
@@ -39,7 +40,12 @@ export default function PanelWindow(): React.JSX.Element {
     togglePreviewShortcut,
     openTagShortcut,
     openSettingsShortcut,
-  } = useSettingsStore()
+  } = useSettingsStore(useShallow((state) => ({
+    toggleFilterShortcut: state.toggleFilterShortcut,
+    togglePreviewShortcut: state.togglePreviewShortcut,
+    openTagShortcut: state.openTagShortcut,
+    openSettingsShortcut: state.openSettingsShortcut,
+  })))
   const { security, lock: lockVault } = useVaultStore()
   const selectedItem = items[selectedIndex] || null
   const [editingItem, setEditingItem] = useState<string | null>(null)
@@ -422,6 +428,8 @@ export default function PanelWindow(): React.JSX.Element {
     </div>
   )
 }
+
+export default memo(PanelWindow)
 
 function TabButton({
   label,

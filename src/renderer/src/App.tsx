@@ -3,6 +3,7 @@ import PanelWindow from './components/Panel/PanelWindow'
 import OnboardingPage from './components/Onboarding/OnboardingPage'
 import { useClipboardStore } from './stores/clipboardStore'
 import { useSettingsStore } from './stores/settingsStore'
+import { isThemeMode } from '../../shared/theme'
 
 function App(): React.JSX.Element {
   const { loadItems, addItem, setVisible } = useClipboardStore()
@@ -37,8 +38,9 @@ function App(): React.JSX.Element {
       }
     })
 
-    const unsubTheme = window.api.onThemeChanged(() => {
-      useSettingsStore.getState().loadSettings()
+    const unsubTheme = window.api.onThemeChanged((theme) => {
+      if (!isThemeMode(theme)) return
+      useSettingsStore.getState().syncTheme(theme)
     })
 
     return () => {

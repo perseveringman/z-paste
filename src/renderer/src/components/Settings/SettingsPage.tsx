@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { memo, useState, useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { useLicenseStore } from '../../stores/licenseStore'
+import { useShallow } from 'zustand/react/shallow'
 import { Switch } from '../ui/switch'
 import { AppLogo } from '../ui/app-logo'
 import { Input } from '../ui/input'
@@ -55,7 +56,7 @@ interface Props {
   onClose: () => void
 }
 
-export default function SettingsPage({ onClose }: Props): React.JSX.Element {
+function SettingsPage({ onClose }: Props): React.JSX.Element {
   const [activeSection, setActiveSection] = useState<SettingsSection>('general')
   const { t } = useTranslation()
 
@@ -180,7 +181,18 @@ function GeneralSection(): React.JSX.Element {
     setLanguage,
     layoutMode,
     setLayoutMode,
-  } = useSettingsStore()
+  } = useSettingsStore(useShallow((state) => ({
+    launchAtLogin: state.launchAtLogin,
+    setLaunchAtLogin: state.setLaunchAtLogin,
+    historyRetention: state.historyRetention,
+    setHistoryRetention: state.setHistoryRetention,
+    maxItems: state.maxItems,
+    setMaxItems: state.setMaxItems,
+    language: state.language,
+    setLanguage: state.setLanguage,
+    layoutMode: state.layoutMode,
+    setLayoutMode: state.setLayoutMode,
+  })))
   const [isCustomMaxItemsSelected, setIsCustomMaxItemsSelected] = useState(
     maxItems > 0 && !isPresetMaxItems(maxItems)
   )
@@ -434,7 +446,23 @@ function ShortcutsSection(): React.JSX.Element {
     setOpenSettingsShortcut,
     cycleLayoutShortcut,
     setCycleLayoutShortcut,
-  } = useSettingsStore()
+  } = useSettingsStore(useShallow((state) => ({
+    customShortcut: state.customShortcut,
+    sequencePasteShortcut: state.sequencePasteShortcut,
+    batchPasteShortcut: state.batchPasteShortcut,
+    batchPasteSeparator: state.batchPasteSeparator,
+    setBatchPasteSeparator: state.setBatchPasteSeparator,
+    toggleFilterShortcut: state.toggleFilterShortcut,
+    setToggleFilterShortcut: state.setToggleFilterShortcut,
+    togglePreviewShortcut: state.togglePreviewShortcut,
+    setTogglePreviewShortcut: state.setTogglePreviewShortcut,
+    openTagShortcut: state.openTagShortcut,
+    setOpenTagShortcut: state.setOpenTagShortcut,
+    openSettingsShortcut: state.openSettingsShortcut,
+    setOpenSettingsShortcut: state.setOpenSettingsShortcut,
+    cycleLayoutShortcut: state.cycleLayoutShortcut,
+    setCycleLayoutShortcut: state.setCycleLayoutShortcut,
+  })))
 
   const separatorOptions = [
     { value: '\n', label: t('settings.shortcuts.separator.newline') },
@@ -542,7 +570,10 @@ function ShortcutsSection(): React.JSX.Element {
 
 function SyncSection(): React.JSX.Element {
   const { t } = useTranslation()
-  const { iCloudSync, setICloudSync } = useSettingsStore()
+  const { iCloudSync, setICloudSync } = useSettingsStore(useShallow((state) => ({
+    iCloudSync: state.iCloudSync,
+    setICloudSync: state.setICloudSync,
+  })))
   const [syncing, setSyncing] = useState(false)
 
   const handleSyncNow = useCallback(async () => {
@@ -585,7 +616,10 @@ function SyncSection(): React.JSX.Element {
 
 function PrivacySection(): React.JSX.Element {
   const { t } = useTranslation()
-  const { encryptionEnabled, setEncryptionEnabled } = useSettingsStore()
+  const { encryptionEnabled, setEncryptionEnabled } = useSettingsStore(useShallow((state) => ({
+    encryptionEnabled: state.encryptionEnabled,
+    setEncryptionEnabled: state.setEncryptionEnabled,
+  })))
   const { security, setLockOnBlur, setAutoLockMinutes, loadItems } = useVaultStore()
   const [confirming, setConfirming] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
@@ -777,7 +811,10 @@ function PrivacySection(): React.JSX.Element {
 
 function ThemeSection(): React.JSX.Element {
   const { t } = useTranslation()
-  const { theme, setTheme } = useSettingsStore()
+  const { theme, setTheme } = useSettingsStore(useShallow((state) => ({
+    theme: state.theme,
+    setTheme: state.setTheme,
+  })))
 
   const themes: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
     { value: 'auto', label: t('settings.theme.auto'), icon: Monitor },
@@ -1047,7 +1084,14 @@ function WidgetSection(): React.JSX.Element {
     setWidgetToggleShortcut,
     widgetQuickPastePrefix,
     setWidgetQuickPastePrefix,
-  } = useSettingsStore()
+  } = useSettingsStore(useShallow((state) => ({
+    widgetFollowFilter: state.widgetFollowFilter,
+    setWidgetFollowFilter: state.setWidgetFollowFilter,
+    widgetToggleShortcut: state.widgetToggleShortcut,
+    setWidgetToggleShortcut: state.setWidgetToggleShortcut,
+    widgetQuickPastePrefix: state.widgetQuickPastePrefix,
+    setWidgetQuickPastePrefix: state.setWidgetQuickPastePrefix,
+  })))
 
   const prefixOptions = [
     { value: 'Alt', label: '⌥ Option' },
@@ -1348,3 +1392,5 @@ function AboutSection(): React.JSX.Element {
     </div>
   )
 }
+
+export default memo(SettingsPage)

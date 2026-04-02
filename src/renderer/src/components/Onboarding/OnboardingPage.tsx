@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useLicenseStore } from '../../stores/licenseStore'
+import { useShallow } from 'zustand/react/shallow'
 import { Button } from '../ui/button'
 import { Switch } from '../ui/switch'
 import { Input } from '../ui/input'
@@ -38,7 +39,12 @@ interface Props {
 export default function OnboardingPage({ onComplete, isRevisit }: Props): React.JSX.Element {
   const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
-  const { setICloudSync, setHasCompletedOnboarding } = useSettingsStore()
+  const { setICloudSync, setHasCompletedOnboarding } = useSettingsStore(
+    useShallow((state) => ({
+      setICloudSync: state.setICloudSync,
+      setHasCompletedOnboarding: state.setHasCompletedOnboarding,
+    }))
+  )
   const { activate: activateLicense } = useLicenseStore()
   const [syncChoice, setSyncChoice] = useState(false)
   const [showActivation, setShowActivation] = useState(false)
