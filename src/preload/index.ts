@@ -200,6 +200,18 @@ const api = {
     ipcRenderer.invoke('vault:setLockOnBlur', enabled),
   vaultSetAutoLockMinutes: (minutes: number) =>
     ipcRenderer.invoke('vault:setAutoLockMinutes', minutes),
+  vaultCopyToClipboard: (text: string) => ipcRenderer.invoke('vault:copyToClipboard', text),
+  vaultImport: (input: { filePath: string; format: 'chrome-csv' | '1password-csv' | 'bitwarden-json' }) =>
+    ipcRenderer.invoke('vault:import', input),
+  vaultImportPreview: (input: {
+    filePath: string
+    format: 'chrome-csv' | '1password-csv' | 'bitwarden-json'
+  }) => ipcRenderer.invoke('vault:importPreview', input),
+  showOpenDialog: (options: {
+    title?: string
+    filters?: Array<{ name: string; extensions: string[] }>
+    properties?: string[]
+  }) => ipcRenderer.invoke('dialog:showOpenDialog', options),
   // App info
   getVersion: () => ipcRenderer.invoke('app:getVersion'),
   // License

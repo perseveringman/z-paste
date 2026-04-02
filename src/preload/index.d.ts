@@ -234,6 +234,33 @@ interface ZPasteAPI {
   }>
   vaultSetLockOnBlur: (enabled: boolean) => Promise<void>
   vaultSetAutoLockMinutes: (minutes: number) => Promise<void>
+  vaultCopyToClipboard: (text: string) => Promise<void>
+  vaultImport: (input: {
+    filePath: string
+    format: 'chrome-csv' | '1password-csv' | 'bitwarden-json'
+  }) => Promise<{
+    total: number
+    imported: number
+    skipped: number
+    errors: string[]
+  }>
+  vaultImportPreview: (input: {
+    filePath: string
+    format: 'chrome-csv' | '1password-csv' | 'bitwarden-json'
+  }) => Promise<{
+    total: number
+    entries: Array<{
+      name: string
+      url?: string
+      username?: string
+      password?: string
+    }>
+  }>
+  showOpenDialog: (options: {
+    title?: string
+    filters?: Array<{ name: string; extensions: string[] }>
+    properties?: string[]
+  }) => Promise<{ canceled: boolean; filePaths: string[] }>
   // App info
   getVersion: () => Promise<string>
   // License

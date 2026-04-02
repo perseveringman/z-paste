@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Button } from '../ui/button'
 import { Separator } from '../ui/separator'
 import { showToast } from '../../utils/toast'
+import VaultImportDialog from '../Vault/VaultImportDialog'
 import {
   MAX_ITEMS_CUSTOM_MIN,
   MAX_ITEMS_PRESETS,
@@ -36,6 +37,7 @@ import {
   AlertTriangle,
   LayoutGrid,
   Crown,
+  Upload,
 } from 'lucide-react'
 
 type SettingsSection =
@@ -572,8 +574,9 @@ function SyncSection(): React.JSX.Element {
 function PrivacySection(): React.JSX.Element {
   const { t } = useTranslation()
   const { encryptionEnabled, setEncryptionEnabled } = useSettingsStore()
-  const { security, setLockOnBlur, setAutoLockMinutes } = useVaultStore()
+  const { security, setLockOnBlur, setAutoLockMinutes, loadItems } = useVaultStore()
   const [confirming, setConfirming] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
   const [vaultState, setVaultState] = useState<{
     locked: boolean
     hasVaultSetup: boolean
@@ -687,6 +690,26 @@ function PrivacySection(): React.JSX.Element {
           )}
         </Button>
       </SettingsItem>
+
+      <Separator />
+
+      {/* Import Passwords */}
+      <SettingsItem
+        label={t('vault.import.title')}
+        description={t('vault.import.description')}
+      >
+        <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
+          <Upload className="w-3 h-3 mr-2" />
+          {t('vault.import.button')}
+        </Button>
+      </SettingsItem>
+
+      {showImportDialog && (
+        <VaultImportDialog
+          onClose={() => setShowImportDialog(false)}
+          onImported={() => loadItems()}
+        />
+      )}
 
       <Separator />
 

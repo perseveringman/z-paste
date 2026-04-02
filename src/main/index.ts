@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, clipboard, dialog, Menu } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { WindowManager } from './window'
 import { WidgetWindowManager } from './widget'
@@ -23,6 +23,8 @@ import { startExtensionBridge, stopExtensionBridge } from './extension-bridge'
 import { autoUpdater } from 'electron-updater'
 import { DEFAULT_MAX_ITEMS, normalizeMaxItems } from '../shared/max-items'
 import * as license from './license'
+import { writeVaultClipboard } from './clipboard/vault-clipboard-guard'
+import { parseImportFile, importEntries, ImportFormat } from './vault/import'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -488,7 +490,7 @@ app.whenReady().then(() => {
       })
       return { ok: true, fallbackCopied: false }
     } catch {
-      clipboard.writeText(detail.fields.password)
+      writeVaultClipboard(detail.fields.password)
       vaultRepository.appendVaultAuditEvent({
         id: nanoid(),
         event_type: 'auto_type',
@@ -500,10 +502,43 @@ app.whenReady().then(() => {
     }
   })
 
+  // Copy vault-sensitive text to clipboard with auto-clear & monitor exclusion
+  ipcMain.handle('vault:copyToClipboard', async (_, text: string) => {
+    writeVaultClipboard(text)
+  })
+
+  // Vault import: parse file and import entries
+  ipcMain.handle(
+    'vault:import',
+    async (_, input: { filePath: string; format: ImportFormat }) => {
+      const entries = parseImportFile(input.filePath, input.format)
+      return await importEntries(entries, vaultService)
+    }
+  )
+
+  // Vault import: parse file for preview (returns entry count without importing)
+  ipcMain.handle(
+    'vault:importPreview',
+    async (_, input: { filePath: string; format: ImportFormat }) => {
+      const entries = parseImportFile(input.filePath, input.format)
+      return { total: entries.length, entries: entries.slice(0, 5) }
+    }
+  )
+
   // Content type counts
   ipcMain.handle('clipboard:getContentTypeCounts', async (_, options) => {
     return repository.getContentTypeCounts(options)
   })
+
+  // File dialog for vault import
+  ipcMain.handle(
+    'dialog:showOpenDialog',
+    async (_, options: Electron.OpenDialogOptions) => {
+      const win = BrowserWindow.getFocusedWindow() || settingsWindowManager?.getWindow()
+      if (!win) return { canceled: true, filePaths: [] }
+      return await dialog.showOpenDialog(win, options)
+    }
+  )
 
   // Source app IPC handlers
   ipcMain.handle('sourceApps:getAll', async () => {
