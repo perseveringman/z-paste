@@ -175,8 +175,8 @@ function ClipboardItemRow({
     isMultiSelected
       ? 'border-primary/35 bg-primary/10 text-foreground shadow-sm'
       : isSelected
-        ? 'border-border/70 bg-background/90 text-foreground shadow-[0_12px_28px_rgba(91,60,36,0.08)]'
-        : 'border-transparent bg-transparent text-foreground hover:border-border/50 hover:bg-background/62'
+        ? 'border-border bg-card text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
+        : 'border-transparent bg-transparent text-foreground hover:border-border/50 hover:bg-muted/50'
   )
 
   return (
@@ -205,7 +205,7 @@ function ClipboardItemRow({
                   ⌘{index + 1}
                 </span>
               ) : (
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/80 text-muted-foreground">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground">
                   <TypeIcon type={item.content_type} className="h-4 w-4" />
                 </span>
               )}
@@ -243,7 +243,7 @@ function ClipboardItemRow({
                 {item.preview || item.content}
               </p>
               <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
-                <span className="rounded-full bg-secondary/75 px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px] text-muted-foreground">
+                <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px] text-muted-foreground">
                   {item.content_type}
                 </span>
                 <span className="text-muted-foreground/50">•</span>
@@ -331,7 +331,7 @@ function ClipboardItemRow({
       {contextMenu && (
         <div
           ref={menuRef}
-          className="fixed z-50 max-w-[calc(100vw-24px)] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
+          className="fixed z-50 max-w-[calc(100vw-24px)] overflow-hidden rounded-[1rem] border border-border bg-popover p-1 text-popover-foreground shadow-xl animate-in fade-in-80 zoom-in-95"
           style={menuPosition ?? { left: contextMenu.x, top: contextMenu.y }}
         >
           <ContextMenuItem
@@ -381,7 +381,7 @@ function ImageRow({
             ⌘{index + 1}
           </span>
         ) : (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/80 text-muted-foreground">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <ImageIcon className="h-4 w-4" />
           </span>
         )}
@@ -397,7 +397,7 @@ function ImageRow({
           {item.preview || i18n.t('panel.image.fallback')}
         </p>
         <div className="mt-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-          <span className="rounded-full bg-secondary/75 px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px]">image</span>
+          <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px]">image</span>
           <span className="text-muted-foreground/50">•</span>
           <span>{formatTime(item.created_at)}</span>
         </div>

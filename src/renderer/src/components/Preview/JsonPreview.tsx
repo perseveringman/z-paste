@@ -16,7 +16,7 @@ export default function JsonPreview({ content }: Props): React.JSX.Element {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/60">
         <span className={`text-xs ${valid ? 'text-syntax-string' : 'text-destructive'}`}>
           {valid ? '✓ Valid JSON' : `✗ ${error}`}
         </span>

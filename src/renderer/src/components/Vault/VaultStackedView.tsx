@@ -66,7 +66,7 @@ export default function VaultStackedView({
     <div className="flex flex-col h-full min-h-0">
       {/* Filter bar */}
       <div className="flex items-center gap-1 px-2 pt-2 pb-1 shrink-0">
-        <div className="flex items-center gap-0.5 flex-1 bg-muted/50 rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 flex-1 bg-muted rounded-md p-0.5">
           {(['all', 'login', 'secure_note'] as const).map((type) => (
             <button
               key={type}
@@ -155,7 +155,7 @@ export default function VaultStackedView({
 
       {/* Reset vault link */}
       {!drawerOpen && (
-        <div className="p-2 border-t bg-muted/10 shrink-0">
+        <div className="p-2 border-t border-border bg-muted/10 shrink-0">
           {showResetConfirm ? (
             <div className="space-y-2">
               <p className="text-[10px] text-destructive font-medium leading-tight">
@@ -214,7 +214,7 @@ function VaultListItem({
       onClick={() => onSelect(item.id)}
       className={`w-full text-left rounded-lg px-3 py-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
         isSelected
-          ? 'bg-accent text-accent-foreground shadow-sm'
+          ? 'bg-muted text-accent-foreground shadow-sm'
           : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
       }`}
       aria-current={isSelected ? 'true' : undefined}
@@ -224,7 +224,7 @@ function VaultListItem({
           className={`p-1.5 rounded-md ${
             isSelected
               ? 'bg-primary/10 text-primary'
-              : 'bg-muted group-hover:bg-background transition-colors'
+              : 'bg-muted group-hover:bg-muted/80 transition-colors'
           }`}
         >
           {item.type === 'login' ? (

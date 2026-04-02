@@ -101,7 +101,7 @@ export default function VaultSetup(): React.JSX.Element {
                     <button 
                       onClick={() => setSecurityMode('strict')}
                       className={`p-4 rounded-xl border text-left transition-all ${
-                        securityMode === 'strict' ? 'bg-primary/10 border-primary/40 ring-1 ring-primary/20' : 'bg-muted/20 hover:bg-muted/40 border-border/50'
+                        securityMode === 'strict' ? 'bg-primary/10 border-primary/40 ring-1 ring-primary/20' : 'bg-muted/30 hover:bg-muted/50 border-border/50'
                       }`}
                     >
                       <div className="flex items-center gap-3 mb-1.5">
@@ -114,7 +114,7 @@ export default function VaultSetup(): React.JSX.Element {
                     <button 
                       onClick={() => setSecurityMode('relaxed')}
                       className={`p-4 rounded-xl border text-left transition-all ${
-                        securityMode === 'relaxed' ? 'bg-primary/10 border-primary/40 ring-1 ring-primary/20' : 'bg-muted/20 hover:bg-muted/40 border-border/50'
+                        securityMode === 'relaxed' ? 'bg-primary/10 border-primary/40 ring-1 ring-primary/20' : 'bg-muted/30 hover:bg-muted/50 border-border/50'
                       }`}
                     >
                       <div className="flex items-center gap-3 mb-1.5">
@@ -161,7 +161,7 @@ export default function VaultSetup(): React.JSX.Element {
                               key={q}
                               onClick={() => setHintQuestion(q)}
                               className={`text-[11px] px-2.5 py-1 rounded-full border transition-all ${
-                                hintQuestion === q ? 'bg-primary text-primary-foreground border-transparent shadow-sm' : 'hover:bg-muted/40 border-muted text-muted-foreground'
+                                hintQuestion === q ? 'bg-primary/90 text-primary-foreground border-transparent shadow-sm' : 'hover:bg-muted/50 border-border text-muted-foreground'
                               }`}
                             >
                               {q}
@@ -196,7 +196,7 @@ export default function VaultSetup(): React.JSX.Element {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <div className="p-5 bg-primary/10 border border-primary/20 rounded-xl relative overflow-hidden">
+                  <div className="p-5 bg-primary/8 border border-primary/20 rounded-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-3 opacity-5">
                       <Key className="w-10 h-10" />
                     </div>

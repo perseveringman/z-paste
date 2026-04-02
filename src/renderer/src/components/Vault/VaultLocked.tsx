@@ -57,7 +57,7 @@ export default function VaultLocked(): React.JSX.Element {
         className={`w-full max-w-sm flex flex-col items-center relative z-10 ${isBottom ? 'px-6 py-3' : 'px-8 py-6'}`}
       >
         {!isBottom && (
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 shadow-sm border border-primary/10 group">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 shadow-sm border border-primary/20 group">
             <Lock className="w-7 h-7 text-primary group-hover:hidden" />
             <Unlock className="w-7 h-7 text-primary hidden group-hover:block" />
           </div>
@@ -84,12 +84,12 @@ export default function VaultLocked(): React.JSX.Element {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && password && !loading && handleUnlock()}
-                    className="h-11 px-4 text-center bg-muted/30 border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/50 text-base"
+                    className="h-11 px-4 text-center bg-muted/50 border border-border shadow-none focus-visible:ring-1 focus-visible:ring-primary/50 text-base"
                   />
                 </div>
                 {security.hasBiometricUnlock && (
                   <Button 
-                    className="w-full h-11 border-none bg-muted/30 hover:bg-muted/50 text-foreground shadow-none" 
+                    className="w-full h-11 border border-border bg-muted/50 hover:bg-muted text-foreground shadow-none" 
                     variant="outline" 
                     onClick={() => unlockWithBiometric()} 
                     disabled={loading}
@@ -114,7 +114,7 @@ export default function VaultLocked(): React.JSX.Element {
                   value={recoveryKey}
                   onChange={(e) => setRecoveryKey(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && recoveryKey && !loading && handleUnlock()}
-                  className="h-11 px-4 text-center bg-muted/30 border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="h-11 px-4 text-center bg-muted/50 border border-border shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
                 />
               </motion.div>
             )}
@@ -127,7 +127,7 @@ export default function VaultLocked(): React.JSX.Element {
                 exit={{ opacity: 0, x: 10 }}
                 className="space-y-3"
               >
-                <div className="p-3 bg-muted/20 rounded-lg border border-muted mb-2 text-center">
+                <div className="p-3 bg-muted/30 rounded-lg border border-border mb-2 text-center">
                   <p className="text-xs font-medium text-muted-foreground mb-1">{t('vault.reset.step1')}</p>
                   <p className="text-sm font-semibold">{security.hintQuestion}</p>
                 </div>
@@ -136,7 +136,7 @@ export default function VaultLocked(): React.JSX.Element {
                   value={hintAnswer}
                   onChange={(e) => setHintAnswer(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && hintAnswer && !loading && handleUnlock()}
-                  className="h-11 px-4 text-center bg-muted/30 border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                  className="h-11 px-4 text-center bg-muted/50 border border-border shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
                 />
               </motion.div>
             )}

@@ -97,7 +97,7 @@ export default function SearchBar({ view }: SearchBarProps): React.JSX.Element {
         autoComplete="off"
         spellCheck={false}
         placeholder={view === 'vault' ? t('vault.search.placeholder') : t('panel.search.placeholder')}
-        className="h-9 rounded-[1rem] border-border/70 bg-background/72 pl-9 pr-9 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] focus-visible:border-primary/45 focus-visible:bg-background"
+        className="h-9 rounded-[1rem] border-border/70 bg-muted/50 pl-9 pr-9 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] focus-visible:border-primary/45 focus-visible:bg-background"
       />
       {localQuery && (
         <Button

@@ -42,13 +42,13 @@ export default function TemplateEditor({ template, onSave, onCancel }: Props): R
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder={t('template.namePlaceholder')}
-        className="w-full bg-muted/50 border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder={t('template.contentPlaceholder')}
-        className="flex-1 w-full bg-muted/50 border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none font-mono"
+        className="flex-1 w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none font-mono"
       />
       <button
         onClick={handleSave}

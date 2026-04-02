@@ -95,7 +95,7 @@ export default function SettingsPage({ onClose }: Props): React.JSX.Element {
               onClick={() => setActiveSection(section.id)}
               className={`w-full text-left px-6 py-2 text-sm transition-colors flex items-center gap-3 ${
                 activeSection === section.id
-                  ? 'bg-accent text-accent-foreground font-medium'
+                  ? 'bg-muted text-accent-foreground font-medium'
                   : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
               }`}
             >

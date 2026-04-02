@@ -48,6 +48,7 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        link: "hsl(var(--link))",
         syntax: {
           key: "hsl(var(--syntax-key))",
           string: "hsl(var(--syntax-string))",

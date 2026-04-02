@@ -103,7 +103,7 @@ export default function VaultCardCarousel({
     <div className="flex flex-col h-full min-h-0">
       {/* Filter bar */}
       <div className="flex items-center gap-1 px-3 pt-2 pb-1 shrink-0">
-        <div className="flex items-center gap-0.5 flex-1 bg-muted/50 rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 flex-1 bg-muted rounded-md p-0.5">
           {(['all', 'login', 'secure_note'] as const).map((type) => (
             <button
               key={type}
@@ -157,7 +157,7 @@ export default function VaultCardCarousel({
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center px-5 py-4 text-sm text-muted-foreground">
-          <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-background/70 px-6 py-6 text-center shadow-sm">
+          <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-card px-6 py-6 text-center shadow-sm">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3 mx-auto">
               <Key className="w-5 h-5 text-muted-foreground" />
             </div>
@@ -234,15 +234,15 @@ const VaultCard = memo(function VaultCard({
       }}
       className={`flex h-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[1rem] border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
         isSelected
-          ? 'border-primary/60 bg-background/95 shadow-lg shadow-primary/10 scale-[1.02]'
-          : 'border-border/50 bg-background/70 hover:border-border/80 hover:bg-background/85'
+          ? 'border-primary/50 bg-card shadow-lg shadow-primary/8 scale-[1.02]'
+          : 'border-border/50 bg-card/80 hover:border-border hover:bg-card'
       }`}
       style={{ width: CARD_WIDTH }}
       aria-label={item.title}
     >
       {/* Card header */}
       <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary/80 text-muted-foreground">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
           {item.type === 'login' ? (
             <Key className="h-3 w-3" />
           ) : (
@@ -349,7 +349,7 @@ function VaultDetailModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="relative w-[90%] max-w-lg max-h-[80vh] rounded-2xl border border-border/70 bg-background shadow-2xl overflow-hidden"
+        className="relative w-[90%] max-w-lg max-h-[80vh] rounded-2xl border border-border bg-popover shadow-2xl overflow-hidden"
       >
         {/* Close button */}
         <button

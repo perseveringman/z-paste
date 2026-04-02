@@ -122,7 +122,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             <br />
             {t('onboarding.step3.autoPaste')}
           </p>
-          <div className="mt-1 w-full rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+          <div className="mt-1 w-full rounded-[1.25rem] border border-border/60 bg-card p-4 shadow-sm">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {t('onboarding.step3.moreShortcuts')}
             </p>
@@ -150,7 +150,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       icon: Lock,
       content: (
         <div className="space-y-4">
-          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+          <div className="rounded-[1.25rem] border border-border/60 bg-card p-4 shadow-sm">
             <p className="mb-2 text-xs font-semibold text-foreground">
               {t('onboarding.step4.storage.title')}
             </p>
@@ -158,7 +158,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
               {t('onboarding.step4.storage.desc')}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-border/60 bg-background/70 p-4 shadow-sm">
+          <div className="rounded-[1.25rem] border border-border/60 bg-card p-4 shadow-sm">
             <div className="mb-2 flex items-center justify-between gap-3">
               <p className="text-xs font-semibold text-foreground">
                 {t('onboarding.step4.sync.title')}
@@ -269,9 +269,9 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,252,248,0.96),rgba(250,244,236,0.92))] backdrop-blur-xl dark:bg-[linear-gradient(180deg,rgba(41,34,29,0.96),rgba(30,25,22,0.92))]"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,hsl(336_60%_96%),hsl(24_100%_98%))] dark:bg-[linear-gradient(180deg,hsl(330_15%_12%),hsl(330_18%_8%))]"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(208,140,82,0.18),_transparent_58%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,_rgba(255,138,74,0.12),_transparent_58%)]" />
       <div className="relative flex flex-1 min-h-0 flex-col px-10 py-6">
         <div className="mb-5 flex shrink-0 items-center justify-between">
           <div>
@@ -285,15 +285,15 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
               {t('onboarding.step1.description')}
             </p>
           </div>
-          <div className="rounded-full border border-border/60 bg-background/65 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="rounded-full border border-border bg-muted px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {currentStep + 1} / {steps.length}
           </div>
         </div>
 
         <div className="grid flex-1 min-h-0 gap-6 md:grid-cols-[140px_minmax(0,1fr)]">
-          <div className="flex flex-col justify-between rounded-[1.5rem] border border-border/60 bg-background/60 p-5 shadow-sm">
+          <div className="flex flex-col justify-between rounded-[1.5rem] border border-border/60 bg-card p-5 shadow-sm">
             <div>
-              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary/75 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+              <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
                 <step.icon className="w-8 h-8 text-foreground" />
               </div>
               <div className="space-y-2">
@@ -304,7 +304,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
                       index === currentStep
                         ? 'bg-primary/12 text-foreground'
                         : index < currentStep
-                          ? 'bg-secondary/70 text-foreground/80'
+                          ? 'bg-muted text-foreground/80'
                           : 'text-muted-foreground'
                     }`}
                   >
@@ -318,7 +318,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             </p>
           </div>
 
-          <div className="flex flex-col rounded-[1.75rem] border border-border/65 bg-background/78 px-8 py-6 shadow-[0_20px_55px_rgba(101,68,43,0.12)] overflow-y-auto">
+          <div className="flex flex-col rounded-[1.75rem] border border-border/60 bg-card px-8 py-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-y-auto">
             <h2
               data-display="true"
               className="mb-2 text-2xl font-semibold text-balance text-foreground"
@@ -375,7 +375,7 @@ function Feature({
   desc: string
 }): React.JSX.Element {
   return (
-    <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/55 bg-background/65 px-4 py-3 shadow-sm">
+    <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/50 bg-card px-4 py-3 shadow-sm">
       <Icon className="w-4 h-4 mt-0.5 text-foreground shrink-0" />
       <div>
         <p className="text-xs font-semibold text-foreground">{title}</p>
@@ -387,7 +387,7 @@ function Feature({
 
 function KeyCap({ label }: { label: string }): React.JSX.Element {
   return (
-    <span className="inline-flex h-11 w-11 items-center justify-center rounded-[1rem] border border-border/60 bg-background/75 text-sm font-semibold text-foreground shadow-sm">
+    <span className="inline-flex h-11 w-11 items-center justify-center rounded-[1rem] border border-border bg-muted text-sm font-semibold text-foreground shadow-sm">
       {label}
     </span>
   )

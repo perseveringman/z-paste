@@ -201,14 +201,14 @@ const ClipboardCard = memo(function ClipboardCard({
           isMultiSelected
             ? 'border-primary/35 bg-primary/10 shadow-sm'
             : isSelected
-              ? 'border-primary/60 bg-background/95 shadow-lg shadow-primary/10 scale-[1.02]'
-              : 'border-border/50 bg-background/70 hover:border-border/80 hover:bg-background/85'
+              ? 'border-primary/50 bg-card shadow-lg shadow-primary/8 scale-[1.02]'
+              : 'border-border/50 bg-card/80 hover:border-border hover:bg-card'
         )}
         style={{ width: CARD_WIDTH }}
       >
         {/* Card header */}
         <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary/80 text-muted-foreground">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <TypeIcon type={item.content_type} className="h-3 w-3" />
           </span>
           {isEditingTitle ? (
@@ -293,7 +293,7 @@ const ClipboardCard = memo(function ClipboardCard({
 
         {/* Card footer */}
         <div className="flex items-center gap-1.5 border-t border-border/40 px-3 py-1.5 text-[10px] text-muted-foreground">
-          <span className="rounded-full bg-secondary/75 px-1.5 py-0.5 uppercase tracking-[0.14em] text-[9px]">
+          <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.14em] text-[9px]">
             {item.content_type}
           </span>
           <span className="text-muted-foreground/50">•</span>
@@ -321,7 +321,7 @@ const ClipboardCard = memo(function ClipboardCard({
       {contextMenu && (
         <div
           ref={menuRef}
-          className="fixed z-50 max-w-[calc(100vw-24px)] overflow-hidden rounded-[1rem] border border-border/70 bg-popover/95 p-1 text-popover-foreground shadow-xl backdrop-blur-xl animate-in fade-in-80 zoom-in-95"
+          className="fixed z-50 max-w-[calc(100vw-24px)] overflow-hidden rounded-[1rem] border border-border bg-popover p-1 text-popover-foreground shadow-xl animate-in fade-in-80 zoom-in-95"
           style={menuPosition ?? { left: contextMenu.x, top: contextMenu.y }}
         >
           <button
@@ -412,7 +412,7 @@ export default function ClipboardCardList({ onDoubleClick, onOpenTagPicker }: {
   if (items.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center px-5 py-8 text-sm text-muted-foreground">
-        <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-background/70 px-6 py-8 text-center shadow-sm">
+        <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-card px-6 py-8 text-center shadow-sm">
           <p className="mb-3 text-3xl">📋</p>
           <p className="text-base font-semibold text-foreground">{t('panel.empty.title')}</p>
           <p className="mt-2 text-xs leading-6 text-muted-foreground">{t('panel.empty.subtitle')}</p>

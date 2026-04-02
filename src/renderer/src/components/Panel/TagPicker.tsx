@@ -142,10 +142,10 @@ export default function TagPicker({ itemId, onClose }: Props): React.JSX.Element
   return (
     <div
       ref={containerRef}
-      className="absolute z-50 w-60 rounded-lg border bg-popover shadow-xl overflow-hidden flex flex-col"
+      className="absolute z-50 w-60 rounded-xl border border-border bg-popover shadow-xl overflow-hidden flex flex-col"
       style={{ maxHeight: 320 }}
     >
-      <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/30">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60 bg-muted/30">
         <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
         <input
           ref={inputRef}

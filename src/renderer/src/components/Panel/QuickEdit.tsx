@@ -33,7 +33,7 @@ export default function QuickEdit({ content, onSave, onCancel }: Props): React.J
   )
 
   return (
-    <div className="flex flex-col h-full border-l bg-background/50">
+    <div className="flex flex-col h-full border-l border-border/60 bg-card">
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Edit2 className="w-3.5 h-3.5" />

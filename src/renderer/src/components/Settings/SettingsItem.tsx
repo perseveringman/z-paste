@@ -62,7 +62,7 @@ export function SettingsSelect<T extends string | number>({
         const parsed = typeof value === 'number' ? (Number(raw) as T) : (raw as T)
         onChange(parsed)
       }}
-      className="bg-muted/50 text-foreground text-xs px-2 py-1.5 rounded-md border border-border outline-none"
+      className="bg-muted text-foreground text-xs px-2 py-1.5 rounded-md border border-border outline-none"
     >
       {options.map((opt) => (
         <option key={String(opt.value)} value={opt.value}>

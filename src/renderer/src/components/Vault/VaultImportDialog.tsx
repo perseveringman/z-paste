@@ -117,7 +117,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-background border border-border rounded-2xl shadow-xl w-[480px] max-h-[80vh] flex flex-col overflow-hidden"
+        className="bg-popover border border-border rounded-2xl shadow-xl w-[480px] max-h-[80vh] flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
@@ -194,7 +194,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
                   {preview.entries.map((entry, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2 px-3 py-2 bg-muted/40 rounded-md text-xs"
+                      className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-md text-xs"
                     >
                       <Globe className="w-3 h-3 text-muted-foreground shrink-0" />
                       <span className="font-medium truncate min-w-0 flex-1">{entry.name}</span>

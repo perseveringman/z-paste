@@ -94,11 +94,11 @@ function WidgetPanel(): React.JSX.Element {
   }, [])
 
   return (
-    <div className="w-full h-full bg-background border rounded-xl overflow-hidden flex flex-col shadow-lg">
+    <div className="w-full h-full bg-background border border-border rounded-xl overflow-hidden flex flex-col shadow-lg">
       {/* Title bar - draggable */}
       <div
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-        className="flex items-center justify-between px-3 py-2 border-b bg-muted/30"
+        className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-muted/30"
       >
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <Clipboard className="w-3.5 h-3.5" />
@@ -110,13 +110,13 @@ function WidgetPanel(): React.JSX.Element {
         >
           <button
             onClick={togglePin}
-            className={`p-1 rounded hover:bg-muted/50 ${pinned ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`p-1 rounded hover:bg-muted ${pinned ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <Pin className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleClose}
-            className="p-1 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
           >
             <X className="w-3.5 h-3.5" />
           </button>

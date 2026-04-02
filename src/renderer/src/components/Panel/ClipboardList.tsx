@@ -93,7 +93,7 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
   if (items.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center px-5 py-8 text-sm text-muted-foreground">
-        <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-background/70 px-6 py-8 text-center shadow-sm">
+        <div className="max-w-xs rounded-[1.25rem] border border-border/60 bg-card px-6 py-8 text-center shadow-sm">
           <p className="mb-3 text-3xl">📋</p>
           <p className="text-base font-semibold text-foreground">{t('panel.empty.title')}</p>
           <p className="mt-2 text-xs leading-6 text-muted-foreground">{t('panel.empty.subtitle')}</p>

@@ -59,7 +59,7 @@ export default function FilterTabs(): React.JSX.Element {
   }, [items, leftFilter, sourceAppFilter])
 
   return (
-    <div className="border-b border-border/60 bg-background/18">
+    <div className="border-b border-border/60 surface-subtle">
       <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-2.5 py-1.5">
         {tabs.map(({ label, value }) => {
           const isActive = filterType === value

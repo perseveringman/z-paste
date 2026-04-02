@@ -32,7 +32,7 @@ export default function PreviewPanel({ item, layout = 'side' }: Props): React.JS
   if (!item) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-muted-foreground">
-        <div className="rounded-[1.5rem] border border-border/60 bg-background/70 px-8 py-10 text-center shadow-sm">
+        <div className="rounded-[1.5rem] border border-border/60 bg-card px-8 py-10 text-center shadow-sm">
           <Clipboard className="mx-auto mb-3 h-12 w-12 opacity-20" />
           <p className="text-xs">{t('preview.selectItem')}</p>
         </div>
@@ -125,7 +125,7 @@ function TextToolbar({ content }: { content: string }): React.JSX.Element {
   ]
 
   return (
-    <div className="flex shrink-0 flex-wrap gap-2 border-t border-border/60 bg-background/25 px-3 py-2.5">
+    <div className="flex shrink-0 flex-wrap gap-2 border-t border-border/60 bg-muted/20 px-3 py-2.5">
       {tools.map(({ label, fn }) => (
         <Button
           key={label}
@@ -151,7 +151,7 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
   }, [expanded, content])
 
   return (
-    <div className="shrink-0 border-t border-border/60 bg-background/25">
+    <div className="shrink-0 border-t border-border/60 bg-muted/20">
       <div className="px-3 py-2">
         <div className="flex items-center justify-between">
           <button
@@ -173,7 +173,7 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
           )}
         </div>
         {expanded && decoded && (
-          <pre className="mt-2 max-h-24 overflow-auto whitespace-pre-wrap break-all rounded-[1rem] border border-border/60 bg-background/75 p-3 font-mono text-xs text-foreground">
+          <pre className="mt-2 max-h-24 overflow-auto whitespace-pre-wrap break-all rounded-[1rem] border border-border/60 bg-muted/30 p-3 font-mono text-xs text-foreground">
             {decoded.valid ? decoded.decoded : t('preview.invalidBase64')}
           </pre>
         )}
@@ -188,7 +188,7 @@ function UrlToolbar({ content }: { content: string }): React.JSX.Element {
   const showDecoded = decoded !== content
 
   return (
-    <div className="flex shrink-0 flex-wrap gap-2 border-t border-border/60 bg-background/25 px-3 py-2.5">
+    <div className="flex shrink-0 flex-wrap gap-2 border-t border-border/60 bg-muted/20 px-3 py-2.5">
       <Button
         variant="outline"
         size="sm"

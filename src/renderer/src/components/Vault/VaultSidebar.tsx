@@ -13,10 +13,10 @@ export default function VaultSidebar(): React.JSX.Element {
   const displayItems = showFavoritesOnly ? items.filter((i) => i.favorite === 1) : items
 
   return (
-    <div className="w-[34%] border-r min-h-0 flex flex-col bg-muted/5">
+    <div className="w-[34%] border-r border-border min-h-0 flex flex-col bg-muted/20">
       {/* Filter bar */}
       <div className="flex items-center gap-1 px-2 pt-2 pb-1">
-        <div className="flex items-center gap-0.5 flex-1 bg-muted/50 rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 flex-1 bg-muted rounded-md p-0.5">
           {(['all', 'login', 'secure_note'] as const).map((type) => (
             <button
               key={type}
@@ -53,13 +53,13 @@ export default function VaultSidebar(): React.JSX.Element {
             onClick={() => selectItem(item.id)}
             className={`w-full text-left rounded-lg px-3 py-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
               detail?.meta.id === item.id
-                ? 'bg-accent text-accent-foreground shadow-sm'
+                ? 'bg-muted text-accent-foreground shadow-sm'
                 : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
             }`}
             aria-current={detail?.meta.id === item.id ? 'true' : undefined}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-1.5 rounded-md ${detail?.meta.id === item.id ? 'bg-primary/10 text-primary' : 'bg-muted group-hover:bg-background transition-colors'}`}>
+              <div className={`p-1.5 rounded-md ${detail?.meta.id === item.id ? 'bg-primary/10 text-primary' : 'bg-muted group-hover:bg-muted/80 transition-colors'}`}>
                 {item.type === 'login' ? <Key className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
               </div>
               <div className="min-w-0 flex-1">
@@ -83,7 +83,7 @@ export default function VaultSidebar(): React.JSX.Element {
         )}
       </div>
 
-      <div className="p-3 border-t bg-muted/10">
+      <div className="p-3 border-t border-border bg-muted/10">
         {showResetConfirm ? (
           <div className="space-y-2">
             <p className="text-[10px] text-destructive font-medium leading-tight">{t('vault.resetVault.prompt')}</p>

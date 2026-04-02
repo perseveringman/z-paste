@@ -58,7 +58,7 @@ export default function TemplateList(): React.JSX.Element {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border/60">
         <span className="text-xs text-muted-foreground">{t('template.title')}</span>
         <button
           onClick={() => setCreating(true)}
