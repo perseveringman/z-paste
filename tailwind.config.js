@@ -48,6 +48,13 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        syntax: {
+          key: "hsl(var(--syntax-key))",
+          string: "hsl(var(--syntax-string))",
+          number: "hsl(var(--syntax-number))",
+          boolean: "hsl(var(--syntax-boolean))",
+          null: "hsl(var(--syntax-null))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

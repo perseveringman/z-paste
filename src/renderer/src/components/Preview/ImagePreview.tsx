@@ -30,10 +30,10 @@ export default function ImagePreview({ content, metadata }: Props): React.JSX.El
       <img
         src={src}
         alt="Clipboard image"
-        className="max-w-full max-h-64 rounded-lg border border-black/10 dark:border-white/10 object-contain"
+        className="max-w-full max-h-64 rounded-lg border border-border object-contain"
       />
       {size && (
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           {size.width} × {size.height}
           {isFilePath && ' (文件引用)'}
         </span>

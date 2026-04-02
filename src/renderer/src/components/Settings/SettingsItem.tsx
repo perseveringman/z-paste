@@ -12,9 +12,9 @@ export default function SettingsItem({
   return (
     <div className="flex items-center justify-between py-3">
       <div className="flex-1 min-w-0 mr-4">
-        <p className="text-sm text-gray-800 dark:text-gray-200">{label}</p>
+        <p className="text-sm text-foreground">{label}</p>
         {description && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
         )}
       </div>
       <div className="shrink-0">{children}</div>
@@ -33,7 +33,7 @@ export function SettingsToggle({
     <button
       onClick={() => onChange(!value)}
       className={`relative w-10 h-6 rounded-full transition-colors ${
-        value ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+        value ? 'bg-primary' : 'bg-muted'
       }`}
     >
       <span
@@ -62,7 +62,7 @@ export function SettingsSelect<T extends string | number>({
         const parsed = typeof value === 'number' ? (Number(raw) as T) : (raw as T)
         onChange(parsed)
       }}
-      className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-1.5 rounded-md border border-gray-200 dark:border-gray-600 outline-none"
+      className="bg-muted/50 text-foreground text-xs px-2 py-1.5 rounded-md border border-border outline-none"
     >
       {options.map((opt) => (
         <option key={String(opt.value)} value={opt.value}>

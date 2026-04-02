@@ -14,19 +14,19 @@ export default function JsonPreview({ content }: Props): React.JSX.Element {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/5">
-        <span className={`text-xs ${valid ? 'text-green-400' : 'text-red-400'}`}>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border">
+        <span className={`text-xs ${valid ? 'text-syntax-string' : 'text-destructive'}`}>
           {valid ? '✓ Valid JSON' : `✗ ${error}`}
         </span>
         <button
           onClick={handleCopy}
-          className="text-xs text-gray-400 hover:text-white transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           复制
         </button>
       </div>
       <pre className="flex-1 overflow-auto p-3 text-xs font-mono whitespace-pre-wrap break-all">
-        {valid ? colorizeJSON(formatted) : <span className="text-gray-300">{content}</span>}
+        {valid ? colorizeJSON(formatted) : <span className="text-foreground">{content}</span>}
       </pre>
     </div>
   )
@@ -41,7 +41,7 @@ function colorizeJSON(json: string): React.JSX.Element {
           // Check if it's a key (followed by :) or a string value
           const isKey = json.indexOf(part + ':', json.indexOf(part)) !== -1
           return (
-            <span key={i} className={isKey ? 'text-blue-400' : 'text-green-400'}>
+            <span key={i} className={isKey ? 'text-syntax-key' : 'text-syntax-string'}>
               {part}
             </span>
           )
@@ -54,7 +54,7 @@ function colorizeJSON(json: string): React.JSX.Element {
 
         if (colored === part) {
           return (
-            <span key={i} className="text-gray-400">
+            <span key={i} className="text-muted-foreground">
               {part}
             </span>
           )
@@ -66,24 +66,24 @@ function colorizeJSON(json: string): React.JSX.Element {
             {segments.map((seg, j) => {
               if (seg.startsWith('<bool>'))
                 return (
-                  <span key={j} className="text-yellow-400">
+                  <span key={j} className="text-syntax-boolean">
                     {seg.replace(/<\/?bool>/g, '')}
                   </span>
                 )
               if (seg.startsWith('<null>'))
                 return (
-                  <span key={j} className="text-red-400">
+                  <span key={j} className="text-syntax-null">
                     {seg.replace(/<\/?null>/g, '')}
                   </span>
                 )
               if (seg.startsWith('<num>'))
                 return (
-                  <span key={j} className="text-purple-400">
+                  <span key={j} className="text-syntax-number">
                     {seg.replace(/<\/?num>/g, '')}
                   </span>
                 )
               return (
-                <span key={j} className="text-gray-400">
+                <span key={j} className="text-muted-foreground">
                   {seg}
                 </span>
               )

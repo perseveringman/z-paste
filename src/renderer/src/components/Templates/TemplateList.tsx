@@ -58,18 +58,18 @@ export default function TemplateList(): React.JSX.Element {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
-        <span className="text-xs text-gray-400">{t('template.title')}</span>
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+        <span className="text-xs text-muted-foreground">{t('template.title')}</span>
         <button
           onClick={() => setCreating(true)}
-          className="text-xs text-blue-400 hover:text-blue-300"
+          className="text-xs text-primary hover:text-primary/80"
         >
           {t('template.new')}
         </button>
       </div>
       <div className="flex-1 overflow-y-auto">
         {templates.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-600 text-xs">
+          <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
             {t('template.empty')}
           </div>
         ) : (
@@ -77,12 +77,12 @@ export default function TemplateList(): React.JSX.Element {
             <div
               key={t.id}
               onClick={() => handlePaste(t)}
-              className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-white/5 transition-colors"
+              className="group flex items-center px-4 py-2.5 cursor-pointer hover:bg-muted/50 transition-colors"
             >
               <span className="mr-2 text-sm">📄</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-200 truncate">{t.name}</p>
-                <p className="text-xs text-gray-500 truncate">{t.content}</p>
+                <p className="text-sm text-foreground truncate">{t.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{t.content}</p>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -90,7 +90,7 @@ export default function TemplateList(): React.JSX.Element {
                     e.stopPropagation()
                     setEditing(t)
                   }}
-                  className="text-xs text-gray-400 hover:text-white px-1"
+                  className="text-xs text-muted-foreground hover:text-foreground px-1"
                 >
                   ✎
                 </button>
@@ -99,7 +99,7 @@ export default function TemplateList(): React.JSX.Element {
                     e.stopPropagation()
                     handleDelete(t.id)
                   }}
-                  className="text-xs text-gray-400 hover:text-red-400 px-1"
+                  className="text-xs text-muted-foreground hover:text-destructive px-1"
                 >
                   ✕
                 </button>

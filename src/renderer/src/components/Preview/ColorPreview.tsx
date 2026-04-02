@@ -19,13 +19,13 @@ export default function ColorPreview({ content }: Props): React.JSX.Element {
   }, [])
 
   if (!color.valid) {
-    return <div className="p-3 text-xs text-gray-500">无法解析颜色值</div>
+    return <div className="p-3 text-xs text-muted-foreground">无法解析颜色值</div>
   }
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div
-        className="w-24 h-24 rounded-xl border border-white/10 shadow-lg"
+        className="w-24 h-24 rounded-xl border border-border shadow-lg"
         style={{ backgroundColor: color.hex }}
       />
       <div className="space-y-2 w-full">
@@ -37,10 +37,10 @@ export default function ColorPreview({ content }: Props): React.JSX.Element {
           <div
             key={label}
             onClick={() => handleCopy(value)}
-            className="flex items-center justify-between px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 cursor-pointer transition-colors"
+            className="flex items-center justify-between px-3 py-1.5 rounded bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
           >
-            <span className="text-xs text-gray-500">{label}</span>
-            <span className="text-xs text-gray-200 font-mono">{value}</span>
+            <span className="text-xs text-muted-foreground">{label}</span>
+            <span className="text-xs text-foreground font-mono">{value}</span>
           </div>
         ))}
       </div>
