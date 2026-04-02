@@ -171,6 +171,11 @@
   "settings.about.version": "Version {{version}}",
   "settings.about.description": "Mac Clipboard + Password Manager — Make Copy-Paste More Efficient",
   "settings.about.docs": "Docs",
+  "settings.about.checkUpdate": "Check for Updates",
+  "settings.about.checking": "Checking...",
+  "settings.about.upToDate": "You're on the latest version",
+  "settings.about.updateAvailable": "New version {{version}} available, update prompt will appear shortly",
+  "settings.about.checkFailed": "Failed to check for updates, please try again later",
 
   "onboarding.step1.title": "Welcome to Stash",
   "onboarding.step1.description": "A powerful Mac clipboard manager to boost your copy-paste workflow",

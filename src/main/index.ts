@@ -165,6 +165,25 @@ app.whenReady().then(() => {
     return app.getVersion()
   })
 
+  ipcMain.handle('app:checkForUpdates', async () => {
+    if (!app.isPackaged) {
+      return { status: 'not-available', message: 'dev-mode' }
+    }
+    try {
+      const result = await autoUpdater.checkForUpdates()
+      if (result && result.updateInfo) {
+        const currentVersion = app.getVersion()
+        const latestVersion = result.updateInfo.version
+        if (latestVersion !== currentVersion) {
+          return { status: 'available', version: latestVersion }
+        }
+      }
+      return { status: 'up-to-date' }
+    } catch {
+      return { status: 'error' }
+    }
+  })
+
   // License IPC handlers
   ipcMain.handle('license:getStatus', async () => {
     return license.getLicenseStatus()

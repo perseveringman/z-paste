@@ -214,6 +214,7 @@ const api = {
   }) => ipcRenderer.invoke('dialog:showOpenDialog', options),
   // App info
   getVersion: () => ipcRenderer.invoke('app:getVersion'),
+  checkForUpdates: () => ipcRenderer.invoke('app:checkForUpdates') as Promise<{ status: 'available' | 'up-to-date' | 'not-available' | 'error'; version?: string; message?: string }>,
   // License
   getLicenseStatus: () => ipcRenderer.invoke('license:getStatus'),
   activateLicense: (code: string) => ipcRenderer.invoke('license:activate', code),

@@ -171,6 +171,11 @@
   "settings.about.version": "版本 {{version}}",
   "settings.about.description": "Mac 剪贴板 + 密码管理器 — 让复制粘贴更高效",
   "settings.about.docs": "文档站",
+  "settings.about.checkUpdate": "检查更新",
+  "settings.about.checking": "检查中...",
+  "settings.about.upToDate": "当前已是最新版本",
+  "settings.about.updateAvailable": "发现新版本 {{version}}，将自动弹出更新提示",
+  "settings.about.checkFailed": "检查更新失败，请稍后重试",
 
   "onboarding.step1.title": "欢迎使用 Stash",
   "onboarding.step1.description": "强大的 Mac 剪贴板管理器，让你的复制粘贴更高效",

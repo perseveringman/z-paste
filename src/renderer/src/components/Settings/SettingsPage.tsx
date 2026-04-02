@@ -1289,11 +1289,33 @@ function LicenseSection(): React.JSX.Element {
 function AboutSection(): React.JSX.Element {
   const { t } = useTranslation()
   const [version, setVersion] = useState<string>('1.0.0')
+  const [checking, setChecking] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<'idle' | 'up-to-date' | 'available' | 'error'>('idle')
+  const [newVersion, setNewVersion] = useState<string>('')
 
   useEffect(() => {
     window.api.getVersion().then((v) => {
       setVersion(v)
     })
+  }, [])
+
+  const handleCheckUpdate = useCallback(async () => {
+    setChecking(true)
+    setUpdateStatus('idle')
+    try {
+      const result = await window.api.checkForUpdates()
+      if (result.status === 'available') {
+        setUpdateStatus('available')
+        setNewVersion(result.version || '')
+      } else if (result.status === 'error') {
+        setUpdateStatus('error')
+      } else {
+        setUpdateStatus('up-to-date')
+      }
+    } catch {
+      setUpdateStatus('error')
+    }
+    setChecking(false)
   }, [])
 
   return (
@@ -1308,25 +1330,37 @@ function AboutSection(): React.JSX.Element {
           </p>
         </div>
         <p className="text-sm text-muted-foreground max-w-xs">{t('settings.about.description')}</p>
-        <div className="flex gap-4">
-          <Button variant="link" asChild>
-            <a
-              href="https://github.com/perseveringman/Stash"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub →
-            </a>
+        <div className="flex flex-col items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCheckUpdate}
+            disabled={checking}
+          >
+            {checking ? (
+              <>
+                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+                {t('settings.about.checking')}
+              </>
+            ) : (
+              t('settings.about.checkUpdate')
+            )}
           </Button>
-          <Button variant="link" asChild>
-            <a
-              href="https://perseveringman.github.io/Stash/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t('settings.about.docs')} →
-            </a>
-          </Button>
+          {updateStatus === 'up-to-date' && (
+            <p className="text-xs text-green-600 dark:text-green-400">
+              {t('settings.about.upToDate')}
+            </p>
+          )}
+          {updateStatus === 'available' && (
+            <p className="text-xs text-primary">
+              {t('settings.about.updateAvailable', { version: newVersion })}
+            </p>
+          )}
+          {updateStatus === 'error' && (
+            <p className="text-xs text-destructive">
+              {t('settings.about.checkFailed')}
+            </p>
+          )}
         </div>
       </div>
     </div>
