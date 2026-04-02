@@ -39,6 +39,9 @@ import {
   LayoutGrid,
   Crown,
   Upload,
+  Download,
+  CheckCircle2,
+  RotateCcw,
 } from 'lucide-react'
 
 type SettingsSection =
@@ -1312,36 +1315,70 @@ function LicenseSection(): React.JSX.Element {
   )
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+type UpdatePhase = 'idle' | 'checking' | 'up-to-date' | 'available' | 'downloading' | 'downloaded' | 'error' | 'download-error'
+
 function AboutSection(): React.JSX.Element {
   const { t } = useTranslation()
   const [version, setVersion] = useState<string>('1.0.0')
-  const [checking, setChecking] = useState(false)
-  const [updateStatus, setUpdateStatus] = useState<'idle' | 'up-to-date' | 'available' | 'error'>('idle')
+  const [phase, setPhase] = useState<UpdatePhase>('idle')
   const [newVersion, setNewVersion] = useState<string>('')
+  const [progress, setProgress] = useState<{ percent: number; bytesPerSecond: number; transferred: number; total: number }>({ percent: 0, bytesPerSecond: 0, transferred: 0, total: 0 })
 
   useEffect(() => {
-    window.api.getVersion().then((v) => {
-      setVersion(v)
+    window.api.getVersion().then((v) => setVersion(v))
+
+    const cleanupProgress = window.api.onUpdateProgress((data) => {
+      setPhase('downloading')
+      setProgress(data)
     })
+    const cleanupDownloaded = window.api.onUpdateDownloaded(() => {
+      setPhase('downloaded')
+    })
+    const cleanupError = window.api.onUpdateError(() => {
+      setPhase((prev) => prev === 'downloading' ? 'download-error' : 'error')
+    })
+
+    return () => {
+      cleanupProgress()
+      cleanupDownloaded()
+      cleanupError()
+    }
   }, [])
 
   const handleCheckUpdate = useCallback(async () => {
-    setChecking(true)
-    setUpdateStatus('idle')
+    setPhase('checking')
     try {
       const result = await window.api.checkForUpdates()
       if (result.status === 'available') {
-        setUpdateStatus('available')
         setNewVersion(result.version || '')
+        setPhase('available')
       } else if (result.status === 'error') {
-        setUpdateStatus('error')
+        setPhase('error')
       } else {
-        setUpdateStatus('up-to-date')
+        setPhase('up-to-date')
       }
     } catch {
-      setUpdateStatus('error')
+      setPhase('error')
     }
-    setChecking(false)
+  }, [])
+
+  const handleDownload = useCallback(async () => {
+    setPhase('downloading')
+    setProgress({ percent: 0, bytesPerSecond: 0, transferred: 0, total: 0 })
+    const result = await window.api.downloadUpdate()
+    if (!result.ok) {
+      setPhase('download-error')
+    }
+  }, [])
+
+  const handleInstall = useCallback(() => {
+    window.api.installUpdate()
   }, [])
 
   return (
@@ -1356,36 +1393,88 @@ function AboutSection(): React.JSX.Element {
           </p>
         </div>
         <p className="text-sm text-muted-foreground max-w-xs">{t('settings.about.description')}</p>
-        <div className="flex flex-col items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCheckUpdate}
-            disabled={checking}
-          >
-            {checking ? (
-              <>
-                <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
-                {t('settings.about.checking')}
-              </>
-            ) : (
-              t('settings.about.checkUpdate')
-            )}
-          </Button>
-          {updateStatus === 'up-to-date' && (
-            <p className="text-xs text-green-600 dark:text-green-400">
+
+        <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+          {/* Check / Download / Install buttons */}
+          {(phase === 'idle' || phase === 'up-to-date' || phase === 'error') && (
+            <Button variant="outline" size="sm" onClick={handleCheckUpdate}>
+              {t('settings.about.checkUpdate')}
+            </Button>
+          )}
+
+          {phase === 'checking' && (
+            <Button variant="outline" size="sm" disabled>
+              <RefreshCw className="w-3 h-3 mr-2 animate-spin" />
+              {t('settings.about.checking')}
+            </Button>
+          )}
+
+          {phase === 'available' && (
+            <Button size="sm" onClick={handleDownload}>
+              <Download className="w-3 h-3 mr-2" />
+              {t('settings.about.downloadUpdate')}
+            </Button>
+          )}
+
+          {phase === 'download-error' && (
+            <Button size="sm" variant="outline" onClick={handleDownload}>
+              <RotateCcw className="w-3 h-3 mr-2" />
+              {t('settings.about.downloadUpdate')}
+            </Button>
+          )}
+
+          {phase === 'downloaded' && (
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleInstall}>
+                <RotateCcw className="w-3 h-3 mr-2" />
+                {t('settings.about.restartInstall')}
+              </Button>
+            </div>
+          )}
+
+          {/* Progress bar */}
+          {phase === 'downloading' && (
+            <div className="w-full space-y-1.5">
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress.percent}%` }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>{t('settings.about.downloadProgress', { percent: progress.percent })}</span>
+                {progress.bytesPerSecond > 0 && (
+                  <span>{t('settings.about.downloadSpeed', { speed: formatBytes(progress.bytesPerSecond) })}</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Status messages */}
+          {phase === 'up-to-date' && (
+            <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
               {t('settings.about.upToDate')}
             </p>
           )}
-          {updateStatus === 'available' && (
+          {(phase === 'available' || phase === 'downloading') && (
             <p className="text-xs text-primary">
               {t('settings.about.updateAvailable', { version: newVersion })}
             </p>
           )}
-          {updateStatus === 'error' && (
-            <p className="text-xs text-destructive">
-              {t('settings.about.checkFailed')}
+          {phase === 'downloaded' && (
+            <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              {t('settings.about.downloadReady')}
             </p>
+          )}
+          {phase === 'error' && (
+            <p className="text-xs text-destructive">{t('settings.about.checkFailed')}</p>
+          )}
+          {phase === 'download-error' && (
+            <p className="text-xs text-destructive">{t('settings.about.downloadFailed')}</p>
           )}
         </div>
       </div>

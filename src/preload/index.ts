@@ -215,6 +215,20 @@ const api = {
   // App info
   getVersion: () => ipcRenderer.invoke('app:getVersion'),
   checkForUpdates: () => ipcRenderer.invoke('app:checkForUpdates') as Promise<{ status: 'available' | 'up-to-date' | 'not-available' | 'error'; version?: string; message?: string }>,
+  downloadUpdate: () => ipcRenderer.invoke('updater:downloadUpdate') as Promise<{ ok: boolean; error?: string }>,
+  installUpdate: () => ipcRenderer.invoke('updater:install'),
+  onUpdateProgress: (callback: (data: { percent: number; bytesPerSecond: number; transferred: number; total: number }) => void) => {
+    ipcRenderer.on('updater:download-progress', (_, data) => callback(data))
+    return () => ipcRenderer.removeAllListeners('updater:download-progress')
+  },
+  onUpdateDownloaded: (callback: () => void) => {
+    ipcRenderer.on('updater:downloaded', () => callback())
+    return () => ipcRenderer.removeAllListeners('updater:downloaded')
+  },
+  onUpdateError: (callback: (message: string) => void) => {
+    ipcRenderer.on('updater:error', (_, message) => callback(message))
+    return () => ipcRenderer.removeAllListeners('updater:error')
+  },
   // License
   getLicenseStatus: () => ipcRenderer.invoke('license:getStatus'),
   activateLicense: (code: string) => ipcRenderer.invoke('license:activate', code),

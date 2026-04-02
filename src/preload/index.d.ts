@@ -263,6 +263,12 @@ interface ZPasteAPI {
   }) => Promise<{ canceled: boolean; filePaths: string[] }>
   // App info
   getVersion: () => Promise<string>
+  checkForUpdates: () => Promise<{ status: 'available' | 'up-to-date' | 'not-available' | 'error'; version?: string; message?: string }>
+  downloadUpdate: () => Promise<{ ok: boolean; error?: string }>
+  installUpdate: () => Promise<void>
+  onUpdateProgress: (callback: (data: { percent: number; bytesPerSecond: number; transferred: number; total: number }) => void) => () => void
+  onUpdateDownloaded: (callback: () => void) => () => void
+  onUpdateError: (callback: (message: string) => void) => () => void
   // License
   getLicenseStatus: () => Promise<{
     type: 'trial' | 'activated' | 'expired'

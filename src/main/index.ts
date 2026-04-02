@@ -39,52 +39,51 @@ let autoTypeAgent: AutoTypeAgent
 let vaultCryptoWorker: VaultCryptoWorkerClient | null = null
 let cleanupMaxItems = DEFAULT_MAX_ITEMS
 
+function broadcastToAllWindows(channel: string, ...args: unknown[]): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) {
+      win.webContents.send(channel, ...args)
+    }
+  }
+}
+
 function setupAutoUpdater(): void {
-  // 开发模式下跳过
   if (!app.isPackaged) return
 
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = true
 
-  autoUpdater.on('update-available', (info) => {
-    dialog.showMessageBox({
-      type: 'info',
-      title: '发现新版本',
-      message: `Stash ${info.version} 已发布`,
-      detail: '是否立即下载更新？下载完成后重启即可安装。',
-      buttons: ['立即更新', '稍后提醒'],
-      defaultId: 0,
-      cancelId: 1,
-    }).then(({ response }) => {
-      if (response === 0) {
-        autoUpdater.downloadUpdate().catch((err) => {
-          console.error('[updater] download failed:', err.message)
-        })
-      }
+  autoUpdater.on('download-progress', (progress) => {
+    broadcastToAllWindows('updater:download-progress', {
+      percent: Math.round(progress.percent),
+      bytesPerSecond: progress.bytesPerSecond,
+      transferred: progress.transferred,
+      total: progress.total,
     })
   })
 
   autoUpdater.on('update-downloaded', () => {
-    dialog.showMessageBox({
-      type: 'info',
-      title: '更新已准备好',
-      message: '新版本已下载完成',
-      detail: '重启 Stash 以完成安装。',
-      buttons: ['现在重启', '稍后'],
-      defaultId: 0,
-      cancelId: 1,
-    }).then(({ response }) => {
-      if (response === 0) {
-        autoUpdater.quitAndInstall()
-      }
-    })
+    broadcastToAllWindows('updater:downloaded')
   })
 
   autoUpdater.on('error', (err) => {
     console.error('[updater] error:', err.message)
+    broadcastToAllWindows('updater:error', err.message)
   })
 
-  // 启动时检查，之后每小时一次
+  ipcMain.handle('updater:downloadUpdate', async () => {
+    try {
+      await autoUpdater.downloadUpdate()
+      return { ok: true }
+    } catch (err) {
+      return { ok: false, error: (err as Error).message }
+    }
+  })
+
+  ipcMain.handle('updater:install', () => {
+    autoUpdater.quitAndInstall()
+  })
+
   autoUpdater.checkForUpdates().catch(() => {})
   const updateIntervalId = setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {})
