@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, Lock, Star, Key, FileText } from 'lucide-react'
 import type { VaultItemMeta } from '../../shared/types'
+import { t } from '../../shared/i18n'
 
 interface Props {
   onLock: () => void
@@ -74,7 +75,7 @@ export function VaultListView({ onLock, onSelectItem }: Props) {
         </h1>
         <button
           onClick={onLock}
-          title="锁定"
+          title={t('lock')}
           className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors"
         >
           <Lock className="w-4 h-4" />
@@ -90,7 +91,7 @@ export function VaultListView({ onLock, onSelectItem }: Props) {
             type="text"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="搜索密码库…"
+            placeholder={t('searchVault')}
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           />
         </div>
@@ -106,7 +107,7 @@ export function VaultListView({ onLock, onSelectItem }: Props) {
           <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
             <Search className="w-8 h-8 mb-3 opacity-50" />
             <p className="text-sm">
-              {query ? '未找到匹配项' : '密码库为空'}
+              {query ? t('noMatch') : t('vaultEmpty')}
             </p>
           </div>
         ) : (

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   content: string
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export default function ImagePreview({ content, metadata }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const size = useMemo(() => {
     if (!metadata) return null
     try {
@@ -35,7 +37,7 @@ export default function ImagePreview({ content, metadata }: Props): React.JSX.El
       {size && (
         <span className="text-xs text-muted-foreground">
           {size.width} × {size.height}
-          {isFilePath && ' (文件引用)'}
+          {isFilePath && ` ${t('preview.fileReference')}`}
         </span>
       )}
     </div>

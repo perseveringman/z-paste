@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Clipboard,
   Pin,
@@ -41,6 +42,7 @@ function truncate(text: string, max: number): string {
 }
 
 function WidgetPanel(): React.JSX.Element {
+  const { t } = useTranslation()
   const [items, setItems] = useState<ClipboardItem[]>([])
   const [pinned, setPinned] = useState(true)
 
@@ -100,7 +102,7 @@ function WidgetPanel(): React.JSX.Element {
       >
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <Clipboard className="w-3.5 h-3.5" />
-          <span>最近剪贴板</span>
+          <span>{t('widget.title')}</span>
         </div>
         <div
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -150,7 +152,7 @@ function WidgetPanel(): React.JSX.Element {
         ))}
         {items.length === 0 && (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-            暂无记录
+            {t('widget.empty')}
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ClipboardItem } from '../../stores/clipboardStore'
 import CodePreview from './CodePreview'
 import JsonPreview from './JsonPreview'
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function PreviewPanel({ item, layout = 'side' }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const { togglePreview } = useClipboardStore()
 
   if (!item) {
@@ -32,7 +34,7 @@ export default function PreviewPanel({ item, layout = 'side' }: Props): React.JS
       <div className="flex flex-1 flex-col items-center justify-center px-6 text-muted-foreground">
         <div className="rounded-[1.5rem] border border-border/60 bg-background/70 px-8 py-10 text-center shadow-sm">
           <Clipboard className="mx-auto mb-3 h-12 w-12 opacity-20" />
-          <p className="text-xs">选择条目查看预览</p>
+          <p className="text-xs">{t('preview.selectItem')}</p>
         </div>
       </div>
     )
@@ -54,17 +56,17 @@ export default function PreviewPanel({ item, layout = 'side' }: Props): React.JS
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           {item.use_count > 0 && (
             <span className="tabular-nums">
-              {item.use_count}次使用
+              {t('preview.useCount', { count: item.use_count })}
             </span>
           )}
           <span className="tabular-nums">
-            {new Date(item.created_at).toLocaleString('zh-CN')}
+            {new Date(item.created_at).toLocaleString()}
           </span>
           <button
             onClick={togglePreview}
-            aria-label="收起详情"
+            aria-label={t('preview.collapseDetails')}
             className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            title="收起详情 (⌥)"
+            title={`${t('preview.collapseDetails')} (⌥)`}
           >
             <PanelRightClose className="w-3.5 h-3.5" />
           </button>
@@ -140,6 +142,7 @@ function TextToolbar({ content }: { content: string }): React.JSX.Element {
 }
 
 function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
   const decoded = useMemo(() => {
@@ -156,7 +159,7 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
             className="flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
           >
             <Code className="w-3 h-3" />
-            {expanded ? '收起解码结果' : '展开解码结果'}
+            {expanded ? t('preview.collapseDecoded') : t('preview.expandDecoded')}
           </button>
           {expanded && decoded?.valid && (
             <Button
@@ -165,13 +168,13 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
               className="h-6 px-2 text-[10px] text-primary hover:text-primary"
               onClick={() => navigator.clipboard.writeText(decoded.decoded)}
             >
-              <Copy className="w-3 h-3 mr-1" /> 复制
+              <Copy className="w-3 h-3 mr-1" /> {t('preview.copy')}
             </Button>
           )}
         </div>
         {expanded && decoded && (
           <pre className="mt-2 max-h-24 overflow-auto whitespace-pre-wrap break-all rounded-[1rem] border border-border/60 bg-background/75 p-3 font-mono text-xs text-foreground">
-            {decoded.valid ? decoded.decoded : '无效的 Base64 内容'}
+            {decoded.valid ? decoded.decoded : t('preview.invalidBase64')}
           </pre>
         )}
       </div>
@@ -180,6 +183,7 @@ function Base64Toolbar({ content }: { content: string }): React.JSX.Element {
 }
 
 function UrlToolbar({ content }: { content: string }): React.JSX.Element {
+  const { t } = useTranslation()
   const decoded = decodeURL(content)
   const showDecoded = decoded !== content
 
@@ -191,7 +195,7 @@ function UrlToolbar({ content }: { content: string }): React.JSX.Element {
         className="h-7 px-3 text-[10px]"
         onClick={() => navigator.clipboard.writeText(content)}
       >
-        <Link className="w-3 h-3 mr-1" /> 复制 URL
+        <Link className="w-3 h-3 mr-1" /> {t('preview.copyUrl')}
       </Button>
       {showDecoded && (
         <Button
@@ -200,7 +204,7 @@ function UrlToolbar({ content }: { content: string }): React.JSX.Element {
           className="h-7 px-3 text-[10px]"
           onClick={() => navigator.clipboard.writeText(decoded)}
         >
-          <Code className="w-3 h-3 mr-1" /> 复制解码
+          <Code className="w-3 h-3 mr-1" /> {t('preview.copyDecoded')}
         </Button>
       )}
     </div>

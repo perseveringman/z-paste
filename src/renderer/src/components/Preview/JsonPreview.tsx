@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatJSON } from '../../utils/formatters'
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export default function JsonPreview({ content }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const { formatted, valid, error } = useMemo(() => formatJSON(content), [content])
 
   const handleCopy = useCallback(() => {
@@ -22,7 +24,7 @@ export default function JsonPreview({ content }: Props): React.JSX.Element {
           onClick={handleCopy}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          复制
+          {t('preview.copy')}
         </button>
       </div>
       <pre className="flex-1 overflow-auto p-3 text-xs font-mono whitespace-pre-wrap break-all">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import type { VaultSecurityState, VaultItemMeta } from '../shared/types'
+import { t } from '../shared/i18n'
 import { DisconnectedView } from './components/DisconnectedView'
 import { NoSetupView } from './components/NoSetupView'
 import { UnlockView } from './components/UnlockView'
@@ -63,7 +64,7 @@ export function App() {
     })
     const result = resp as { success: boolean }
     if (!result.success) {
-      throw new Error('密码错误，请重试')
+      throw new Error(t('passwordError'))
     }
     await loadState()
   }

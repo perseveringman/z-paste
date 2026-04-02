@@ -3,6 +3,7 @@ import {
   ArrowLeft, Copy, Eye, EyeOff, Key, FileText, Star, ExternalLink,
 } from 'lucide-react'
 import type { VaultItemMeta, VaultItemDetail, VaultLoginFields } from '../../shared/types'
+import { t } from '../../shared/i18n'
 
 interface Props {
   item: VaultItemMeta
@@ -83,7 +84,7 @@ export function ItemDetailView({ item, onBack }: Props) {
         </div>
       ) : !detail ? (
         <div className="flex-1 flex items-center justify-center text-sm text-slate-400">
-          加载失败
+          {t('loadFailed')}
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
@@ -110,7 +111,7 @@ export function ItemDetailView({ item, onBack }: Props) {
             <>
               {/* Username */}
               <FieldRow
-                label="用户名"
+                label={t('username')}
                 value={loginFields.username}
                 copied={copiedField === 'username'}
                 onCopy={() => copyToClipboard(loginFields.username, 'username')}
@@ -119,7 +120,7 @@ export function ItemDetailView({ item, onBack }: Props) {
               {/* Password */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  密码
+                  {t('password')}
                 </label>
                 <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                   <span className="flex-1 text-sm font-mono text-slate-800 dark:text-slate-100 truncate select-all">
@@ -128,7 +129,7 @@ export function ItemDetailView({ item, onBack }: Props) {
                   <button
                     onClick={() => setShowPassword(!showPassword)}
                     className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                    title={showPassword ? '隐藏' : '显示'}
+                    title={showPassword ? t('hide') : t('show')}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -142,7 +143,7 @@ export function ItemDetailView({ item, onBack }: Props) {
               {/* TOTP */}
               {loginFields.totpSecret && (
                 <FieldRow
-                  label="TOTP 密钥"
+                  label={t('totpSecret')}
                   value={loginFields.totpSecret}
                   copied={copiedField === 'totp'}
                   onCopy={() => copyToClipboard(loginFields.totpSecret!, 'totp')}
@@ -156,7 +157,7 @@ export function ItemDetailView({ item, onBack }: Props) {
                 disabled={filling}
                 className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium transition-colors mt-2"
               >
-                {filling ? '填充中…' : '自动填充'}
+                {filling ? t('filling') : t('autoFill')}
               </button>
             </>
           )}
@@ -165,7 +166,7 @@ export function ItemDetailView({ item, onBack }: Props) {
           {isLogin && loginFields?.notes && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                备注
+                {t('notes')}
               </label>
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                 <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words">
@@ -179,7 +180,7 @@ export function ItemDetailView({ item, onBack }: Props) {
           {!isLogin && 'content' in detail.fields && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                内容
+                {t('content')}
               </label>
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                 <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words">
@@ -194,7 +195,7 @@ export function ItemDetailView({ item, onBack }: Props) {
       {/* Copied toast */}
       {copiedField && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 text-white text-xs font-medium shadow-lg animate-fade-in">
-          已复制
+          {t('copied')}
         </div>
       )}
     </div>
@@ -234,7 +235,7 @@ function CopyButton({ copied, onClick }: { copied: boolean; onClick: () => void 
     <button
       onClick={onClick}
       className="p-1 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-      title="复制"
+      title={t('copy')}
     >
       {copied ? (
         <span className="text-xs text-emerald-500 font-medium">✓</span>

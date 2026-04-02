@@ -3,6 +3,20 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { copyFileSync, mkdirSync, existsSync, readdirSync, renameSync } from 'fs'
 
+function copyDirRecursive(src: string, dest: string): void {
+  if (!existsSync(src)) return
+  mkdirSync(dest, { recursive: true })
+  for (const entry of readdirSync(src, { withFileTypes: true })) {
+    const srcPath = resolve(src, entry.name)
+    const destPath = resolve(dest, entry.name)
+    if (entry.isDirectory()) {
+      copyDirRecursive(srcPath, destPath)
+    } else {
+      copyFileSync(srcPath, destPath)
+    }
+  }
+}
+
 export default defineConfig({
   plugins: [
     react(),
@@ -23,6 +37,12 @@ export default defineConfig({
             copyFileSync(resolve(srcIcons, file), resolve(iconsDir, file))
           }
         }
+
+        // Copy _locales for i18n
+        copyDirRecursive(
+          resolve(__dirname, 'public', '_locales'),
+          resolve(distDir, '_locales')
+        )
 
         // Copy content.css
         copyFileSync(

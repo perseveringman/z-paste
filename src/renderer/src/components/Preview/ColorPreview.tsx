@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   content: string
@@ -12,6 +13,7 @@ interface ColorInfo {
 }
 
 export default function ColorPreview({ content }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const color = useMemo(() => parseColor(content.trim()), [content])
 
   const handleCopy = useCallback((value: string) => {
@@ -19,7 +21,7 @@ export default function ColorPreview({ content }: Props): React.JSX.Element {
   }, [])
 
   if (!color.valid) {
-    return <div className="p-3 text-xs text-muted-foreground">无法解析颜色值</div>
+    return <div className="p-3 text-xs text-muted-foreground">{t('preview.colorParseError')}</div>
   }
 
   return (

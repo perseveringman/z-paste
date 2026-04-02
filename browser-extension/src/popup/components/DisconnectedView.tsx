@@ -1,5 +1,6 @@
 import React from 'react'
 import { WifiOff, RefreshCw } from 'lucide-react'
+import { t } from '../../shared/i18n'
 
 interface Props {
   onRetry: () => void
@@ -14,10 +15,10 @@ export function DisconnectedView({ onRetry, loading }: Props) {
       </div>
 
       <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">
-        无法连接到 Stash 桌面端
+        {t('disconnectedTitle')}
       </h2>
       <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-8">
-        请确保 Stash 应用正在运行
+        {t('disconnectedDesc')}
       </p>
 
       <button
@@ -26,7 +27,7 @@ export function DisconnectedView({ onRetry, loading }: Props) {
         className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium transition-colors"
       >
         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        重新连接
+        {t('reconnect')}
       </button>
     </div>
   )

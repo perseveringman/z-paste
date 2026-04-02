@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Lock, Eye, EyeOff, Key } from 'lucide-react'
+import { t } from '../../shared/i18n'
 
 interface Props {
   onUnlock: (password: string) => Promise<void>
@@ -27,7 +28,7 @@ export function UnlockView({ onUnlock, securityMode, hintQuestion }: Props) {
     try {
       await onUnlock(password)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '密码错误，请重试')
+      setError(err instanceof Error ? err.message : t('passwordError'))
       setPassword('')
       inputRef.current?.focus()
     } finally {
@@ -45,7 +46,7 @@ export function UnlockView({ onUnlock, securityMode, hintQuestion }: Props) {
         Stash
       </h1>
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
-        输入主密码以解锁密码库
+        {t('unlockDesc')}
       </p>
 
       {/* Form */}
@@ -57,7 +58,7 @@ export function UnlockView({ onUnlock, securityMode, hintQuestion }: Props) {
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="主密码"
+            placeholder={t('masterPassword')}
             className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           />
           <button
@@ -77,7 +78,7 @@ export function UnlockView({ onUnlock, securityMode, hintQuestion }: Props) {
 
         {securityMode === 'relaxed' && hintQuestion && (
           <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-            提示：{hintQuestion}
+            {t('hint')}{hintQuestion}
           </p>
         )}
 
@@ -86,7 +87,7 @@ export function UnlockView({ onUnlock, securityMode, hintQuestion }: Props) {
           disabled={!password.trim() || loading}
           className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
         >
-          {loading ? '解锁中…' : '解锁'}
+          {loading ? t('unlocking') : t('unlock')}
         </button>
       </form>
     </div>

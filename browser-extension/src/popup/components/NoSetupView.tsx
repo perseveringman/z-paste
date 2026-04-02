@@ -1,5 +1,6 @@
 import React from 'react'
 import { Shield } from 'lucide-react'
+import { t } from '../../shared/i18n'
 
 export function NoSetupView() {
   return (
@@ -9,10 +10,10 @@ export function NoSetupView() {
       </div>
 
       <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">
-        请先在 Stash 桌面端设置主密码
+        {t('noSetupTitle')}
       </h2>
       <p className="text-sm text-slate-500 dark:text-slate-400 text-center leading-relaxed">
-        打开 Stash 桌面应用，按照引导完成密码库初始化后，即可在浏览器中使用。
+        {t('noSetupDesc')}
       </p>
     </div>
   )
