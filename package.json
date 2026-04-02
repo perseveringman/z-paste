@@ -1,6 +1,6 @@
 {
   "name": "stash",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Stash 剪贴板管理工具 - Mac 剪贴板管理器",
   "main": "./out/main/index.js",
   "author": "Stash",
