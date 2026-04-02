@@ -47,7 +47,7 @@ export default function VaultSetup(): React.JSX.Element {
 
   const handleCopy = async (): Promise<void> => {
     if (recoveryKey) {
-      await navigator.clipboard.writeText(recoveryKey)
+      await window.api.vaultCopyToClipboard(recoveryKey)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }

@@ -153,7 +153,7 @@ export default function VaultDetail({ createType, onCancelCreate, compact = fals
   }
 
   const handleCopy = async (text: string, field: string): Promise<void> => {
-    await navigator.clipboard.writeText(text)
+    await window.api.vaultCopyToClipboard(text)
     setCopiedField(field)
     setTimeout(() => setCopiedField(null), 2000)
   }
@@ -175,7 +175,7 @@ export default function VaultDetail({ createType, onCancelCreate, compact = fals
     const result = await getTotpCode(detail.meta.id)
     if (result) {
       setTotp({ code: result.code, remain: result.remainingSeconds })
-      await navigator.clipboard.writeText(result.code)
+      await window.api.vaultCopyToClipboard(result.code)
       setCopiedField('totp')
       setTimeout(() => setCopiedField(null), 2000)
     }

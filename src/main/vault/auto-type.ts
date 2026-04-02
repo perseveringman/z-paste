@@ -1,5 +1,6 @@
 import { clipboard } from 'electron'
 import { exec } from 'child_process'
+import { markAsVaultContent } from '../clipboard/vault-clipboard-guard'
 
 interface AutoTypeOptions {
   username: string
@@ -33,6 +34,7 @@ export class AutoTypeAgent {
       await sleep(stepDelay)
     }
 
+    markAsVaultContent(options.username)
     clipboard.writeText(options.username)
     await runAppleScript('tell application "System Events" to keystroke "v" using command down')
     await sleep(stepDelay)
@@ -40,6 +42,7 @@ export class AutoTypeAgent {
     await runAppleScript('tell application "System Events" to key code 48')
     await sleep(stepDelay)
 
+    markAsVaultContent(options.password)
     clipboard.writeText(options.password)
     await runAppleScript('tell application "System Events" to keystroke "v" using command down')
 

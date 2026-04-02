@@ -205,7 +205,7 @@ const VaultCard = memo(function VaultCard({
       e.stopPropagation()
       const detail = await window.api.vaultGetItemDetail(item.id)
       if (detail && detail.type === 'login') {
-        await navigator.clipboard.writeText(detail.fields.username)
+        await window.api.vaultCopyToClipboard(detail.fields.username)
         setCopiedField('username')
         setTimeout(() => setCopiedField(null), 1500)
       }
