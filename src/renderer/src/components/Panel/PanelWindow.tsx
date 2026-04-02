@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+
 import { useTranslation } from 'react-i18next'
 import SearchBar from './SearchBar'
 import ClipboardList from './ClipboardList'
@@ -32,7 +33,7 @@ export default function PanelWindow(): React.JSX.Element {
   useKeyboard(view)
   useQueueToast()
   const items = useSearch()
-  const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters, isQueueActive, sequenceQueue, clearQueue } = useClipboardStore()
+  const { selectedIndex, pasteItem, previewCollapsed, togglePreview, filtersCollapsed, toggleFilters, isQueueActive, sequenceQueue, clearQueue, tagBarCollapsed, toggleTagBar, typeFilterCollapsed, toggleTypeFilter, sourceAppFilterCollapsed, toggleSourceAppFilter } = useClipboardStore()
   const { toggleFilterShortcut, togglePreviewShortcut, openTagShortcut, openSettingsShortcut } = useSettingsStore()
   const { security, lock: lockVault } = useVaultStore()
   const selectedItem = items[selectedIndex] || null
@@ -42,6 +43,7 @@ export default function PanelWindow(): React.JSX.Element {
   const [vaultCreateType, setVaultCreateType] = useState<'login' | 'secure_note' | null>(null)
   const [showCreateMenu, setShowCreateMenu] = useState(false)
   const createMenuRef = useRef<HTMLDivElement>(null)
+
 
   // 右侧预览 debounce：hover 稳定 150ms 后才显示
   const [previewItem, setPreviewItem] = useState<(typeof selectedItem) | null>(null)
@@ -141,17 +143,8 @@ export default function PanelWindow(): React.JSX.Element {
         className="surface-subtle flex h-14 items-center gap-2.5 border-b border-border/60 px-3"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
-        <div className="min-w-0 shrink-0 pr-1.5">
-          <div className="hidden sm:flex items-center gap-2">
-            <img src={appIcon} alt="Stash" className="h-7 w-7" />
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                Stash Desk
-              </p>
-              <p className="text-[13px] font-semibold text-foreground/95">Clipboard atelier</p>
-            </div>
-          </div>
-          <img src={appIcon} alt="Stash" className="block sm:hidden h-7 w-7" />
+        <div className="shrink-0">
+          <img src={appIcon} alt="Stash" className="h-7 w-7" />
         </div>
 
         <div
@@ -221,6 +214,28 @@ export default function PanelWindow(): React.JSX.Element {
           {view === 'vault' && security.locked && (
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/60 text-muted-foreground">
               <Lock className="w-4 h-4" />
+            </div>
+          )}
+          {view === 'clipboard' && layoutMode !== 'side' && (
+            <div className="flex items-center gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+              {[
+                { collapsed: tagBarCollapsed, toggle: toggleTagBar, label: '1' },
+                { collapsed: typeFilterCollapsed, toggle: toggleTypeFilter, label: '2' },
+                { collapsed: sourceAppFilterCollapsed, toggle: toggleSourceAppFilter, label: '3' },
+              ].map(({ collapsed, toggle, label }) => (
+                <button
+                  key={label}
+                  onClick={toggle}
+                  className={cn(
+                    'flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold transition-colors',
+                    collapsed
+                      ? 'bg-muted text-muted-foreground hover:bg-muted-foreground/20'
+                      : 'bg-primary text-primary-foreground'
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           )}
           <Button

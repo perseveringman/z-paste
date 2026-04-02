@@ -71,7 +71,7 @@ export default function VaultStackedView({
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`flex-1 text-[10px] px-1.5 py-1 rounded transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
+              className={`flex-1 text-[10px] px-1.5 py-1 rounded-[5px] transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
                 filterType === type
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -214,7 +214,7 @@ function VaultListItem({
       onClick={() => onSelect(item.id)}
       className={`w-full text-left rounded-lg px-3 py-2.5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
         isSelected
-          ? 'bg-muted text-accent-foreground shadow-sm'
+          ? 'bg-muted text-foreground shadow-sm'
           : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
       }`}
       aria-current={isSelected ? 'true' : undefined}

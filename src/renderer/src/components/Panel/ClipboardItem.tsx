@@ -323,7 +323,7 @@ function ClipboardItemRow({
             )}
             {item.is_pinned !== 0 && <Pin className="w-3 h-3 text-primary" />}
             {item.is_favorite !== 0 && <Star className="w-3 h-3 text-yellow-500" />}
-            {hasTag && <Tag className="w-3 h-3 text-blue-500" />}
+            {hasTag && <Tag className="w-3 h-3 text-primary" />}
           </div>
         </div>
       </div>

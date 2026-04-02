@@ -8,7 +8,7 @@ import { Star } from 'lucide-react'
 
 export default function TagBar(): React.JSX.Element {
   const { t } = useTranslation()
-  const { leftFilter, setLeftFilter, starredCount } = useClipboardStore()
+  const { leftFilter, setLeftFilter, starredCount, tagBarCollapsed } = useClipboardStore()
   const { tags, loadTags } = useTagStore()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -43,6 +43,8 @@ export default function TagBar(): React.JSX.Element {
     if (!el) return
     el.scrollBy({ left: direction === 'left' ? -120 : 120, behavior: 'smooth' })
   }
+
+  if (tagBarCollapsed) return <></>
 
   const isAll = leftFilter.type === 'all'
   const isStarred = leftFilter.type === 'starred'

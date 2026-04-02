@@ -108,7 +108,7 @@ export default function VaultCardCarousel({
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`flex-1 text-[10px] px-1.5 py-1 rounded transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
+              className={`flex-1 text-[10px] px-1.5 py-1 rounded-[5px] transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
                 filterType === type
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'

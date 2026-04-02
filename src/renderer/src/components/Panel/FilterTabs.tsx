@@ -15,7 +15,7 @@ const iconCache = new Map<string, string>()
 
 export default function FilterTabs(): React.JSX.Element {
   const { t } = useTranslation()
-  const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items, sortBy, setSortBy, leftFilter } = useClipboardStore()
+  const { filterType, setFilterType, sourceAppFilter, setSourceAppFilter, items, sortBy, setSortBy, leftFilter, typeFilterCollapsed, sourceAppFilterCollapsed } = useClipboardStore()
 
   const tabs = [
     { label: t('panel.filter.all'), value: null },
@@ -58,52 +58,62 @@ export default function FilterTabs(): React.JSX.Element {
     }).then(setTypeCounts)
   }, [items, leftFilter, sourceAppFilter])
 
+  const showTypeFilter = !typeFilterCollapsed
+  const showSourceApps = !sourceAppFilterCollapsed && sourceApps.length > 0
+
+  if (!showTypeFilter && !showSourceApps) return <></>
+
   return (
     <div className="border-b border-border/60 surface-subtle">
-      <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-2.5 py-1.5">
-        {tabs.map(({ label, value }) => {
-          const isActive = filterType === value
-          const count = value !== null ? (typeCounts[value] || 0) : 0
-          return (
-            <Badge
-              key={label}
-              variant={isActive ? 'default' : 'secondary'}
-              className={cn(
-                'cursor-pointer whitespace-nowrap border px-2.5 py-1 text-[11px]',
-                !isActive &&
-                  'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
-              )}
-              onClick={() => setFilterType(value)}
-            >
-              {label}
-              {count > 0 && (
-                <span className={cn(
-                  'ml-1 text-[10px] tabular-nums',
-                  isActive ? 'opacity-80' : 'opacity-50'
-                )}>
-                  {count}
-                </span>
-              )}
-            </Badge>
-          )
-        })}
-        <div className="mx-0.5 h-4 w-px bg-border/70" />
-        <Badge
-          variant={sortBy === 'usage' ? 'default' : 'secondary'}
-          className={cn(
-            'flex cursor-pointer items-center gap-1 whitespace-nowrap border px-2.5 py-1 text-[11px]',
-            sortBy !== 'usage' &&
-              'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
-          )}
-          onClick={() => setSortBy(sortBy === 'usage' ? 'recent' : 'usage')}
-        >
-          <ArrowDownWideNarrow className="h-3 w-3" aria-hidden="true" />
-          {t('panel.filter.byUsage')}
-        </Badge>
-      </div>
+      {showTypeFilter && (
+        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-2.5 py-1.5">
+          {tabs.map(({ label, value }) => {
+            const isActive = filterType === value
+            const count = value !== null ? (typeCounts[value] || 0) : 0
+            return (
+              <Badge
+                key={label}
+                variant={isActive ? 'default' : 'secondary'}
+                className={cn(
+                  'cursor-pointer whitespace-nowrap border px-2.5 py-1 text-[11px]',
+                  !isActive &&
+                    'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
+                )}
+                onClick={() => setFilterType(value)}
+              >
+                {label}
+                {count > 0 && (
+                  <span className={cn(
+                    'ml-1 text-[10px] tabular-nums',
+                    isActive ? 'opacity-80' : 'opacity-50'
+                  )}>
+                    {count}
+                  </span>
+                )}
+              </Badge>
+            )
+          })}
+          <div className="mx-0.5 h-4 w-px bg-border/70" />
+          <Badge
+            variant={sortBy === 'usage' ? 'default' : 'secondary'}
+            className={cn(
+              'flex cursor-pointer items-center gap-1 whitespace-nowrap border px-2.5 py-1 text-[11px]',
+              sortBy !== 'usage' &&
+                'border-transparent bg-transparent text-muted-foreground hover:border-border/60 hover:bg-background/65 hover:text-foreground'
+            )}
+            onClick={() => setSortBy(sortBy === 'usage' ? 'recent' : 'usage')}
+          >
+            <ArrowDownWideNarrow className="h-3 w-3" aria-hidden="true" />
+            {t('panel.filter.byUsage')}
+          </Badge>
+        </div>
+      )}
 
-      {sourceApps.length > 0 && (
-        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto border-t border-border/50 px-2.5 py-1.5">
+      {showSourceApps && (
+        <div className={cn(
+          'no-scrollbar flex items-center gap-1.5 overflow-x-auto px-2.5 py-1.5',
+          showTypeFilter && 'border-t border-border/50'
+        )}>
           <button
             className={cn(
               'inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors',

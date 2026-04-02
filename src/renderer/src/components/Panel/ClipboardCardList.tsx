@@ -281,7 +281,7 @@ const ClipboardCard = memo(function ClipboardCard({
               )}
               {item.is_pinned !== 0 && <Pin className="w-3 h-3 text-primary" />}
               {item.is_favorite !== 0 && <Star className="w-3 h-3 text-yellow-500" />}
-              {hasTag && <Tag className="w-3 h-3 text-blue-500" />}
+              {hasTag && <Tag className="w-3 h-3 text-primary" />}
             </div>
           </div>
         </div>
@@ -293,7 +293,7 @@ const ClipboardCard = memo(function ClipboardCard({
 
         {/* Card footer */}
         <div className="flex items-center gap-1.5 border-t border-border/40 px-3 py-1.5 text-[10px] text-muted-foreground">
-          <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.14em] text-[9px]">
+          <span className="rounded-full bg-primary/15 text-foreground px-1.5 py-0.5 uppercase tracking-[0.14em] text-[9px]">
             {item.content_type}
           </span>
           <span className="text-muted-foreground/50">•</span>

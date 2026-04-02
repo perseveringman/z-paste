@@ -14,7 +14,7 @@
     --popover-foreground: 0 0% 10%;
     --primary: 21 100% 64%;          /* Icon orange #FF7F43 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 47 100% 62%;        /* Icon yellow #FFD743 */
+    --secondary: 0 0% 90%;
     --secondary-foreground: 0 0% 10%;
     --muted: 0 0% 93%;
     --muted-foreground: 0 0% 45%;
@@ -60,8 +60,8 @@
     --popover-foreground: 0 0% 92%;
     --primary: 21 100% 68%;
     --primary-foreground: 0 0% 7%;
-    --secondary: 47 90% 55%;
-    --secondary-foreground: 0 0% 7%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 92%;
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
     --accent: 21 100% 68%;

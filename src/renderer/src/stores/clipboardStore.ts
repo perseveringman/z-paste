@@ -33,6 +33,9 @@ interface ClipboardState {
   leftFilter: LeftFilter
   previewCollapsed: boolean
   filtersCollapsed: boolean
+  tagBarCollapsed: boolean
+  typeFilterCollapsed: boolean
+  sourceAppFilterCollapsed: boolean
   sortBy: 'recent' | 'usage'
   sourceAppFilter: string | null
   starredCount: number
@@ -65,6 +68,9 @@ interface ClipboardState {
   setSortBy: (sortBy: 'recent' | 'usage') => void
   togglePreview: () => void
   toggleFilters: () => void
+  toggleTagBar: () => void
+  toggleTypeFilter: () => void
+  toggleSourceAppFilter: () => void
   deleteItem: (id: string) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
   togglePin: (id: string) => Promise<void>
@@ -83,6 +89,9 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   leftFilter: { type: 'all' },
   previewCollapsed: false,
   filtersCollapsed: false,
+  tagBarCollapsed: false,
+  typeFilterCollapsed: false,
+  sourceAppFilterCollapsed: false,
   sourceAppFilter: null,
   sortBy: 'recent',
   starredCount: 0,
@@ -224,6 +233,9 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
 
   togglePreview: () => set((state) => ({ previewCollapsed: !state.previewCollapsed })),
   toggleFilters: () => set((state) => ({ filtersCollapsed: !state.filtersCollapsed })),
+  toggleTagBar: () => set((state) => ({ tagBarCollapsed: !state.tagBarCollapsed })),
+  toggleTypeFilter: () => set((state) => ({ typeFilterCollapsed: !state.typeFilterCollapsed })),
+  toggleSourceAppFilter: () => set((state) => ({ sourceAppFilterCollapsed: !state.sourceAppFilterCollapsed })),
 
   deleteItem: async (id) => {
     await window.api.deleteItem(id)

@@ -294,7 +294,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
           <div className="flex flex-col justify-between rounded-[1.5rem] border border-border/60 bg-card p-5 shadow-sm">
             <div>
               <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
-                <step.icon className="w-8 h-8 text-foreground" />
+                <step.icon className="w-8 h-8 text-primary" />
               </div>
               <div className="space-y-2">
                 {steps.map((candidate, index) => (
@@ -318,17 +318,17 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
             </p>
           </div>
 
-          <div className="flex flex-col rounded-[1.75rem] border border-border/60 bg-card px-8 py-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-y-auto">
+          <div className="flex flex-col rounded-[1.75rem] border border-border/60 bg-card px-6 py-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-y-auto">
             <h2
               data-display="true"
               className="mb-2 text-2xl font-semibold text-balance text-foreground"
             >
               {step.title}
             </h2>
-            <p className="mb-5 max-w-md text-sm leading-7 text-muted-foreground">
+            <p className="mb-5 text-sm leading-7 text-muted-foreground">
               {step.description}
             </p>
-            <div className="w-full max-w-md">{step.content}</div>
+            <div className="w-full">{step.content}</div>
           </div>
         </div>
       </div>
