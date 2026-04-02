@@ -15,6 +15,7 @@
   "panel.settings.tooltip": "Settings (⌘,)",
   "panel.empty.title": "No clipboard records",
   "panel.empty.subtitle": "Copied content will appear here automatically",
+  "panel.loadingMore": "Loading more...",
   "panel.preview.expand": "Expand details (⌥)",
   "panel.quickEdit.title": "Quick Edit",
 

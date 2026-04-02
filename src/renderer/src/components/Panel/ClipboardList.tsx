@@ -18,6 +18,8 @@ function getItemHeight(contentType: string): number {
 
 export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props): React.JSX.Element {
   const items = useSearch()
+  const hasMore = useClipboardStore((s) => s.hasMore)
+  const isLoadingMore = useClipboardStore((s) => s.isLoadingMore)
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
@@ -87,7 +89,15 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
   }, [])
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop)
+    const el = e.currentTarget
+    setScrollTop(el.scrollTop)
+
+    // 检测滚动到底部，触发加载更多
+    const scrollPos = el.scrollTop + el.clientHeight
+    const total = el.scrollHeight
+    if (total - scrollPos < 200) {
+      useClipboardStore.getState().loadNextPage()
+    }
   }, [])
 
   if (items.length === 0) {
@@ -139,14 +149,25 @@ export default function ClipboardList({ onDoubleClick, onOpenTagPicker }: Props)
     )
   }
 
+  const LOADING_HEIGHT = 48
+  const listTotalHeight = totalHeight + (hasMore ? LOADING_HEIGHT : 0)
+
   return (
     <div
       ref={containerRef}
       className="flex-1 overflow-y-auto px-1.5 py-1.5"
       onScroll={handleScroll}
     >
-      <div style={{ position: 'relative', height: totalHeight, width: '100%' }}>
+      <div style={{ position: 'relative', height: listTotalHeight, width: '100%' }}>
         {visibleItems}
+        {isLoadingMore && (
+          <div
+            style={{ position: 'absolute', top: totalHeight, left: 0, right: 0, height: LOADING_HEIGHT }}
+            className="flex items-center justify-center text-xs text-muted-foreground"
+          >
+            {t('panel.loadingMore')}
+          </div>
+        )}
       </div>
     </div>
   )

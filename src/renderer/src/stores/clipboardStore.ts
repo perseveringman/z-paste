@@ -39,6 +39,8 @@ interface ClipboardState {
   sortBy: 'recent' | 'usage'
   sourceAppFilter: string | null
   starredCount: number
+  hasMore: boolean
+  isLoadingMore: boolean
 
   // Sequence paste queue
   sequenceQueue: ClipboardItem[]
@@ -78,6 +80,7 @@ interface ClipboardState {
   updateTitle: (id: string, title: string | null) => Promise<void>
   clearAll: () => Promise<void>
   search: (query: string) => Promise<void>
+  loadNextPage: () => Promise<void>
 }
 
 export const useClipboardStore = create<ClipboardState>((set, get) => ({
@@ -95,6 +98,8 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
   sourceAppFilter: null,
   sortBy: 'recent',
   starredCount: 0,
+  hasMore: true,
+  isLoadingMore: false,
 
   // Sequence paste queue
   sequenceQueue: [],
@@ -181,8 +186,30 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
       sourceApp: state.sourceAppFilter || undefined,
       sortBy: state.sortBy
     })
-    set({ items, selectedIndex: 0 })
+    set({ items, selectedIndex: 0, hasMore: items.length >= 50 })
     get().loadStarredCount()
+  },
+
+  loadNextPage: async () => {
+    const state = get()
+    if (state.isLoadingMore || !state.hasMore || state.searchQuery.trim()) return
+    set({ isLoadingMore: true })
+    try {
+      const moreItems = await window.api.getItems({
+        limit: 50,
+        offset: state.items.length,
+        contentType: state.filterType || undefined,
+        leftFilter: state.leftFilter,
+        sourceApp: state.sourceAppFilter || undefined,
+        sortBy: state.sortBy
+      })
+      set((prev) => ({
+        items: [...prev.items, ...moreItems],
+        hasMore: moreItems.length >= 50
+      }))
+    } finally {
+      set({ isLoadingMore: false })
+    }
   },
 
   loadStarredCount: async () => {
@@ -283,7 +310,7 @@ export const useClipboardStore = create<ClipboardState>((set, get) => ({
       return
     }
     const items = await window.api.searchItems(query)
-    set({ items, selectedIndex: 0 })
+    set({ items, selectedIndex: 0, hasMore: false })
   }
 }))
 

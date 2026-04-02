@@ -26,13 +26,21 @@ function sleep(ms: number): Promise<void> {
 }
 
 export class AutoTypeAgent {
-  async run(previousAppBundleId: string | null, options: AutoTypeOptions): Promise<void> {
+  async run(
+    previousAppBundleId: string | null,
+    options: AutoTypeOptions,
+    hideWindow?: () => void
+  ): Promise<void> {
     const stepDelay = Math.max(20, options.stepDelayMs ?? 80)
 
+    // 1. 先激活目标应用，让它获得焦点
     if (previousAppBundleId) {
       await runAppleScript(`tell application id "${previousAppBundleId}" to activate`)
-      await sleep(stepDelay)
     }
+
+    // 2. 隐藏 Stash 窗口（目标应用已在前台）
+    hideWindow?.()
+    await sleep(stepDelay)
 
     markAsVaultContent(options.username)
     clipboard.writeText(options.username)

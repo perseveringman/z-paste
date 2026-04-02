@@ -1243,25 +1243,7 @@ function LicenseSection(): React.JSX.Element {
             </p>
           )}
           <Separator />
-          {/* Buy CTA */}
-          <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-5">
-            <div className="flex items-start gap-3">
-              <Crown className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">{t('license.getPro')}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t('license.getProDesc')}</p>
-                <Button variant="default" size="sm" className="mt-3" asChild>
-                  <a
-                    href={t('license.buyUrl')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t('license.buyButton')} →
-                  </a>
-                </Button>
-              </div>
-            </div>
-          </div>
+          {/* Buy CTA - hidden for now */}
         </>
       )}
 

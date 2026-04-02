@@ -17,16 +17,17 @@ interface VaultViewProps {
 export default function VaultView({ layoutMode, createType, onCreateTypeChange }: VaultViewProps): React.JSX.Element {
   const { security, securityInitialized, refreshSecurity, recoveryKey, detail } = useVaultStore()
 
+  // 仅在组件挂载时刷新安全状态
   useEffect(() => {
     refreshSecurity()
-  }, [refreshSecurity])
+  }, [])
 
   useEffect(() => {
     const unsub = window.api.onPanelHidden(() => {
       refreshSecurity()
     })
     return unsub
-  }, [refreshSecurity])
+  }, [])
 
   useEffect(() => {
     if (detail) {

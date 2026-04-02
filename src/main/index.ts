@@ -492,14 +492,13 @@ app.whenReady().then(() => {
     }
 
     const previousApp = windowManager.getPreviousAppBundleId()
-    windowManager.hide()
     try {
       await autoTypeAgent.run(previousApp, {
         username: detail.fields.username,
         password: detail.fields.password,
         submit: input.submit,
         stepDelayMs: input.stepDelayMs
-      })
+      }, () => windowManager.hide())
       vaultRepository.appendVaultAuditEvent({
         id: nanoid(),
         event_type: 'auto_type',

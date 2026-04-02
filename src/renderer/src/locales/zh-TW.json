@@ -15,6 +15,7 @@
   "panel.settings.tooltip": "設定 (⌘,)",
   "panel.empty.title": "暫無剪貼簿記錄",
   "panel.empty.subtitle": "複製內容後將自動出現在這裡",
+  "panel.loadingMore": "載入更多...",
   "panel.preview.expand": "展開詳情 (⌥)",
   "panel.quickEdit.title": "快速編輯",
 
