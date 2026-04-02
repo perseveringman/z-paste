@@ -18,6 +18,7 @@ import { useClipboardStore } from '../../stores/clipboardStore'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { matchShortcut } from '../../utils/shortcut'
+import appIcon from '../../assets/icon.png'
 import { Settings, PanelRightOpen, HelpCircle, ListOrdered, X, Lock, Unlock, FilePlus, Key, FileText } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
@@ -141,13 +142,16 @@ export default function PanelWindow(): React.JSX.Element {
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       >
         <div className="min-w-0 shrink-0 pr-1.5">
-          <div className="hidden sm:block">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              Stash Desk
-            </p>
-            <p className="text-[13px] font-semibold text-foreground/95">Clipboard atelier</p>
+          <div className="hidden sm:flex items-center gap-2">
+            <img src={appIcon} alt="Stash" className="h-7 w-7" />
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                Stash Desk
+              </p>
+              <p className="text-[13px] font-semibold text-foreground/95">Clipboard atelier</p>
+            </div>
           </div>
-          <p className="block sm:hidden text-[16px] font-bold text-foreground/95">S</p>
+          <img src={appIcon} alt="Stash" className="block sm:hidden h-7 w-7" />
         </div>
 
         <div
