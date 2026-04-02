@@ -1,9 +1,15 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { homedir, hostname } from 'os'
+import { randomUUID } from 'crypto'
 import { app } from 'electron'
 import * as repository from '../database/repository'
 import type { ClipboardItem } from '../database/repository'
+import {
+  encryptWithPassword,
+  decryptWithPassword,
+  type EncryptedPayload
+} from '../security/encryption'
 
 interface ChangeRecord {
   operation: 'add' | 'update' | 'delete'
@@ -18,6 +24,12 @@ interface SyncFile {
   exportedAt: number
 }
 
+interface EncryptedSyncFile {
+  version: 2
+  encrypted: true
+  data: EncryptedPayload
+}
+
 interface SyncState {
   lastSyncTime: number
   processedFiles: string[]
@@ -30,15 +42,21 @@ export class iCloudSync {
   private lastSyncTime: number = 0
   private processedFiles: Set<string> = new Set()
   private stateFile: string
+  private syncPassword: string | null = null
 
-  constructor() {
+  constructor(syncPassword?: string) {
     this.syncDir = join(
       homedir(),
       'Library/Mobile Documents/com~apple~CloudDocs/ZPaste'
     )
     this.stateFile = join(app.getPath('userData'), 'sync-state.json')
     this.deviceId = this.getDeviceId()
+    this.syncPassword = syncPassword || null
     this.loadSyncState()
+  }
+
+  setSyncPassword(password: string | null): void {
+    this.syncPassword = password
   }
 
   start(): void {
@@ -86,7 +104,21 @@ export class iCloudSync {
       }
 
       const filename = `sync_${this.deviceId}_${Date.now()}.json`
-      writeFileSync(join(this.syncDir, filename), JSON.stringify(syncFile, null, 2), 'utf-8')
+      const plaintext = JSON.stringify(syncFile)
+
+      if (this.syncPassword) {
+        const encrypted = encryptWithPassword(plaintext, this.syncPassword)
+        const encryptedFile: EncryptedSyncFile = {
+          version: 2,
+          encrypted: true,
+          data: encrypted
+        }
+        writeFileSync(join(this.syncDir, filename), JSON.stringify(encryptedFile), 'utf-8')
+      } else {
+        console.warn('[iCloudSync] no sync password set, writing plaintext (insecure)')
+        writeFileSync(join(this.syncDir, filename), JSON.stringify(syncFile, null, 2), 'utf-8')
+      }
+
       this.lastSyncTime = Date.now()
       this.saveSyncState()
     } catch (error) {
@@ -106,7 +138,12 @@ export class iCloudSync {
 
         try {
           const content = readFileSync(join(this.syncDir, file), 'utf-8')
-          const syncFile: SyncFile = JSON.parse(content)
+          const syncFile = this.parseSyncFile(content)
+
+          if (!syncFile) {
+            console.warn(`[iCloudSync] skipping ${file}: unable to decrypt or parse`)
+            continue
+          }
 
           for (const change of syncFile.changes) {
             this.applyChange(change)
@@ -121,6 +158,32 @@ export class iCloudSync {
       this.saveSyncState()
     } catch (error) {
       console.error('[iCloudSync] import error:', error)
+    }
+  }
+
+  /** Parse sync file content, handling both encrypted (v2) and legacy plaintext formats */
+  private parseSyncFile(content: string): SyncFile | null {
+    try {
+      const parsed = JSON.parse(content)
+
+      // Encrypted format (version 2)
+      if (parsed.version === 2 && parsed.encrypted === true) {
+        if (!this.syncPassword) {
+          console.warn('[iCloudSync] encrypted sync file found but no password set')
+          return null
+        }
+        const decrypted = decryptWithPassword(parsed.data as EncryptedPayload, this.syncPassword)
+        return JSON.parse(decrypted) as SyncFile
+      }
+
+      // Legacy plaintext format (backward compatible)
+      if (parsed.deviceId && Array.isArray(parsed.changes)) {
+        return parsed as SyncFile
+      }
+
+      return null
+    } catch {
+      return null
     }
   }
 
@@ -209,7 +272,7 @@ export class iCloudSync {
       // ignore
     }
 
-    const id = `device_${hostname()}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    const id = `device_${hostname()}_${Date.now()}_${randomUUID().slice(0, 8)}`
     try {
       writeFileSync(idFile, id, 'utf-8')
     } catch {
