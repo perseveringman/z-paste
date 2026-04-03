@@ -370,17 +370,35 @@ function hexToHsl(hex: string): { h: number; s: number; l: number } {
 }
 
 function applyAccent(hex: string): void {
-  const root = document.documentElement
   const { h, s, l } = hexToHsl(hex)
-  // Lighten in dark mode to keep colors vivid; ensure legible foreground
-  const isDark = root.classList.contains('dark')
-  const finalL = isDark ? Math.min(Math.max(l, 50) + 8, 80) : l
-  const fg = finalL > 58 ? '0 0% 7%' : '0 0% 100%'
-  root.style.setProperty('--primary', `${h} ${s}% ${finalL}%`)
-  root.style.setProperty('--accent', `${h} ${s}% ${finalL}%`)
-  root.style.setProperty('--ring', `${h} ${s}% ${finalL}%`)
-  root.style.setProperty('--primary-foreground', fg)
-  root.style.setProperty('--accent-foreground', fg)
+  // Light mode: use original lightness; dark mode: brighten for vivid appearance
+  const lightL = l
+  const darkL = Math.min(Math.max(l, 50) + 8, 80)
+  const lightFg = lightL > 58 ? '0 0% 7%' : '0 0% 100%'
+  const darkFg = darkL > 58 ? '0 0% 7%' : '0 0% 100%'
+
+  let style = document.getElementById('zpaste-accent-override') as HTMLStyleElement | null
+  if (!style) {
+    style = document.createElement('style')
+    style.id = 'zpaste-accent-override'
+    document.head.appendChild(style)
+  }
+  style.textContent = `
+    :root {
+      --primary: ${h} ${s}% ${lightL}% !important;
+      --accent: ${h} ${s}% ${lightL}% !important;
+      --ring: ${h} ${s}% ${lightL}% !important;
+      --primary-foreground: ${lightFg} !important;
+      --accent-foreground: ${lightFg} !important;
+    }
+    .dark {
+      --primary: ${h} ${s}% ${darkL}% !important;
+      --accent: ${h} ${s}% ${darkL}% !important;
+      --ring: ${h} ${s}% ${darkL}% !important;
+      --primary-foreground: ${darkFg} !important;
+      --accent-foreground: ${darkFg} !important;
+    }
+  `
 }
 
 // Listen for system theme changes
