@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode, AccentColor } from '../../stores/settingsStore'
+import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { useLicenseStore } from '../../stores/licenseStore'
@@ -42,6 +42,7 @@ import {
   Download,
   CheckCircle2,
   RotateCcw,
+  Pipette,
 } from 'lucide-react'
 
 type SettingsSection =
@@ -827,13 +828,8 @@ function ThemeSection(): React.JSX.Element {
     { value: 'light', label: t('settings.theme.light'), icon: Sun },
   ]
 
-  const accents: { value: AccentColor; label: string; light: string; dark: string }[] = [
-    { value: 'orange', label: t('settings.theme.accent.orange'), light: '#FF7F43', dark: '#FF8F5A' },
-    { value: 'purple', label: t('settings.theme.accent.purple'), light: '#7C52D4', dark: '#A080E8' },
-    { value: 'blue',   label: t('settings.theme.accent.blue'),   light: '#1A7DE8', dark: '#4DA3F5' },
-    { value: 'green',  label: t('settings.theme.accent.green'),  light: '#22A05A', dark: '#3DCB7A' },
-    { value: 'pink',   label: t('settings.theme.accent.pink'),   light: '#E83060', dark: '#F06090' },
-  ]
+  const presets = ['#FF7F43', '#8D6DE0', '#1A7DE8', '#22A05A', '#E83060', '#F5A623']
+  const isPreset = presets.includes(accentColor)
 
   return (
     <div className="space-y-6">
@@ -865,22 +861,42 @@ function ThemeSection(): React.JSX.Element {
 
       <div>
         <p className="text-sm font-semibold text-foreground mb-3">{t('settings.theme.accentColor')}</p>
-        <div className="flex gap-3">
-          {accents.map((ac) => (
+        <div className="flex items-center gap-3 flex-wrap">
+          {presets.map((color) => (
             <button
-              key={ac.value}
-              title={ac.label}
-              onClick={() => setAccentColor(ac.value)}
-              className={`relative w-9 h-9 rounded-full transition-all focus:outline-none ${
-                accentColor === ac.value ? 'ring-2 ring-offset-2 ring-offset-background ring-current scale-110' : 'hover:scale-105'
+              key={color}
+              title={color}
+              onClick={() => setAccentColor(color)}
+              className={`w-8 h-8 rounded-full transition-all focus:outline-none ${
+                accentColor === color
+                  ? 'ring-2 ring-offset-2 ring-offset-background scale-110'
+                  : 'hover:scale-105 opacity-80 hover:opacity-100'
               }`}
-              style={{ backgroundColor: ac.light, color: ac.light }}
-            >
-              {accentColor === ac.value && (
-                <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">✓</span>
-              )}
-            </button>
+              style={{
+                backgroundColor: color,
+                ...(accentColor === color ? { ringColor: color } : {}),
+              }}
+            />
           ))}
+
+          {/* Custom color picker */}
+          <label
+            className={`relative w-8 h-8 rounded-full cursor-pointer flex items-center justify-center transition-all hover:scale-105 ${
+              !isPreset
+                ? 'ring-2 ring-offset-2 ring-offset-background scale-110'
+                : 'bg-muted border border-dashed border-muted-foreground'
+            }`}
+            style={!isPreset ? { backgroundColor: accentColor } : {}}
+            title={t('settings.theme.accentCustom')}
+          >
+            {isPreset && <Pipette className="w-3.5 h-3.5 text-muted-foreground" />}
+            <input
+              type="color"
+              value={accentColor}
+              onChange={(e) => setAccentColor(e.target.value)}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer rounded-full"
+            />
+          </label>
         </div>
       </div>
     </div>

@@ -162,11 +162,7 @@
   "settings.theme.dark": "Dark",
   "settings.theme.light": "Light",
   "settings.theme.accentColor": "Accent Color",
-  "settings.theme.accent.orange": "Orange",
-  "settings.theme.accent.purple": "Purple",
-  "settings.theme.accent.blue": "Blue",
-  "settings.theme.accent.green": "Green",
-  "settings.theme.accent.pink": "Pink",
+  "settings.theme.accentCustom": "Custom color",
 
   "settings.tags.title": "Tag Management",
   "settings.tags.total": "Total Tags",

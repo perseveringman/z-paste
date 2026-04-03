@@ -115,7 +115,7 @@ function normalizeSettings(settings: Settings): Settings {
 
 const defaults: Settings = {
   theme: 'auto',
-  accentColor: 'orange',
+  accentColor: '#FF7F43',
   language: 'auto',
   launchAtLogin: false,
   historyRetention: 30,
@@ -156,6 +156,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set(patch)
     get().saveSettings()
     applyTheme(patch.resolvedTheme)
+    applyAccent(get().accentColor)
     window.api.setTheme?.(theme)
   },
 
@@ -167,6 +168,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
     set(patch)
     applyTheme(patch.resolvedTheme)
+    applyAccent(get().accentColor)
   },
 
   setAccentColor: (color) => {
@@ -346,16 +348,39 @@ function applyTheme(theme: 'dark' | 'light'): void {
   }
 }
 
-const ACCENT_COLORS: AccentColor[] = ['orange', 'purple', 'blue', 'green', 'pink']
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (!result) return { h: 21, s: 100, l: 64 }
+  const r = parseInt(result[1], 16) / 255
+  const g = parseInt(result[2], 16) / 255
+  const b = parseInt(result[3], 16) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h = 0
+  let s = 0
+  const l = (max + min) / 2
+  if (max !== min) {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6
+    else if (max === g) h = ((b - r) / d + 2) / 6
+    else h = ((r - g) / d + 4) / 6
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) }
+}
 
-function applyAccent(color: AccentColor): void {
+function applyAccent(hex: string): void {
   const root = document.documentElement
-  for (const c of ACCENT_COLORS) {
-    root.classList.remove(`accent-${c}`)
-  }
-  if (color !== 'orange') {
-    root.classList.add(`accent-${color}`)
-  }
+  const { h, s, l } = hexToHsl(hex)
+  // Lighten in dark mode to keep colors vivid; ensure legible foreground
+  const isDark = root.classList.contains('dark')
+  const finalL = isDark ? Math.min(Math.max(l, 50) + 8, 80) : l
+  const fg = finalL > 58 ? '0 0% 7%' : '0 0% 100%'
+  root.style.setProperty('--primary', `${h} ${s}% ${finalL}%`)
+  root.style.setProperty('--accent', `${h} ${s}% ${finalL}%`)
+  root.style.setProperty('--ring', `${h} ${s}% ${finalL}%`)
+  root.style.setProperty('--primary-foreground', fg)
+  root.style.setProperty('--accent-foreground', fg)
 }
 
 // Listen for system theme changes
@@ -370,6 +395,7 @@ if (typeof window !== 'undefined') {
       }
       useSettingsStore.setState(patch)
       applyTheme(patch.resolvedTheme)
+      applyAccent(state.accentColor)
     }
   })
 

@@ -1,6 +1,6 @@
 export type ThemeMode = 'auto' | 'dark' | 'light'
 export type ResolvedTheme = 'dark' | 'light'
-export type AccentColor = 'orange' | 'purple' | 'blue' | 'green' | 'pink'
+export type AccentColor = string // hex color, e.g. '#FF7F43'
 
 export function isThemeMode(value: string): value is ThemeMode {
   return value === 'auto' || value === 'dark' || value === 'light'

@@ -162,11 +162,7 @@
   "settings.theme.dark": "暗色",
   "settings.theme.light": "亮色",
   "settings.theme.accentColor": "主题色",
-  "settings.theme.accent.orange": "橙色",
-  "settings.theme.accent.purple": "紫色",
-  "settings.theme.accent.blue": "蓝色",
-  "settings.theme.accent.green": "绿色",
-  "settings.theme.accent.pink": "粉色",
+  "settings.theme.accentCustom": "自定义颜色",
 
   "settings.tags.title": "标签管理",
   "settings.tags.total": "总标签数",
