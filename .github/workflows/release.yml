@@ -75,7 +75,7 @@ jobs:
 
       - name: Verify artifacts
         run: |
-          ls dist/*.dmg dist/latest-mac.yml
+          ls dist/*.dmg dist/*.zip dist/latest-mac.yml
           test -f dist/latest-mac.yml
 
       # - name: Upload to Tencent Cloud COS
