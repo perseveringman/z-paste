@@ -35,5 +35,5 @@ dmg:
 
 publish:
   provider: github
-  owner: perseveringman
-  repo: stash
+  owner: buggyblues
+  repo: Stash
