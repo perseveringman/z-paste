@@ -99,7 +99,7 @@ function setupAutoUpdater(): void {
   })
 
   autoUpdater.on('error', (err) => {
-    console.error('[updater] error:', err.message)
+    console.error('[updater] error:', err.message, err.stack)
     broadcastToAllWindows('updater:error', err.message)
   })
 
