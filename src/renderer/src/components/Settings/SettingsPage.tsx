@@ -1329,6 +1329,7 @@ function AboutSection(): React.JSX.Element {
   const [phase, setPhase] = useState<UpdatePhase>('idle')
   const [newVersion, setNewVersion] = useState<string>('')
   const [progress, setProgress] = useState<{ percent: number; bytesPerSecond: number; transferred: number; total: number }>({ percent: 0, bytesPerSecond: 0, transferred: 0, total: 0 })
+  const [errorMsg, setErrorMsg] = useState<string>('')
 
   useEffect(() => {
     window.api.getVersion().then((v) => setVersion(v))
@@ -1340,7 +1341,8 @@ function AboutSection(): React.JSX.Element {
     const cleanupDownloaded = window.api.onUpdateDownloaded(() => {
       setPhase('downloaded')
     })
-    const cleanupError = window.api.onUpdateError(() => {
+    const cleanupError = window.api.onUpdateError((message: string) => {
+      setErrorMsg(message)
       setPhase((prev) => prev === 'downloading' ? 'download-error' : 'error')
     })
 
@@ -1474,7 +1476,10 @@ function AboutSection(): React.JSX.Element {
             <p className="text-xs text-destructive">{t('settings.about.checkFailed')}</p>
           )}
           {phase === 'download-error' && (
-            <p className="text-xs text-destructive">{t('settings.about.downloadFailed')}</p>
+            <div className="text-xs text-destructive text-center">
+              <p>{t('settings.about.downloadFailed')}</p>
+              {errorMsg && <p className="mt-1 text-[10px] text-muted-foreground break-all">{errorMsg}</p>}
+            </div>
           )}
         </div>
       </div>
