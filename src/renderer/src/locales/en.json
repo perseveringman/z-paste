@@ -554,5 +554,8 @@
   "updater.dialog.title": "Update Available",
   "updater.dialog.message": "A new version {{version}} is available. Would you like to update now?",
   "updater.dialog.update": "Update Now",
-  "updater.dialog.later": "Later"
+  "updater.dialog.later": "Later",
+  "updater.dialog.downloadedTitle": "Update Ready",
+  "updater.dialog.downloadedMessage": "Update has been downloaded and is ready to install. Restart now?",
+  "updater.dialog.restartNow": "Restart Now"
 }

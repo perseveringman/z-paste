@@ -86,21 +86,48 @@ function setupAutoUpdater(): void {
   autoUpdater.autoInstallOnAppQuit = true
 
   autoUpdater.on('download-progress', (progress) => {
-    broadcastToAllWindows('updater:download-progress', {
+    const data = {
       percent: Math.round(progress.percent),
       bytesPerSecond: progress.bytesPerSecond,
       transferred: progress.transferred,
       total: progress.total,
-    })
+    }
+    broadcastToAllWindows('updater:download-progress', data)
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.setProgressBar(data.percent / 100)
+    }
   })
 
   autoUpdater.on('update-downloaded', () => {
     broadcastToAllWindows('updater:downloaded')
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.setProgressBar(-1)
+    }
+    dialog
+      .showMessageBox({
+        type: 'info',
+        title: translateDesktop('updater.dialog.downloadedTitle'),
+        message: translateDesktop('updater.dialog.downloadedMessage'),
+        buttons: [
+          translateDesktop('updater.dialog.restartNow'),
+          translateDesktop('updater.dialog.later')
+        ],
+        defaultId: 0,
+        cancelId: 1,
+      })
+      .then(({ response }) => {
+        if (response === 0) {
+          autoUpdater.quitAndInstall()
+        }
+      })
   })
 
   autoUpdater.on('error', (err) => {
     console.error('[updater] error:', err.message, err.stack)
     broadcastToAllWindows('updater:error', err.message)
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.setProgressBar(-1)
+    }
   })
 
   ipcMain.handle('updater:downloadUpdate', async () => {
