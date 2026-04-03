@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode } from '../../stores/settingsStore'
+import { useSettingsStore, ThemeMode, LanguageMode, LayoutMode, AccentColor } from '../../stores/settingsStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTagStore, TagWithCount } from '../../stores/tagStore'
 import { useLicenseStore } from '../../stores/licenseStore'
@@ -814,9 +814,11 @@ function PrivacySection(): React.JSX.Element {
 
 function ThemeSection(): React.JSX.Element {
   const { t } = useTranslation()
-  const { theme, setTheme } = useSettingsStore(useShallow((state) => ({
+  const { theme, setTheme, accentColor, setAccentColor } = useSettingsStore(useShallow((state) => ({
     theme: state.theme,
     setTheme: state.setTheme,
+    accentColor: state.accentColor,
+    setAccentColor: state.setAccentColor,
   })))
 
   const themes: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
@@ -825,30 +827,61 @@ function ThemeSection(): React.JSX.Element {
     { value: 'light', label: t('settings.theme.light'), icon: Sun },
   ]
 
+  const accents: { value: AccentColor; label: string; light: string; dark: string }[] = [
+    { value: 'orange', label: t('settings.theme.accent.orange'), light: '#FF7F43', dark: '#FF8F5A' },
+    { value: 'purple', label: t('settings.theme.accent.purple'), light: '#7C52D4', dark: '#A080E8' },
+    { value: 'blue',   label: t('settings.theme.accent.blue'),   light: '#1A7DE8', dark: '#4DA3F5' },
+    { value: 'green',  label: t('settings.theme.accent.green'),  light: '#22A05A', dark: '#3DCB7A' },
+    { value: 'pink',   label: t('settings.theme.accent.pink'),   light: '#E83060', dark: '#F06090' },
+  ]
+
   return (
-    <div>
-      <SectionTitle title={t('settings.theme.title')} />
-      <div className="grid grid-cols-3 gap-4">
-        {themes.map((th) => (
-          <button
-            key={th.value}
-            onClick={() => setTheme(th.value)}
-            className={`flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-              theme === th.value
-                ? 'border-primary bg-primary/5'
-                : 'border-transparent bg-muted hover:bg-muted/80'
-            }`}
-          >
-            <th.icon
-              className={`w-6 h-6 ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}
-            />
-            <span
-              className={`text-sm font-medium ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}
+    <div className="space-y-6">
+      <div>
+        <SectionTitle title={t('settings.theme.title')} />
+        <div className="grid grid-cols-3 gap-4">
+          {themes.map((th) => (
+            <button
+              key={th.value}
+              onClick={() => setTheme(th.value)}
+              className={`flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                theme === th.value
+                  ? 'border-primary bg-primary/5'
+                  : 'border-transparent bg-muted hover:bg-muted/80'
+              }`}
             >
-              {th.label}
-            </span>
-          </button>
-        ))}
+              <th.icon
+                className={`w-6 h-6 ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}
+              />
+              <span
+                className={`text-sm font-medium ${theme === th.value ? 'text-primary' : 'text-muted-foreground'}`}
+              >
+                {th.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold text-foreground mb-3">{t('settings.theme.accentColor')}</p>
+        <div className="flex gap-3">
+          {accents.map((ac) => (
+            <button
+              key={ac.value}
+              title={ac.label}
+              onClick={() => setAccentColor(ac.value)}
+              className={`relative w-9 h-9 rounded-full transition-all focus:outline-none ${
+                accentColor === ac.value ? 'ring-2 ring-offset-2 ring-offset-background ring-current scale-110' : 'hover:scale-105'
+              }`}
+              style={{ backgroundColor: ac.light, color: ac.light }}
+            >
+              {accentColor === ac.value && (
+                <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

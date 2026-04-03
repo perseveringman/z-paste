@@ -2,13 +2,14 @@ import { create } from 'zustand'
 import i18n from '../i18n'
 import { normalizeMaxItems } from '../../../shared/max-items'
 import type { LayoutMode } from '../../../shared/layout-mode'
-import { getThemeStatePatch, type ResolvedTheme, type ThemeMode } from '../../../shared/theme'
+import { getThemeStatePatch, type ResolvedTheme, type ThemeMode, type AccentColor } from '../../../shared/theme'
 export type { LayoutMode } from '../../../shared/layout-mode'
-export type { ThemeMode } from '../../../shared/theme'
+export type { ThemeMode, AccentColor } from '../../../shared/theme'
 export type LanguageMode = 'auto' | 'zh-CN' | 'en' | 'zh-TW'
 
 export interface Settings {
   theme: ThemeMode
+  accentColor: AccentColor
   language: LanguageMode
   launchAtLogin: boolean
   historyRetention: number // days, 0 = forever
@@ -36,6 +37,7 @@ interface SettingsState extends Settings {
   resolvedTheme: ResolvedTheme
   setTheme: (theme: ThemeMode) => void
   syncTheme: (theme: ThemeMode) => void
+  setAccentColor: (color: AccentColor) => void
   setLanguage: (lang: LanguageMode) => void
   setLaunchAtLogin: (value: boolean) => void
   setHistoryRetention: (days: number) => void
@@ -113,6 +115,7 @@ function normalizeSettings(settings: Settings): Settings {
 
 const defaults: Settings = {
   theme: 'auto',
+  accentColor: 'orange',
   language: 'auto',
   launchAtLogin: false,
   historyRetention: 30,
@@ -164,6 +167,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
     set(patch)
     applyTheme(patch.resolvedTheme)
+  },
+
+  setAccentColor: (color) => {
+    set({ accentColor: color })
+    get().saveSettings()
+    applyAccent(color)
   },
 
   setLanguage: (lang) => {
@@ -288,6 +297,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const themePatch = getThemePatch(merged.theme)
     set({ ...merged, resolvedTheme: themePatch.resolvedTheme })
     applyTheme(themePatch.resolvedTheme)
+    applyAccent(merged.accentColor)
     window.api.setMaxItems?.(merged.maxItems)
     if (merged.iCloudSync) {
       window.api.syncStart?.()
@@ -298,6 +308,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const state = get()
     const settings: Settings = {
       theme: state.theme,
+      accentColor: state.accentColor,
       language: state.language,
       launchAtLogin: state.launchAtLogin,
       historyRetention: state.historyRetention,
@@ -335,6 +346,18 @@ function applyTheme(theme: 'dark' | 'light'): void {
   }
 }
 
+const ACCENT_COLORS: AccentColor[] = ['orange', 'purple', 'blue', 'green', 'pink']
+
+function applyAccent(color: AccentColor): void {
+  const root = document.documentElement
+  for (const c of ACCENT_COLORS) {
+    root.classList.remove(`accent-${c}`)
+  }
+  if (color !== 'orange') {
+    root.classList.add(`accent-${color}`)
+  }
+}
+
 // Listen for system theme changes
 if (typeof window !== 'undefined') {
   const mql = window.matchMedia('(prefers-color-scheme: dark)')
@@ -350,7 +373,8 @@ if (typeof window !== 'undefined') {
     }
   })
 
-  // Apply initial theme
+  // Apply initial theme and accent
   applyTheme(initialTheme.resolvedTheme)
+  applyAccent(initialSettings.accentColor)
   window.api.setMaxItems?.(initialSettings.maxItems)
 }

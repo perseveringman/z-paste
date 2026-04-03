@@ -161,6 +161,12 @@
   "settings.theme.auto": "自動",
   "settings.theme.dark": "深色",
   "settings.theme.light": "淺色",
+  "settings.theme.accentColor": "主題色",
+  "settings.theme.accent.orange": "橙色",
+  "settings.theme.accent.purple": "紫色",
+  "settings.theme.accent.blue": "藍色",
+  "settings.theme.accent.green": "綠色",
+  "settings.theme.accent.pink": "粉色",
 
   "settings.tags.title": "標籤管理",
   "settings.tags.total": "總標籤數",
