@@ -4,6 +4,7 @@ import { VaultSessionManager } from './session'
 import { generatePassword, PasswordGenerateOptions } from './password-generator'
 import { generateTotpCode } from './totp'
 import { VaultCryptoWorkerClient } from './worker-client'
+import { createVaultError } from './errors'
 
 export interface CreateLoginInput {
   title: string
@@ -181,7 +182,7 @@ export class VaultService {
     await this.session.ensureUnlocked()
     const meta = vaultRepository.getVaultItemMetaById(input.id)
     if (!meta) {
-      throw new Error('Vault item not found')
+      throw createVaultError('vault.error.itemNotFound')
     }
 
     const updates: Partial<
@@ -202,7 +203,7 @@ export class VaultService {
     if (input.loginFields || input.secureNoteFields) {
       const existingSecret = vaultRepository.getVaultItemSecretById(input.id)
       if (!existingSecret) {
-        throw new Error('Vault item secret not found')
+        throw createVaultError('vault.error.itemSecretNotFound')
       }
 
       const payload =

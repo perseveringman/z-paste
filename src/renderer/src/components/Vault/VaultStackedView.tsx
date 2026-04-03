@@ -136,7 +136,7 @@ export default function VaultStackedView({
               <button
                 onClick={() => setDrawerOpen(false)}
                 className="flex items-center justify-center py-1 shrink-0 hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label={t('vault.detail.collapse') || 'Collapse detail'}
+                aria-label={t('vault.detail.collapse')}
               >
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </button>

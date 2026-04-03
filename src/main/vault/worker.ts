@@ -10,6 +10,7 @@ import {
   unwrapDEKWithMasterPassword,
   unwrapDEKWithRecoveryKey
 } from './crypto'
+import { createVaultError } from './errors'
 
 type WorkerAction =
   | 'setupMasterPassword'
@@ -47,7 +48,7 @@ let activeDEK: Buffer | null = null
 
 function getActiveDEKOrThrow(): Buffer {
   if (!activeDEK) {
-    throw new Error('Vault is locked')
+    throw createVaultError('vault.error.locked')
   }
   return activeDEK
 }
@@ -59,16 +60,16 @@ function normalizeKdfType(value: unknown): VaultKdfType {
   return 'pbkdf2'
 }
 
-function asString(value: unknown, fieldName: string): string {
+function asString(value: unknown): string {
   if (typeof value !== 'string' || value.length === 0) {
-    throw new Error(`Invalid ${fieldName}`)
+    throw createVaultError('vault.error.workerRequestFailed')
   }
   return value
 }
 
 function asKdfParams(value: unknown): VaultKdfParams {
   if (!value || typeof value !== 'object') {
-    throw new Error('Invalid kdf params')
+    throw createVaultError('vault.error.workerRequestFailed')
   }
   return value as VaultKdfParams
 }
@@ -78,7 +79,7 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
 
   switch (request.action) {
     case 'setupMasterPassword': {
-      const masterPassword = asString(payload.masterPassword, 'master password')
+      const masterPassword = asString(payload.masterPassword)
       const hintAnswer = typeof payload.hintAnswer === 'string' && payload.hintAnswer.length > 0
         ? payload.hintAnswer
         : null
@@ -103,9 +104,9 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     case 'unlockWithMasterPassword': {
-      const wrapped = asString(payload.wrapped, 'wrapped key')
-      const masterPassword = asString(payload.masterPassword, 'master password')
-      const salt = asString(payload.salt, 'salt')
+      const wrapped = asString(payload.wrapped)
+      const masterPassword = asString(payload.masterPassword)
+      const salt = asString(payload.salt)
       const kdfType = normalizeKdfType(payload.kdfType)
       const kdfParams = asKdfParams(payload.kdfParams)
       activeDEK = await unwrapDEKWithMasterPassword(wrapped, masterPassword, salt, kdfType, kdfParams)
@@ -113,9 +114,9 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     case 'unlockWithRecoveryKey': {
-      const wrapped = asString(payload.wrapped, 'wrapped key')
-      const recoveryKey = asString(payload.recoveryKey, 'recovery key')
-      const salt = asString(payload.salt, 'salt')
+      const wrapped = asString(payload.wrapped)
+      const recoveryKey = asString(payload.recoveryKey)
+      const salt = asString(payload.salt)
       const kdfType = normalizeKdfType(payload.kdfType)
       const kdfParams = asKdfParams(payload.kdfParams)
       activeDEK = await unwrapDEKWithRecoveryKey(wrapped, recoveryKey, salt, kdfType, kdfParams)
@@ -123,7 +124,7 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     case 'setDEK': {
-      const dekBase64 = asString(payload.dekBase64, 'dek')
+      const dekBase64 = asString(payload.dekBase64)
       activeDEK = Buffer.from(dekBase64, 'base64')
       return { ok: true }
     }
@@ -145,7 +146,7 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     case 'encryptItemPayload': {
-      const plaintext = asString(payload.plaintext, 'plaintext')
+      const plaintext = asString(payload.plaintext)
       const itemKey = randomBytes(32)
       return {
         encryptedPayload: encryptVaultPayload(plaintext, itemKey),
@@ -155,16 +156,16 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     case 'decryptItemPayload': {
-      const encryptedPayload = asString(payload.encryptedPayload, 'encrypted payload')
-      const wrappedItemKey = asString(payload.wrappedItemKey, 'wrapped item key')
+      const encryptedPayload = asString(payload.encryptedPayload)
+      const wrappedItemKey = asString(payload.wrappedItemKey)
       const itemKeyB64 = decryptVaultPayload(wrappedItemKey, getActiveDEKOrThrow())
       const itemKey = Buffer.from(itemKeyB64, 'base64')
       return { plaintext: decryptVaultPayload(encryptedPayload, itemKey) }
     }
 
     case 'reencryptItemPayload': {
-      const plaintext = asString(payload.plaintext, 'plaintext')
-      const wrappedItemKey = asString(payload.wrappedItemKey, 'wrapped item key')
+      const plaintext = asString(payload.plaintext)
+      const wrappedItemKey = asString(payload.wrappedItemKey)
       const itemKeyB64 = decryptVaultPayload(wrappedItemKey, getActiveDEKOrThrow())
       const itemKey = Buffer.from(itemKeyB64, 'base64')
       return { encryptedPayload: encryptVaultPayload(plaintext, itemKey) }
@@ -172,7 +173,7 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
 
     case 'changeMasterPassword': {
       const dek = getActiveDEKOrThrow()
-      const newMasterPassword = asString(payload.newMasterPassword, 'new master password')
+      const newMasterPassword = asString(payload.newMasterPassword)
       const hintAnswer = typeof payload.hintAnswer === 'string' && payload.hintAnswer.length > 0
         ? payload.hintAnswer
         : null
@@ -216,7 +217,7 @@ async function handleRequest(request: WorkerRequest): Promise<unknown> {
     }
 
     default:
-      throw new Error('Unsupported vault worker action')
+      throw createVaultError('vault.error.workerRequestFailed')
   }
 }
 
@@ -224,7 +225,7 @@ function getErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {
     return error.message
   }
-  return 'Vault worker request failed'
+  return createVaultError('vault.error.workerRequestFailed').message
 }
 
 process.on('message', async (raw: unknown) => {

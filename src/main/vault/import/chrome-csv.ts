@@ -1,5 +1,6 @@
 import { ImportedEntry } from './types'
 import { parseCSV } from './csv-parser'
+import { createVaultError, translateVaultText } from '../errors'
 
 /**
  * Parse Chrome/Edge exported password CSV.
@@ -18,7 +19,7 @@ export function parseChromeCSV(content: string): ImportedEntry[] {
   const noteIdx = header.indexOf('note')
 
   if (usernameIdx === -1 && passwordIdx === -1) {
-    throw new Error('Invalid Chrome CSV: missing username and password columns')
+    throw createVaultError('vault.import.invalidChromeCsv')
   }
 
   const entries: ImportedEntry[] = []
@@ -31,7 +32,10 @@ export function parseChromeCSV(content: string): ImportedEntry[] {
     if (!password && !username) continue
 
     entries.push({
-      name: (nameIdx >= 0 ? row[nameIdx]?.trim() : '') || extractDomain(row[urlIdx]) || 'Untitled',
+      name:
+        (nameIdx >= 0 ? row[nameIdx]?.trim() : '') ||
+        extractDomain(row[urlIdx]) ||
+        translateVaultText('vault.import.untitled'),
       url: urlIdx >= 0 ? row[urlIdx]?.trim() || undefined : undefined,
       username: username || undefined,
       password: password || undefined,

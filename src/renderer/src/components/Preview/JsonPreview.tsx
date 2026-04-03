@@ -8,7 +8,7 @@ interface Props {
 
 export default function JsonPreview({ content }: Props): React.JSX.Element {
   const { t } = useTranslation()
-  const { formatted, valid, error } = useMemo(() => formatJSON(content), [content])
+  const { formatted, valid } = useMemo(() => formatJSON(content), [content])
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(formatted)
@@ -18,7 +18,7 @@ export default function JsonPreview({ content }: Props): React.JSX.Element {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/60">
         <span className={`text-xs ${valid ? 'text-syntax-string' : 'text-destructive'}`}>
-          {valid ? '✓ Valid JSON' : `✗ ${error}`}
+          {valid ? t('preview.json.valid') : t('preview.json.invalid')}
         </span>
         <button
           onClick={handleCopy}

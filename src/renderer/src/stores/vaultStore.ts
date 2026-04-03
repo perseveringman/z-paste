@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { normalizeVaultDisplayError } from '../utils/vaultErrors'
 
 export type VaultItemType = 'login' | 'secure_note'
 
@@ -116,6 +117,10 @@ const defaultSecurityState: VaultSecurityState = {
   lockOnBlur: true
 }
 
+function getVaultErrorMessage(error: unknown, fallbackKey: string): string {
+  return normalizeVaultDisplayError(error, fallbackKey)
+}
+
 export const useVaultStore = create<VaultState>((set, get) => ({
   items: [],
   selectedId: null,
@@ -165,7 +170,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ recoveryKey: result.recoveryKey })
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Setup failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.setupFailed') })
     } finally {
       set({ loading: false })
     }
@@ -178,7 +183,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await get().refreshSecurity()
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Unlock failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.unlockFailed') })
     } finally {
       set({ loading: false })
     }
@@ -191,7 +196,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await get().refreshSecurity()
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Recovery unlock failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.recoveryUnlockFailed') })
     } finally {
       set({ loading: false })
     }
@@ -204,7 +209,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await get().refreshSecurity()
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Biometric unlock failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.biometricUnlockFailed') })
     } finally {
       set({ loading: false })
     }
@@ -217,7 +222,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await get().refreshSecurity()
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Hint unlock failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.hintUnlockFailed') })
     } finally {
       set({ loading: false })
     }
@@ -230,7 +235,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ recoveryKey: result.recoveryKey })
       await get().refreshSecurity()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Password reset failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.resetPasswordFailed') })
     } finally {
       set({ loading: false })
     }
@@ -287,7 +292,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await window.api.vaultCreateLogin(input)
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Create login failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.createLoginFailed') })
     } finally {
       set({ loading: false })
     }
@@ -299,7 +304,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       await window.api.vaultCreateSecureNote(input)
       await get().loadItems()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Create note failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.createNoteFailed') })
     } finally {
       set({ loading: false })
     }
@@ -329,7 +334,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ items: [], selectedId: null, detail: null, recoveryKey: null })
       await get().refreshSecurity()
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Reset vault failed' })
+      set({ error: getVaultErrorMessage(e, 'vault.error.resetVaultFailed') })
     } finally {
       set({ loading: false })
     }

@@ -1097,9 +1097,9 @@ function WidgetSection(): React.JSX.Element {
   })))
 
   const prefixOptions = [
-    { value: 'Alt', label: '⌥ Option' },
-    { value: 'Control', label: '⌃ Control' },
-    { value: 'CommandOrControl', label: '⌘ Command' },
+    { value: 'Alt', label: t('settings.shortcuts.widgetQuickPastePrefix.alt') },
+    { value: 'Control', label: t('settings.shortcuts.widgetQuickPastePrefix.control') },
+    { value: 'CommandOrControl', label: t('settings.shortcuts.widgetQuickPastePrefix.command') },
   ]
 
   return (

@@ -31,7 +31,7 @@ export default function ImagePreview({ content, metadata }: Props): React.JSX.El
     <div className="flex flex-col items-center gap-3 p-4">
       <img
         src={src}
-        alt="Clipboard image"
+        alt={t('preview.image.alt')}
         className="max-w-full max-h-64 rounded-lg border border-border object-contain"
       />
       {size && (

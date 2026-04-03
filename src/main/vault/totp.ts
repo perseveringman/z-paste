@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto'
+import { createVaultError } from './errors'
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
 
@@ -9,7 +10,7 @@ function base32ToBuffer(input: string): Buffer {
   for (const ch of normalized) {
     const val = BASE32_ALPHABET.indexOf(ch)
     if (val === -1) {
-      throw new Error('Invalid TOTP secret')
+      throw createVaultError('vault.error.invalidTotpSecret')
     }
     bits += val.toString(2).padStart(5, '0')
   }
@@ -43,4 +44,3 @@ export function generateTotpCode(secret: string): { code: string; remainingSecon
   const code = String(binary % 1_000_000).padStart(6, '0')
   return { code, remainingSeconds }
 }
-

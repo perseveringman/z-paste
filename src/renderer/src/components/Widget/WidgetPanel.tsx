@@ -144,7 +144,7 @@ function WidgetPanel(): React.JSX.Element {
             ) : null}
             <span className="text-xs truncate flex-1">
               {item.content_type === 'image'
-                ? (item.preview || 'Image')
+                ? (item.preview || t('widget.imageFallback'))
                 : truncate(item.preview || item.content, 40)}
             </span>
             <ContentTypeIcon type={item.content_type} />

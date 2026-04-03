@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../ui/button'
 import { Separator } from '../ui/separator'
 import { Upload, FileText, Check, AlertCircle, ArrowLeft, Loader2, Globe, Key } from 'lucide-react'
+import { normalizeVaultDisplayError, normalizeVaultMessage } from '../../utils/vaultErrors'
 
 type ImportFormat = 'chrome-csv' | '1password-csv' | 'bitwarden-json'
 type Step = 'select-source' | 'select-file' | 'preview' | 'importing' | 'done'
@@ -68,7 +69,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
       try {
         const dialogResult = await window.api.showOpenDialog({
           title: t('vault.import.selectFile'),
-          filters: [{ name: source.labelKey, extensions: source.ext }],
+          filters: [{ name: t(source.labelKey), extensions: source.ext }],
           properties: ['openFile']
         })
         if (dialogResult.canceled || !dialogResult.filePaths.length) return
@@ -82,7 +83,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
         setPreview(previewData)
         setStep('preview')
       } catch (e) {
-        setError(t('vault.import.parseError', { error: e instanceof Error ? e.message : String(e) }))
+        setError(t('vault.import.parseError', { error: normalizeVaultDisplayError(e, 'vault.import.parseFailed') }))
       }
     },
     [t]
@@ -98,7 +99,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
       setStep('done')
       onImported()
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
+      setError(normalizeVaultDisplayError(e, 'vault.import.importFailedGeneric'))
       setStep('preview')
     }
   }, [filePath, format, onImported])
@@ -208,7 +209,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
                   ))}
                   {preview.total > 5 && (
                     <p className="text-xs text-muted-foreground text-center py-1">
-                      …and {preview.total - 5} more
+                      {t('vault.import.previewMore', { count: preview.total - 5 })}
                     </p>
                   )}
                 </div>
@@ -264,7 +265,7 @@ export default function VaultImportDialog({ onClose, onImported }: Props): React
                   {result.errors.length > 0 && (
                     <div className="mt-3 w-full max-h-24 overflow-y-auto text-xs text-destructive bg-destructive/5 rounded-md p-2 space-y-0.5">
                       {result.errors.slice(0, 10).map((err, i) => (
-                        <p key={i}>{err}</p>
+                        <p key={i}>{normalizeVaultMessage(err, 'vault.import.importFailedGeneric')}</p>
                       ))}
                     </div>
                   )}

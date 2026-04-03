@@ -2,17 +2,12 @@ import { Tray, Menu, nativeImage, app, clipboard } from 'electron'
 import { execSync } from 'child_process'
 import { WindowManager } from './window'
 import * as repository from './database/repository'
-
-const trayLabels: Record<string, Record<string, string>> = {
-  'zh-CN': { openPanel: '打开面板', launchAtLogin: '开机自启', quit: '退出', recentItems: '最近剪贴板' },
-  en: { openPanel: 'Open Panel', launchAtLogin: 'Launch at Login', quit: 'Quit', recentItems: 'Recent Clipboard' },
-  'zh-TW': { openPanel: '開啟面板', launchAtLogin: '開機自啟', quit: '結束', recentItems: '最近剪貼簿' }
-}
+import { normalizeDesktopLanguage, translateDesktop } from './localization'
 
 export class TrayManager {
   private tray: Tray | null = null
   private windowManager: WindowManager
-  private language: string = 'zh-CN'
+  private language = normalizeDesktopLanguage(app.getLocale())
   private quickPastePrefix: string = 'Alt'
 
   constructor(windowManager: WindowManager) {
@@ -20,7 +15,7 @@ export class TrayManager {
   }
 
   private getLabel(key: string): string {
-    return trayLabels[this.language]?.[key] ?? trayLabels['zh-CN'][key]
+    return translateDesktop(`tray.${key}`, this.language)
   }
 
   private formatPrefixSymbol(): string {
@@ -129,7 +124,7 @@ export class TrayManager {
   }
 
   setLanguage(lang: string): void {
-    this.language = lang
+    this.language = normalizeDesktopLanguage(lang)
     this.buildMenu()
   }
 

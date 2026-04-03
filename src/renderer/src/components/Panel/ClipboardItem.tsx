@@ -4,6 +4,7 @@ import i18n from '../../i18n'
 import { ClipboardItem, useClipboardStore } from '../../stores/clipboardStore'
 import { useAppIcon } from '../../hooks/useAppIcon'
 import { cn } from '../../lib/utils'
+import { getContentTypeLabel } from '../../utils/contentType'
 import { getContextMenuPosition } from '../../utils/contextMenu'
 import {
   FileText,
@@ -244,7 +245,7 @@ function ClipboardItemRow({
               </p>
               <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
                 <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px] text-muted-foreground">
-                  {item.content_type}
+                  {getContentTypeLabel(t, item.content_type)}
                 </span>
                 <span className="text-muted-foreground/50">•</span>
                 <span>
@@ -253,7 +254,7 @@ function ClipboardItemRow({
                 {item.use_count > 0 && (
                   <>
                     <span className="text-muted-foreground/50">•</span>
-                    <span className="tabular-nums">{item.use_count}次</span>
+                    <span className="tabular-nums">{t('panel.item.useCount', { count: item.use_count })}</span>
                   </>
                 )}
                 {sourceApp && (
@@ -397,7 +398,9 @@ function ImageRow({
           {item.preview || i18n.t('panel.image.fallback')}
         </p>
         <div className="mt-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-          <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px]">image</span>
+          <span className="rounded-full bg-secondary px-1.5 py-0.5 uppercase tracking-[0.16em] text-[9px]">
+            {i18n.t('panel.filter.image')}
+          </span>
           <span className="text-muted-foreground/50">•</span>
           <span>{formatTime(item.created_at)}</span>
         </div>

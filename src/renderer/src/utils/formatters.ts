@@ -2,8 +2,8 @@ export function formatJSON(input: string): { formatted: string; valid: boolean; 
   try {
     const parsed = JSON.parse(input)
     return { formatted: JSON.stringify(parsed, null, 2), valid: true }
-  } catch (e) {
-    return { formatted: input, valid: false, error: (e as Error).message }
+  } catch {
+    return { formatted: input, valid: false }
   }
 }
 

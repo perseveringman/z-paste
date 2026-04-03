@@ -1,6 +1,7 @@
 import { ChildProcess, fork } from 'child_process'
 import { join } from 'path'
 import { VaultKdfParams, VaultKdfType } from './crypto'
+import { createVaultError } from './errors'
 
 interface WorkerSuccessResponse {
   id: number
@@ -49,11 +50,11 @@ export class VaultCryptoWorkerClient {
     processRef.on('message', (message: unknown) => {
       this.handleWorkerMessage(message)
     })
-    processRef.on('error', error => {
-      this.rejectAllPending(error)
+    processRef.on('error', () => {
+      this.rejectAllPending(createVaultError('vault.error.workerExited'))
     })
     processRef.on('exit', () => {
-      this.rejectAllPending(new Error('Vault worker process exited'))
+      this.rejectAllPending(createVaultError('vault.error.workerExited'))
       this.workerProcess = null
     })
 
@@ -82,7 +83,7 @@ export class VaultCryptoWorkerClient {
       return
     }
 
-    pending.reject(new Error(response.error || 'Vault worker request failed'))
+    pending.reject(response.error ? new Error(response.error) : createVaultError('vault.error.workerRequestFailed'))
   }
 
   private rejectAllPending(error: unknown): void {
@@ -96,7 +97,7 @@ export class VaultCryptoWorkerClient {
   private async request<T>(action: string, payload?: Record<string, unknown>): Promise<T> {
     const processRef = this.ensureWorkerStarted()
     if (!processRef.connected) {
-      throw new Error('Vault worker is not connected')
+      throw createVaultError('vault.error.workerNotConnected')
     }
 
     const id = ++this.requestId
@@ -111,7 +112,7 @@ export class VaultCryptoWorkerClient {
           return
         }
         this.pending.delete(id)
-        reject(error)
+        reject(createVaultError('vault.error.workerRequestFailed'))
       })
     })
   }

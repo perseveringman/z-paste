@@ -1,4 +1,5 @@
 import { ImportedEntry } from './types'
+import { createVaultError, translateVaultText } from '../errors'
 
 interface BitwardenUri {
   uri?: string
@@ -33,15 +34,15 @@ export function parseBitwardenJSON(content: string): ImportedEntry[] {
   try {
     data = JSON.parse(content)
   } catch {
-    throw new Error('Invalid Bitwarden JSON: failed to parse')
+    throw createVaultError('vault.import.invalidBitwardenJson')
   }
 
   if (data.encrypted) {
-    throw new Error('Encrypted Bitwarden exports are not supported. Please export as unencrypted JSON.')
+    throw createVaultError('vault.import.bitwardenEncrypted')
   }
 
   if (!Array.isArray(data.items)) {
-    throw new Error('Invalid Bitwarden JSON: missing items array')
+    throw createVaultError('vault.import.bitwardenMissingItems')
   }
 
   const entries: ImportedEntry[] = []
@@ -59,7 +60,7 @@ export function parseBitwardenJSON(content: string): ImportedEntry[] {
     const url = login.uris?.[0]?.uri?.trim()
 
     entries.push({
-      name: item.name?.trim() || 'Untitled',
+      name: item.name?.trim() || translateVaultText('vault.import.untitled'),
       url: url || undefined,
       username: username || undefined,
       password: password || undefined,

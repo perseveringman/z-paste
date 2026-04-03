@@ -3,6 +3,7 @@ import * as vaultRepository from '../database/vault-repository'
 import { VaultKdfParams, VaultKdfType } from './crypto'
 import { clearBiometricDEK, hasBiometricDEK, loadBiometricDEK, saveBiometricDEK } from './biometric'
 import { VaultCryptoWorkerClient } from './worker-client'
+import { createVaultError } from './errors'
 
 const DEFAULT_AUTO_LOCK_MINUTES = 10
 const META_ID = 'primary'
@@ -34,7 +35,7 @@ export class VaultSessionManager {
   }): Promise<{ recoveryKey: string }> {
     const existingMeta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (existingMeta) {
-      throw new Error('Vault is already initialized')
+      throw createVaultError('vault.error.alreadyInitialized')
     }
 
     const now = Date.now()
@@ -74,7 +75,7 @@ export class VaultSessionManager {
   async unlockWithMasterPassword(masterPassword: string): Promise<void> {
     const meta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (!meta) {
-      throw new Error('Vault is not initialized')
+      throw createVaultError('vault.error.notInitialized')
     }
 
     try {
@@ -104,14 +105,14 @@ export class VaultSessionManager {
         reason_code: 'invalid_master_password',
         created_at: Date.now()
       })
-      throw new Error('Invalid master password')
+      throw createVaultError('vault.error.invalidMasterPassword')
     }
   }
 
   async unlockWithRecoveryKey(recoveryKey: string): Promise<void> {
     const meta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (!meta) {
-      throw new Error('Vault is not initialized')
+      throw createVaultError('vault.error.notInitialized')
     }
 
     try {
@@ -141,14 +142,14 @@ export class VaultSessionManager {
         reason_code: 'invalid_recovery_key',
         created_at: Date.now()
       })
-      throw new Error('Invalid recovery key')
+      throw createVaultError('vault.error.invalidRecoveryKey')
     }
   }
 
   async unlockWithBiometric(): Promise<void> {
     const meta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (!meta) {
-      throw new Error('Vault is not initialized')
+      throw createVaultError('vault.error.notInitialized')
     }
 
     const dek = await loadBiometricDEK()
@@ -160,7 +161,7 @@ export class VaultSessionManager {
         reason_code: 'biometric_material_not_found',
         created_at: Date.now()
       })
-      throw new Error('Biometric unlock is not available')
+      throw createVaultError('vault.error.biometricUnavailable')
     }
 
     await this.cryptoWorker.setDEK(dek.toString('base64'))
@@ -178,7 +179,7 @@ export class VaultSessionManager {
         reason_code: 'biometric_dek_invalid',
         created_at: Date.now()
       })
-      throw new Error('Biometric unlock failed: stored key is invalid')
+      throw createVaultError('vault.error.biometricInvalidKey')
     }
 
     this.lastUnlockMethod = 'biometric'
@@ -195,10 +196,10 @@ export class VaultSessionManager {
   async unlockWithHintAnswer(hintAnswer: string): Promise<void> {
     const meta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (!meta) {
-      throw new Error('Vault is not initialized')
+      throw createVaultError('vault.error.notInitialized')
     }
     if (meta.security_mode !== 'relaxed' || !meta.dek_wrapped_by_hint) {
-      throw new Error('Hint unlock is not available in strict mode')
+      throw createVaultError('vault.error.hintUnavailable')
     }
 
     try {
@@ -228,7 +229,7 @@ export class VaultSessionManager {
         reason_code: 'invalid_hint_answer',
         created_at: Date.now()
       })
-      throw new Error('Invalid hint answer')
+      throw createVaultError('vault.error.invalidHintAnswer')
     }
   }
 
@@ -241,7 +242,7 @@ export class VaultSessionManager {
 
     const meta = vaultRepository.getVaultCryptoMeta(META_ID)
     if (!meta) {
-      throw new Error('Vault is not initialized')
+      throw createVaultError('vault.error.notInitialized')
     }
 
     const keys = await this.cryptoWorker.changeMasterPassword(
@@ -295,7 +296,7 @@ export class VaultSessionManager {
   async ensureUnlocked(): Promise<void> {
     const unlocked = await this.isUnlocked()
     if (!unlocked) {
-      throw new Error('Vault is locked')
+      throw createVaultError('vault.error.locked')
     }
     this.touch()
   }

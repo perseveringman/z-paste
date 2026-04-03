@@ -24,12 +24,12 @@ export default function VaultSetup(): React.JSX.Element {
   const [hintAnswer, setHintAnswer] = useState('')
   const [copied, setCopied] = useState(false)
 
-  const HINT_QUESTIONS = [
-    'What was the name of your first pet?',
-    'What city were you born in?',
-    'What was the name of your first school?',
-    'What is your favorite movie?',
-    'What is your childhood nickname?'
+  const hintQuestions = [
+    t('vault.setup.hintQuestion.pet'),
+    t('vault.setup.hintQuestion.birthCity'),
+    t('vault.setup.hintQuestion.school'),
+    t('vault.setup.hintQuestion.movie'),
+    t('vault.setup.hintQuestion.nickname')
   ]
 
   const canContinueToStep2 = securityMode !== null
@@ -126,7 +126,7 @@ export default function VaultSetup(): React.JSX.Element {
                   </div>
                   <div className="flex justify-end pt-2">
                     <Button onClick={() => setStep(2)} disabled={!canContinueToStep2} className="w-full h-10">
-                      {t('vault.setup.next') || '下一步'} <ArrowRight className="w-4 h-4 ml-2" />
+                      {t('vault.setup.next')} <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
                 </motion.div>
@@ -156,7 +156,7 @@ export default function VaultSetup(): React.JSX.Element {
                       <div className="space-y-2">
                         <label className="text-xs font-medium text-muted-foreground">{t('vault.setup.securityQuestion')}</label>
                         <div className="flex flex-wrap gap-2">
-                          {HINT_QUESTIONS.map((q) => (
+                          {hintQuestions.map((q) => (
                             <button
                               key={q}
                               onClick={() => setHintQuestion(q)}
@@ -210,11 +210,11 @@ export default function VaultSetup(): React.JSX.Element {
                     </div>
                   </div>
 
-                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                    <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
-                      ⚠️ {t('vault.setup.recoveryKeyDesc') || 'This recovery key is the ONLY way to access your vault if you forget your master password. Save it in a safe place!'}
-                    </p>
-                  </div>
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                      <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
+                        ⚠️ {t('vault.setup.recoveryKeyDesc')}
+                      </p>
+                    </div>
 
                   <Button onClick={handleFinish} className="w-full h-11">
                     <Check className="w-5 h-5 mr-2" /> {t('vault.setup.savedContinue')}

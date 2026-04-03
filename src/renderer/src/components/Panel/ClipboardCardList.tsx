@@ -9,6 +9,7 @@ import JsonPreview from '../Preview/JsonPreview'
 import ColorPreview from '../Preview/ColorPreview'
 import ImagePreview from '../Preview/ImagePreview'
 import { cn } from '../../lib/utils'
+import { getContentTypeLabel } from '../../utils/contentType'
 import { getContextMenuPosition } from '../../utils/contextMenu'
 import {
   FileText,
@@ -229,7 +230,7 @@ const ClipboardCard = memo(function ClipboardCard({
             />
           ) : (
             <span className="truncate text-[11px] font-semibold text-foreground/90">
-              {item.title || item.preview || item.content_type.toUpperCase()}
+              {item.title || item.preview || getContentTypeLabel(t, item.content_type)}
             </span>
           )}
           <div className="relative ml-auto flex min-w-[52px] items-center justify-end">
@@ -294,14 +295,14 @@ const ClipboardCard = memo(function ClipboardCard({
         {/* Card footer */}
         <div className="flex items-center gap-1.5 border-t border-border/40 px-3 py-1.5 text-[10px] text-muted-foreground">
           <span className="rounded-full bg-primary/15 text-foreground px-1.5 py-0.5 uppercase tracking-[0.14em] text-[9px]">
-            {item.content_type}
+            {getContentTypeLabel(t, item.content_type)}
           </span>
           <span className="text-muted-foreground/50">•</span>
           <span>{formatTime(item.created_at)}</span>
           {item.use_count > 0 && (
             <>
               <span className="text-muted-foreground/50">•</span>
-              <span className="tabular-nums">{item.use_count}次</span>
+              <span className="tabular-nums">{t('panel.item.useCount', { count: item.use_count })}</span>
             </>
           )}
           {sourceApp && appIcon && (

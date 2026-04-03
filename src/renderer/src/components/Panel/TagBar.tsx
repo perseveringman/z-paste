@@ -55,7 +55,7 @@ export default function TagBar(): React.JSX.Element {
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          aria-label="Scroll tags left"
+          aria-label={t('panel.tagBar.scrollLeft')}
           className="absolute left-0 z-10 flex h-full items-center px-1 text-muted-foreground transition-colors hover:text-foreground"
         >
           <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -135,7 +135,7 @@ export default function TagBar(): React.JSX.Element {
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          aria-label="Scroll tags right"
+          aria-label={t('panel.tagBar.scrollRight')}
           className="absolute right-0 z-10 flex h-full items-center px-1 text-muted-foreground transition-colors hover:text-foreground"
         >
           <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>

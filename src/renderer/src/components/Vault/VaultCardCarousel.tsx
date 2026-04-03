@@ -289,7 +289,7 @@ const VaultCard = memo(function VaultCard({
               aria-label={t('vault.action.autoTypeEnter')}
             >
               <ShieldCheck className="w-3 h-3 mr-1" />
-              {t('vault.action.autoType') || 'Auto-type'}
+              {t('vault.action.autoType')}
             </Button>
           </>
         )}
@@ -302,10 +302,10 @@ const VaultCard = memo(function VaultCard({
               e.stopPropagation()
               onDoubleClick(item)
             }}
-            aria-label={t('vault.action.view') || 'View'}
+            aria-label={t('vault.action.view')}
           >
             <Eye className="w-3 h-3 mr-1" />
-            {t('vault.action.view') || 'View'}
+            {t('vault.action.view')}
           </Button>
         )}
       </div>
@@ -323,6 +323,8 @@ function VaultDetailModal({
   onCreateTypeChange: (type: 'login' | 'secure_note' | null) => void
   onClose: () => void
 }): React.JSX.Element {
+  const { t } = useTranslation()
+
   // Close on click outside
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
@@ -355,7 +357,7 @@ function VaultDetailModal({
         <button
           onClick={onClose}
           className="absolute right-3 top-3 z-10 p-1.5 rounded-full hover:bg-muted/80 text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Close"
+          aria-label={t('common.close')}
         >
           <X className="w-4 h-4" />
         </button>

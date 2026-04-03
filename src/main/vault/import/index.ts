@@ -4,6 +4,7 @@ import { parseChromeCSV } from './chrome-csv'
 import { parseOnePasswordCSV } from './onepassword-csv'
 import { parseBitwardenJSON } from './bitwarden-json'
 import { VaultService } from '../service'
+import { createVaultError, isVaultError, translateVaultText } from '../errors'
 
 const parsers: Record<ImportFormat, (content: string) => ImportedEntry[]> = {
   'chrome-csv': parseChromeCSV,
@@ -12,12 +13,26 @@ const parsers: Record<ImportFormat, (content: string) => ImportedEntry[]> = {
 }
 
 export function parseImportFile(filePath: string, format: ImportFormat): ImportedEntry[] {
-  const content = fs.readFileSync(filePath, 'utf-8')
+  let content: string
+  try {
+    content = fs.readFileSync(filePath, 'utf-8')
+  } catch {
+    throw createVaultError('vault.import.parseFailed')
+  }
+
   const parser = parsers[format]
   if (!parser) {
-    throw new Error(`Unsupported import format: ${format}`)
+    throw createVaultError('vault.import.unsupportedFormat', { format })
   }
-  return parser(content)
+
+  try {
+    return parser(content)
+  } catch (error) {
+    if (isVaultError(error)) {
+      throw error
+    }
+    throw createVaultError('vault.import.parseFailed')
+  }
 }
 
 export async function importEntries(
@@ -56,7 +71,12 @@ export async function importEntries(
       existingDetails.set(dupKey, true)
       result.imported++
     } catch (e) {
-      result.errors.push(`Failed to import "${entry.name}": ${e instanceof Error ? e.message : String(e)}`)
+      result.errors.push(
+        translateVaultText('vault.import.entryError', {
+          name: entry.name,
+          error: isVaultError(e) ? e.message : translateVaultText('vault.import.importFailedGeneric')
+        })
+      )
     }
   }
 

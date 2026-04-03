@@ -19,6 +19,7 @@ import {
 import { Clipboard, Copy, Link, Code, PanelRightClose } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useClipboardStore } from '../../stores/clipboardStore'
+import { getContentTypeLabel } from '../../utils/contentType'
 
 interface Props {
   item: ClipboardItem | null
@@ -45,7 +46,7 @@ export default function PreviewPanel({ item, layout = 'side' }: Props): React.JS
       <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            {item.content_type}
+            {getContentTypeLabel(t, item.content_type)}
           </span>
           {item.title && (
             <span className="truncate text-xs font-semibold text-primary">
@@ -113,15 +114,16 @@ function PreviewContent({ item }: { item: ClipboardItem }): React.JSX.Element {
 }
 
 function TextToolbar({ content }: { content: string }): React.JSX.Element {
+  const { t } = useTranslation()
   const tools = [
-    { label: 'UPPER', fn: () => toUpperCase(content) },
-    { label: 'lower', fn: () => toLowerCase(content) },
-    { label: 'Title', fn: () => toTitleCase(content) },
-    { label: 'camel', fn: () => toCamelCase(content) },
-    { label: 'snake', fn: () => toSnakeCase(content) },
-    { label: 'kebab', fn: () => toKebabCase(content) },
-    { label: 'Trim', fn: () => trimWhitespace(content) },
-    { label: 'NoSpace', fn: () => removeAllWhitespace(content) }
+    { label: t('preview.toolbar.upper'), fn: () => toUpperCase(content) },
+    { label: t('preview.toolbar.lower'), fn: () => toLowerCase(content) },
+    { label: t('preview.toolbar.title'), fn: () => toTitleCase(content) },
+    { label: t('preview.toolbar.camel'), fn: () => toCamelCase(content) },
+    { label: t('preview.toolbar.snake'), fn: () => toSnakeCase(content) },
+    { label: t('preview.toolbar.kebab'), fn: () => toKebabCase(content) },
+    { label: t('preview.toolbar.trim'), fn: () => trimWhitespace(content) },
+    { label: t('preview.toolbar.noSpace'), fn: () => removeAllWhitespace(content) }
   ]
 
   return (

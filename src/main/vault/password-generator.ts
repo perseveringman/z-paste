@@ -1,4 +1,5 @@
 import { randomBytes } from 'crypto'
+import { createVaultError } from './errors'
 
 export interface PasswordGenerateOptions {
   length?: number
@@ -45,7 +46,7 @@ export function generatePassword(options: PasswordGenerateOptions = {}): string 
   if (useSymbols) groups.push(SYMBOLS)
 
   if (groups.length === 0) {
-    throw new Error('At least one character group must be enabled')
+    throw createVaultError('vault.error.passwordRequiresCharacterGroup')
   }
 
   const finalLength = Math.max(length, groups.length)
@@ -68,4 +69,3 @@ export function generatePassword(options: PasswordGenerateOptions = {}): string 
 
   return chars.join('')
 }
-

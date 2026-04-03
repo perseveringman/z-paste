@@ -19,12 +19,14 @@ import { VaultService } from './vault/service'
 import { AutoTypeAgent } from './vault/auto-type'
 import { nanoid } from 'nanoid'
 import { VaultCryptoWorkerClient } from './vault/worker-client'
+import { createVaultError, isVaultError } from './vault/errors'
 import { startExtensionBridge, stopExtensionBridge } from './extension-bridge'
 import { autoUpdater } from 'electron-updater'
 import { DEFAULT_MAX_ITEMS, normalizeMaxItems } from '../shared/max-items'
 import * as license from './license'
 import { writeVaultClipboard } from './clipboard/vault-clipboard-guard'
 import { parseImportFile, importEntries, ImportFormat } from './vault/import'
+import { setDesktopLanguage, translateDesktop } from './localization'
 
 let windowManager: WindowManager
 let widgetManager: WidgetWindowManager
@@ -38,6 +40,7 @@ let vaultService: VaultService
 let autoTypeAgent: AutoTypeAgent
 let vaultCryptoWorker: VaultCryptoWorkerClient | null = null
 let cleanupMaxItems = DEFAULT_MAX_ITEMS
+let appLanguage = setDesktopLanguage(app.getLocale())
 
 function broadcastToAllWindows(channel: string, ...args: unknown[]): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -45,6 +48,35 @@ function broadcastToAllWindows(channel: string, ...args: unknown[]): void {
       win.webContents.send(channel, ...args)
     }
   }
+}
+
+function setApplicationMenu(language: string): void {
+  appLanguage = setDesktopLanguage(language)
+
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      {
+        label: app.name,
+        submenu: [{ role: 'quit' }]
+      },
+      {
+        label: translateDesktop('menu.edit', appLanguage),
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' }
+        ]
+      },
+      {
+        label: translateDesktop('menu.view', appLanguage),
+        submenu: [{ role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'resetZoom' }]
+      }
+    ])
+  )
 }
 
 function setupAutoUpdater(): void {
@@ -95,30 +127,7 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zpaste.app')
 
   // Set application menu with zoom shortcuts (Cmd+-, Cmd+=, Cmd+0)
-  Menu.setApplicationMenu(
-    Menu.buildFromTemplate([
-      {
-        label: app.name,
-        submenu: [{ role: 'quit' }]
-      },
-      {
-        label: 'Edit',
-        submenu: [
-          { role: 'undo' },
-          { role: 'redo' },
-          { type: 'separator' },
-          { role: 'cut' },
-          { role: 'copy' },
-          { role: 'paste' },
-          { role: 'selectAll' }
-        ]
-      },
-      {
-        label: 'View',
-        submenu: [{ role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'resetZoom' }]
-      }
-    ])
-  )
+  setApplicationMenu(appLanguage)
 
   // Hide dock icon — only show in menu bar tray
   if (app.dock) app.dock.hide()
@@ -135,6 +144,7 @@ app.whenReady().then(() => {
   shortcutManager = new ShortcutManager(windowManager)
   shortcutManager.setWidgetManager(widgetManager)
   trayManager = new TrayManager(windowManager)
+  trayManager.setLanguage(appLanguage)
   settingsWindowManager = new SettingsWindowManager()
   settingsWindowManager.onClosed(() => {
     windowManager.show()
@@ -344,6 +354,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle('settings:setLanguage', async (_, lang: string) => {
     trayManager.setLanguage(lang)
+    setApplicationMenu(lang)
   })
 
   ipcMain.handle('settings:setTheme', async (_, theme: string) => {
@@ -528,8 +539,15 @@ app.whenReady().then(() => {
   ipcMain.handle(
     'vault:import',
     async (_, input: { filePath: string; format: ImportFormat }) => {
-      const entries = parseImportFile(input.filePath, input.format)
-      return await importEntries(entries, vaultService)
+      try {
+        const entries = parseImportFile(input.filePath, input.format)
+        return await importEntries(entries, vaultService)
+      } catch (error) {
+        if (isVaultError(error)) {
+          throw error
+        }
+        throw createVaultError('vault.import.importFailedGeneric')
+      }
     }
   )
 
@@ -537,8 +555,15 @@ app.whenReady().then(() => {
   ipcMain.handle(
     'vault:importPreview',
     async (_, input: { filePath: string; format: ImportFormat }) => {
-      const entries = parseImportFile(input.filePath, input.format)
-      return { total: entries.length, entries: entries.slice(0, 5) }
+      try {
+        const entries = parseImportFile(input.filePath, input.format)
+        return { total: entries.length, entries: entries.slice(0, 5) }
+      } catch (error) {
+        if (isVaultError(error)) {
+          throw error
+        }
+        throw createVaultError('vault.import.parseFailed')
+      }
     }
   )
 

@@ -196,7 +196,7 @@ export default function VaultDetail({ createType, onCancelCreate, compact = fals
         </div>
         <h3 className="text-lg font-medium text-muted-foreground">{t('vault.detail.selectItem')}</h3>
         <p className="text-sm text-muted-foreground/60 max-w-xs mt-1">
-          {t('vault.detail.selectItemDesc') || 'Select an item from the sidebar to view or edit its contents securely.'}
+          {t('vault.detail.selectItemDesc')}
         </p>
       </div>
     )
@@ -245,7 +245,12 @@ export default function VaultDetail({ createType, onCancelCreate, compact = fals
                       </div>
                       <div className="space-y-1">
                         <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.website')}</label>
-                        <Input value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} placeholder="https://..." className="h-8 text-sm" />
+                        <Input
+                          value={editWebsite}
+                          onChange={(e) => setEditWebsite(e.target.value)}
+                          placeholder={t('vault.field.website.placeholder')}
+                          className="h-8 text-sm"
+                        />
                       </div>
                     </div>
                     <div className="flex gap-3">
@@ -272,7 +277,12 @@ export default function VaultDetail({ createType, onCancelCreate, compact = fals
                     </div>
                     <div className="space-y-1">
                       <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.totpSecret')}</label>
-                      <Input value={editTotpSecret} onChange={(e) => setEditTotpSecret(e.target.value)} placeholder="Secret key (Base32)" className="h-8 text-sm" />
+                      <Input
+                        value={editTotpSecret}
+                        onChange={(e) => setEditTotpSecret(e.target.value)}
+                        placeholder={t('vault.field.totpSecret.placeholder')}
+                        className="h-8 text-sm"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[11px] font-medium text-muted-foreground">{t('vault.field.notes')}</label>
@@ -376,7 +386,7 @@ export default function VaultDetail({ createType, onCancelCreate, compact = fals
                       {t('vault.action.autoTypeEnter')}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleAutoType(false)} className="h-9">
-                      {t('vault.action.autoTypeNoEnter') || 'Auto-type Only'}
+                      {t('vault.action.autoTypeNoEnter')}
                     </Button>
                     {autoTypeNotice && (
                       <span className="text-xs font-medium text-primary animate-in fade-in slide-in-from-left-2">
