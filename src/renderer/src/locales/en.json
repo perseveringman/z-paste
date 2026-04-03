@@ -449,7 +449,7 @@
   "license.buyButton": "Purchase License",
   "license.buyUrl": "https://perseveringman.github.io/Stash/pricing",
 
-  "onboarding.step5.trialInfo": "You have a 14-day free trial to explore all features.",
+  "onboarding.step5.trialInfo": "You have {{days}} days of free trial to explore all features.",
   "onboarding.step5.activateNow": "Already have a code? Activate now",
   "onboarding.step5.activatePlaceholder": "XXXX-XXXX-XXXX-XXXX",
 

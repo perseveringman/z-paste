@@ -449,7 +449,7 @@
   "license.buyButton": "購買授權",
   "license.buyUrl": "https://perseveringman.github.io/Stash/pricing",
 
-  "onboarding.step5.trialInfo": "您有 14 天免費試用期，盡情探索所有功能。",
+  "onboarding.step5.trialInfo": "您還有 {{days}} 天免費試用期，盡情探索所有功能。",
   "onboarding.step5.activateNow": "已有啟用碼？立即啟用",
   "onboarding.step5.activatePlaceholder": "XXXX-XXXX-XXXX-XXXX",
 

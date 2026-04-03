@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../stores/settingsStore'
@@ -45,8 +45,13 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
       setHasCompletedOnboarding: state.setHasCompletedOnboarding,
     }))
   )
-  const { activate: activateLicense } = useLicenseStore()
+  const { activate: activateLicense, trialDaysLeft, fetchStatus } = useLicenseStore()
   const [syncChoice, setSyncChoice] = useState(false)
+
+  useEffect(() => {
+    fetchStatus()
+  }, [fetchStatus])
+
   const [showActivation, setShowActivation] = useState(false)
   const [activationCode, setActivationCode] = useState('')
   const [activationStatus, setActivationStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -192,7 +197,7 @@ export default function OnboardingPage({ onComplete, isRevisit }: Props): React.
           <p className="text-center text-xs leading-6 text-muted-foreground">
             {t('onboarding.step5.ready')}
             <br />
-            {t('onboarding.step5.trialInfo')}
+            {t('onboarding.step5.trialInfo', { days: trialDaysLeft })}
           </p>
           {!showActivation ? (
             <button
