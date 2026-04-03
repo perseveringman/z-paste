@@ -426,6 +426,14 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('settings:setAccentColor', async (_, color: string) => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send('settings:accentColorChanged', color)
+      }
+    }
+  })
+
   ipcMain.handle('settings:setLayoutMode', async (_, mode: string) => {
     if (mode === 'center' || mode === 'side' || mode === 'bottom') {
       windowManager.setLayoutMode(mode)

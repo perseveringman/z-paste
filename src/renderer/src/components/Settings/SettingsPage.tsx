@@ -897,6 +897,9 @@ function ThemeSection(): React.JSX.Element {
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer rounded-full"
             />
           </label>
+
+          {/* Hex color input */}
+          <HexColorInput value={accentColor} onChange={setAccentColor} />
         </div>
       </div>
     </div>
@@ -1533,6 +1536,34 @@ function AboutSection(): React.JSX.Element {
         </div>
       </div>
     </div>
+  )
+}
+
+function HexColorInput({ value, onChange }: { value: string; onChange: (v: string) => void }): React.JSX.Element {
+  const [draft, setDraft] = useState(value)
+  useEffect(() => setDraft(value), [value])
+
+  return (
+    <input
+      type="text"
+      value={draft}
+      onChange={(e) => {
+        const v = e.target.value
+        if (/^#?[0-9A-Fa-f]{0,6}$/.test(v)) {
+          setDraft(v)
+          if (/^#[0-9A-Fa-f]{6}$/.test(v)) onChange(v)
+        }
+      }}
+      onBlur={() => {
+        if (/^#[0-9A-Fa-f]{6}$/.test(draft)) onChange(draft)
+        else setDraft(value)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && /^#[0-9A-Fa-f]{6}$/.test(draft)) onChange(draft)
+      }}
+      placeholder="#FF7F43"
+      className="w-[5.5rem] h-8 px-2 text-xs font-mono rounded-md border border-border bg-muted text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+    />
   )
 }
 

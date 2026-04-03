@@ -38,6 +38,7 @@ interface SettingsState extends Settings {
   setTheme: (theme: ThemeMode) => void
   syncTheme: (theme: ThemeMode) => void
   setAccentColor: (color: AccentColor) => void
+  syncAccentColor: (color: AccentColor) => void
   setLanguage: (lang: LanguageMode) => void
   setLaunchAtLogin: (value: boolean) => void
   setHistoryRetention: (days: number) => void
@@ -174,6 +175,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setAccentColor: (color) => {
     set({ accentColor: color })
     get().saveSettings()
+    applyAccent(color)
+    window.api.setAccentColor?.(color)
+  },
+
+  syncAccentColor: (color) => {
+    const state = get()
+    if (state.accentColor === color) {
+      return
+    }
+    set({ accentColor: color })
     applyAccent(color)
   },
 

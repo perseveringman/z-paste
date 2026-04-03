@@ -48,10 +48,15 @@ const api = {
   getLaunchAtLogin: () => ipcRenderer.invoke('settings:getLaunchAtLogin'),
   setLanguage: (lang: string) => ipcRenderer.invoke('settings:setLanguage', lang),
   setTheme: (theme: string) => ipcRenderer.invoke('settings:setTheme', theme),
+  setAccentColor: (color: string) => ipcRenderer.invoke('settings:setAccentColor', color),
   setMaxItems: (value: number) => ipcRenderer.invoke('settings:setMaxItems', value),
   onThemeChanged: (callback: (theme: string) => void) => {
     ipcRenderer.on('settings:themeChanged', (_, theme) => callback(theme))
     return () => ipcRenderer.removeAllListeners('settings:themeChanged')
+  },
+  onAccentColorChanged: (callback: (color: string) => void) => {
+    ipcRenderer.on('settings:accentColorChanged', (_, color) => callback(color))
+    return () => ipcRenderer.removeAllListeners('settings:accentColorChanged')
   },
   setLayoutMode: (mode: string) => ipcRenderer.invoke('settings:setLayoutMode', mode),
   onLayoutModeChanged: (callback: (mode: string) => void) => {

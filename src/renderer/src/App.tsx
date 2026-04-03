@@ -43,12 +43,17 @@ function App(): React.JSX.Element {
       useSettingsStore.getState().syncTheme(theme)
     })
 
+    const unsubAccentColor = window.api.onAccentColorChanged((color) => {
+      useSettingsStore.getState().syncAccentColor(color)
+    })
+
     return () => {
       unsubNewItem()
       unsubShown()
       unsubHidden()
       unsubLayout()
       unsubTheme()
+      unsubAccentColor()
     }
   }, [])
 
