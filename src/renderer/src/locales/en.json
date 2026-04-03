@@ -517,5 +517,10 @@
   "vault.import.untitled": "Untitled",
   "vault.import.entryError": "Failed to import \"{{name}}\": {{error}}",
   "vault.import.vaultLocked": "Please unlock the vault before importing",
-  "vault.import.button": "Import Passwords…"
+  "vault.import.button": "Import Passwords…",
+
+  "updater.dialog.title": "Update Available",
+  "updater.dialog.message": "A new version {{version}} is available. Would you like to update now?",
+  "updater.dialog.update": "Update Now",
+  "updater.dialog.later": "Later"
 }

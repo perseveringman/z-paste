@@ -116,6 +116,35 @@ function setupAutoUpdater(): void {
     autoUpdater.quitAndInstall()
   })
 
+  autoUpdater.on('update-available', (info) => {
+    const version = info.version
+    const title = translateDesktop('updater.dialog.title')
+    const message = translateDesktop('updater.dialog.message', undefined, { version })
+    dialog
+      .showMessageBox({
+        type: 'info',
+        title,
+        message,
+        buttons: [
+          translateDesktop('updater.dialog.update'),
+          translateDesktop('updater.dialog.later')
+        ],
+        defaultId: 0,
+        cancelId: 1
+      })
+      .then(({ response }) => {
+        if (response === 0) {
+          autoUpdater.downloadUpdate().catch(() => {})
+          broadcastToAllWindows('updater:download-progress', {
+            percent: 0,
+            bytesPerSecond: 0,
+            transferred: 0,
+            total: 0
+          })
+        }
+      })
+  })
+
   autoUpdater.checkForUpdates().catch(() => {})
   const updateIntervalId = setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {})
@@ -162,6 +191,10 @@ app.whenReady().then(() => {
   trayManager.create()
   clipboardMonitor.start()
   setupAutoUpdater()
+
+  // Show main window on startup
+  windowManager.create()
+  windowManager.show()
 
   // Auto cleanup every 10 minutes
   setInterval(() => {
