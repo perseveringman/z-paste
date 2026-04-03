@@ -164,7 +164,7 @@
 
   "settings.tags.title": "标签管理",
   "settings.tags.total": "总标签数",
-  "settings.tags.singleUse": "仅 1 条内容",
+  "settings.tags.singleUse": "仅用一次的标签",
   "settings.tags.tooMany": "标签数量超过 15 个，建议合并类似标签以保持高效率。",
   "settings.tags.empty": "暂无标签",
   "settings.tags.rename": "重命名",
